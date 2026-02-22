@@ -75,8 +75,8 @@ NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
 # ──────────────────────────────────────────────
 # GitHub Pages で公開する場合のベースURL
 # 例: https://<username>.github.io/<repo>/
-GITHUB_PAGES_BASE_URL = os.environ.get(
-    "GITHUB_PAGES_BASE_URL",
+PAGES_BASE_URL = os.environ.get(
+    "PAGES_BASE_URL",
     "https://your-username.github.io/paint-news-app/",
 )
 

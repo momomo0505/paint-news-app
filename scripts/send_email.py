@@ -25,7 +25,7 @@ from sendgrid.helpers.mail import (
 from scripts.collect_news import Article
 from scripts.config import (
     FROM_EMAIL,
-    GITHUB_PAGES_BASE_URL,
+    PAGES_BASE_URL,
     NOTIFY_EMAIL,
     SENDGRID_API_KEY,
 )
@@ -110,7 +110,7 @@ def _build_email_html(
     <div style="text-align:center;font-size:0.75rem;color:#9ca3af;">
         <p>このメールは塗装業界ニュース自動まとめツールにより送信されています。</p>
         <p>
-            <a href="{GITHUB_PAGES_BASE_URL}" style="color:#6b7280;">
+            <a href="{PAGES_BASE_URL}" style="color:#6b7280;">
                 過去のレポート一覧
             </a>
         </p>
@@ -156,7 +156,7 @@ def send_notification(
     issue_date = now_jst.strftime("%Y年%m月%d日")
 
     # レポートURL
-    report_url = f"{GITHUB_PAGES_BASE_URL.rstrip('/')}/{report_filename}"
+    report_url = f"{PAGES_BASE_URL.rstrip('/')}/{report_filename}"
 
     # メール構築
     subject = f"🎨 塗装業界ニュース {issue_date}号 — {len(articles)}件の記事"
