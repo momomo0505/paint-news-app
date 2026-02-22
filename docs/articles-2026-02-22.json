@@ -1,0 +1,35 @@
+[
+  {
+    "title": "Revolutionary Paint Booth Design Cuts Energy Use by 40%",
+    "description": "A new booth design uses advanced airflow patterns to significantly reduce energy consumption while maintaining superior finish quality.",
+    "url": "https://example.com/news/1",
+    "source": "Coating World",
+    "published_at": "2026-02-20T10:00:00Z",
+    "image_url": null,
+    "title_ja": "革新的な塗装ブース設計がエネルギー使用量を40%削減",
+    "summary_ja": "新型ブース設計は先進的な気流パターンを活用し、優れた仕上がり品質を維持しながらエネルギー消費を大幅に削減します。従来の設計と比較して40%の省エネを達成し、塗装業界の持続可能性向上に貢献することが期待されています。自動車製造業を中心に、幅広い産業での採用が見込まれます。",
+    "category": "equipment"
+  },
+  {
+    "title": "Global Automotive Coatings Market Expected to Reach $12B by 2030",
+    "description": "New market research report highlights strong growth in automotive OEM coatings driven by EV production and sustainability requirements.",
+    "url": "https://example.com/news/2",
+    "source": "Paint & Coatings Industry",
+    "published_at": "2026-02-19T14:30:00Z",
+    "image_url": null,
+    "title_ja": "世界の自動車用塗料市場が2030年までに120億ドルに到達する見込み",
+    "summary_ja": "最新の市場調査レポートによると、自動車OEM用塗料市場はEV生産の拡大と持続可能性要件の強化により力強い成長が見込まれています。水性塗料やパウダーコーティングの需要が特に増加しており、アジア太平洋地域が最大の成長市場となっています。主要メーカーは低VOC製品の開発を加速しています。",
+    "category": "market"
+  },
+  {
+    "title": "New EU VOC Regulations to Impact Industrial Coating Operations",
+    "description": "European Union announces stricter VOC emission limits for industrial painting facilities, effective 2027.",
+    "url": "https://example.com/news/3",
+    "source": "European Coatings Journal",
+    "published_at": "2026-02-18T09:15:00Z",
+    "image_url": null,
+    "title_ja": "EU新VOC規制が産業用塗装作業に影響を与える見通し",
+    "summary_ja": "欧州連合は産業用塗装施設に対するVOC排出制限を厳格化する新規制を発表しました。2027年から施行予定のこの規制は、現行基準から排出量を25%削減することを求めています。塗装設備メーカーや塗料メーカーは対応技術の開発を急いでおり、日本の塗装業界にも波及する可能性があります。",
+    "category": "regulation"
+  }
+]

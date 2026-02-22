@@ -1,0 +1,145 @@
+# ============================================================
+# 塗装業界ニュース自動まとめツール — GitHub Actions ワークフロー
+# ============================================================
+# 毎週月曜 08:00 JST (日曜 23:00 UTC) に自動実行
+# 手動実行も可能（workflow_dispatch）
+
+name: Weekly Paint Industry News
+
+on:
+  # 定期実行: 毎週月曜 08:00 JST = 日曜 23:00 UTC
+  schedule:
+    - cron: '0 23 * * 0'
+
+  # 手動実行（テスト用）
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'ドライラン（ダミーデータ使用）'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      skip_email:
+        description: 'メール送信スキップ'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+# 同時実行制御: 前回の実行が終わるまで待機
+concurrency:
+  group: weekly-news
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  generate-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ────────────────────────
+      # 1. チェックアウト
+      # ────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ────────────────────────
+      # 2. Python セットアップ
+      # ────────────────────────
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ────────────────────────
+      # 3. 依存パッケージインストール
+      # ────────────────────────
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ────────────────────────
+      # 4. パイプライン実行
+      # ────────────────────────
+      - name: Run news pipeline
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          GITHUB_PAGES_BASE_URL: ${{ secrets.GITHUB_PAGES_BASE_URL }}
+          LOG_LEVEL: INFO
+        run: |
+          # コマンドライン引数の構築
+          ARGS=""
+
+          # ドライラン判定
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          # メール送信スキップ判定
+          if [ "${{ github.event.inputs.skip_email }}" = "true" ]; then
+            ARGS="$ARGS --no-email"
+          fi
+
+          python -m scripts.main $ARGS
+
+      # ────────────────────────
+      # 5. 生成ファイルをコミット & プッシュ
+      # ────────────────────────
+      - name: Commit and push generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # docs/ ディレクトリの変更をステージ
+          git add docs/
+
+          # 変更がある場合のみコミット
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            DATE=$(TZ='Asia/Tokyo' date +%Y-%m-%d)
+            git commit -m "📰 Weekly news report: ${DATE}"
+            git push
+          fi
+
+      # ────────────────────────
+      # 6. 実行結果サマリー
+      # ────────────────────────
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## 🎨 塗装業界ニュース生成結果" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "docs" ]; then
+            FILE_COUNT=$(ls docs/weekly-news-*.html 2>/dev/null | wc -l)
+            echo "- 📄 レポートファイル数: ${FILE_COUNT}" >> $GITHUB_STEP_SUMMARY
+
+            LATEST=$(ls -t docs/weekly-news-*.html 2>/dev/null | head -1)
+            if [ -n "$LATEST" ]; then
+              echo "- 📝 最新レポート: \`$(basename $LATEST)\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- ⚠️ docs/ ディレクトリが見つかりません" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_実行時刻: $(TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M:%S JST')_" >> $GITHUB_STEP_SUMMARY

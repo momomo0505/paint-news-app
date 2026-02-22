@@ -1,0 +1,20 @@
+# Paint Industry News Aggregator - Dependencies
+# =============================================
+
+# News collection
+requests>=2.31.0
+
+# AI translation & summarization
+anthropic>=0.42.0
+
+# HTML template engine
+Jinja2>=3.1.3
+
+# Email delivery
+sendgrid>=6.11.0
+
+# Date/time handling
+python-dateutil>=2.8.2
+
+# Environment variable management (for local development)
+python-dotenv>=1.0.0

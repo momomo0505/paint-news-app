@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年02月22日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年02月22日</span>
+            <span>📰 3件の記事</span>
+            <span>🌍 対象期間: 2026/02/15 〜 2026/02/22</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-equipment"></span>
+            塗装設備: 1件
+        </span>
+        
+        
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-regulation"></span>
+            環境規制: 1件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-market"></span>
+            市場動向: 1件
+        </span>
+        
+        
+        
+        
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-equipment">
+                    塗装設備
+                </span>
+                <h2 class="article-title">革新的な塗装ブース設計がエネルギー使用量を40%削減</h2>
+            </div>
+            <p class="article-summary">新型ブース設計は先進的な気流パターンを活用し、優れた仕上がり品質を維持しながらエネルギー消費を大幅に削減します。従来の設計と比較して40%の省エネを達成し、塗装業界の持続可能性向上に貢献することが期待されています。自動車製造業を中心に、幅広い産業での採用が見込まれます。</p>
+            <div class="article-footer">
+                <span class="article-source">Coating World — 2026年02月20日</span>
+                <a href="https://example.com/news/1" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-market">
+                    市場動向
+                </span>
+                <h2 class="article-title">世界の自動車用塗料市場が2030年までに120億ドルに到達する見込み</h2>
+            </div>
+            <p class="article-summary">最新の市場調査レポートによると、自動車OEM用塗料市場はEV生産の拡大と持続可能性要件の強化により力強い成長が見込まれています。水性塗料やパウダーコーティングの需要が特に増加しており、アジア太平洋地域が最大の成長市場となっています。主要メーカーは低VOC製品の開発を加速しています。</p>
+            <div class="article-footer">
+                <span class="article-source">Paint &amp; Coatings Industry — 2026年02月19日</span>
+                <a href="https://example.com/news/2" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-regulation">
+                    環境規制
+                </span>
+                <h2 class="article-title">EU新VOC規制が産業用塗装作業に影響を与える見通し</h2>
+            </div>
+            <p class="article-summary">欧州連合は産業用塗装施設に対するVOC排出制限を厳格化する新規制を発表しました。2027年から施行予定のこの規制は、現行基準から排出量を25%削減することを求めています。塗装設備メーカーや塗料メーカーは対応技術の開発を急いでおり、日本の塗装業界にも波及する可能性があります。</p>
+            <div class="article-footer">
+                <span class="article-source">European Coatings Journal — 2026年02月18日</span>
+                <a href="https://example.com/news/3" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
