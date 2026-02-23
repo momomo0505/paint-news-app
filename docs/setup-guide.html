@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI業界ニュース自動まとめツール — 構築ガイド</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a2e;
+            --text2: #4b5563;
+            --text3: #6b7280;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --green: #059669;
+            --green-light: #ecfdf5;
+            --orange: #d97706;
+            --orange-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+            --border: #e5e7eb;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", "Meiryo", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── レイアウト ── */
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ── ヘッダー ── */
+        .hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 48px 0 40px;
+        }
+        .hero h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .hero .subtitle {
+            font-size: 1rem;
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ── 目次 ── */
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin: 32px 0;
+        }
+        .toc h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .toc ol {
+            padding-left: 20px;
+        }
+        .toc li {
+            margin-bottom: 6px;
+        }
+        .toc a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .toc a:hover { text-decoration: underline; }
+        .toc .sub-list {
+            margin-top: 4px;
+            padding-left: 18px;
+            list-style-type: disc;
+        }
+        .toc .sub-list li {
+            margin-bottom: 2px;
+        }
+        .toc .sub-list a {
+            font-weight: 400;
+            color: var(--text2);
+        }
+
+        /* ── セクション ── */
+        .section {
+            margin-bottom: 48px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-top: 24px;
+        }
+        .section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .section-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+        .section h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 28px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--accent-light);
+        }
+
+        /* ── カード ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+        .card p, .card li {
+            font-size: 0.9rem;
+            color: var(--text2);
+        }
+        .card ul, .card ol {
+            padding-left: 20px;
+        }
+        .card li {
+            margin-bottom: 6px;
+        }
+
+        /* ── ステップカード ── */
+        .step-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 18px 22px;
+            margin-bottom: 14px;
+        }
+        .step-card.step-green  { border-left-color: var(--green); }
+        .step-card.step-orange { border-left-color: var(--orange); }
+        .step-card.step-purple { border-left-color: var(--purple); }
+
+        .step-label {
+            display: inline-block;
+            padding: 1px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+        }
+        .label-blue   { background: var(--accent-light); color: var(--accent); }
+        .label-green  { background: var(--green-light);  color: var(--green);  }
+        .label-orange { background: var(--orange-light); color: var(--orange); }
+        .label-purple { background: var(--purple-light); color: var(--purple); }
+        .label-red    { background: var(--red-light);    color: var(--red);    }
+
+        .step-card h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .step-card p, .step-card li {
+            font-size: 0.88rem;
+            color: var(--text2);
+        }
+
+        /* ── コードブロック ── */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            margin: 12px 0 16px;
+            overflow-x: auto;
+            font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            position: relative;
+        }
+        .code-block .code-lang {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.65rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .code-block .comment { color: #64748b; }
+        .code-block .highlight { color: #fbbf24; }
+        .code-block .string { color: #34d399; }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Cascadia Code", "Consolas", monospace;
+            font-size: 0.85em;
+            color: #be185d;
+        }
+
+        /* ── プロンプトボックス ── */
+        .prompt-box {
+            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+            border: 1px solid #fde68a;
+            border-radius: var(--radius);
+            padding: 18px 22px;
+            margin: 12px 0 16px;
+        }
+        .prompt-box .prompt-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+        .prompt-box .prompt-text {
+            font-size: 0.9rem;
+            color: #92400e;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        /* ── 注意ボックス ── */
+        .callout {
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin: 14px 0;
+            font-size: 0.87rem;
+        }
+        .callout-info {
+            background: var(--accent-light);
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+        .callout-warn {
+            background: var(--orange-light);
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        .callout-success {
+            background: var(--green-light);
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+        .callout-danger {
+            background: var(--red-light);
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        /* ── テーブル ── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 14px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.87rem;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        td { color: var(--text2); }
+
+        /* ── 画像風エリア ── */
+        .screenshot-placeholder {
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            color: var(--text3);
+            font-size: 0.85rem;
+            margin: 14px 0;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            text-align: center;
+            padding: 32px 0;
+            font-size: 0.8rem;
+            color: var(--text3);
+            border-top: 1px solid var(--border);
+            margin-top: 48px;
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: #fff; }
+            .hero { background: #1e3a5f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .code-block { background: #f1f5f9; color: #1e293b; border: 1px solid #d1d5db; -webkit-print-color-adjust: exact; }
+            .section { page-break-inside: avoid; }
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 1.35rem; }
+            .container { padding: 0 16px; }
+            .code-block { padding: 14px; font-size: 0.78rem; }
+        }
+
+        /* ── 折りたたみ ── */
+        details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 12px 0;
+        }
+        details summary {
+            padding: 12px 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+        details summary:hover { background: #f9fafb; }
+        details[open] summary { border-bottom: 1px solid var(--border); }
+        details .details-content {
+            padding: 16px 18px;
+        }
+
+        /* ── フロー図 ── */
+        .flow-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        .flow-step {
+            background: var(--accent-light);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius);
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .flow-arrow {
+            color: var(--text3);
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- ヒーロー                                                       -->
+<!-- ============================================================ -->
+<header class="hero">
+    <div class="container">
+        <h1>AI業界ニュース自動まとめツール 構築ガイド</h1>
+        <p class="subtitle">Claude Code を使って、業界ニュース自動収集ツールをゼロから作る方法</p>
+        <div class="hero-badges">
+            <span class="hero-badge">Windows 対応</span>
+            <span class="hero-badge">Claude Code 使用</span>
+            <span class="hero-badge">所要時間 約2時間</span>
+            <span class="hero-badge">プログラミング経験 不要</span>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+
+<!-- ============================================================ -->
+<!-- 目次                                                          -->
+<!-- ============================================================ -->
+<nav class="toc">
+    <h2>目次</h2>
+    <ol>
+        <li><a href="#sec1">このガイドでできること</a></li>
+        <li><a href="#sec2">全体像を理解する</a></li>
+        <li>
+            <a href="#sec3">事前準備（Windows環境構築）</a>
+            <ul class="sub-list">
+                <li><a href="#sec3-1">Node.js をインストール</a></li>
+                <li><a href="#sec3-2">Python をインストール</a></li>
+                <li><a href="#sec3-3">Git をインストール</a></li>
+                <li><a href="#sec3-4">Claude Code をインストール</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#sec4">外部サービスのAPIキーを取得する</a>
+            <ul class="sub-list">
+                <li><a href="#sec4-1">NewsAPI キー</a></li>
+                <li><a href="#sec4-2">Anthropic（Claude）API キー</a></li>
+                <li><a href="#sec4-3">SendGrid API キー</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#sec5">Claude Code の基本操作</a>
+            <ul class="sub-list">
+                <li><a href="#sec5-1">起動と基本コマンド</a></li>
+                <li><a href="#sec5-2">効果的なプロンプトの書き方</a></li>
+            </ul>
+        </li>
+        <li><a href="#sec6">ツールを作成する（プロンプト全文）</a></li>
+        <li><a href="#sec7">GitHubにデプロイする</a></li>
+        <li><a href="#sec8">運用開始・メンテナンス</a></li>
+        <li><a href="#sec9">トラブルシューティング</a></li>
+    </ol>
+</nav>
+
+
+<!-- ============================================================ -->
+<!-- 1. このガイドでできること                                       -->
+<!-- ============================================================ -->
+<section class="section" id="sec1">
+    <div class="section-header">
+        <span class="section-num">1</span>
+        <h2>このガイドでできること</h2>
+    </div>
+
+    <div class="card">
+        <p>このガイドに沿って作業すると、以下のようなツールが完成します:</p>
+        <br>
+        <ul>
+            <li><strong>世界の業界ニュースを毎週自動で収集</strong>（英語ニュースを対象）</li>
+            <li><strong>AIが日本語に翻訳・要約</strong>（3〜5行の簡潔なまとめ）</li>
+            <li><strong>見やすいWebページとして自動公開</strong>（HTMLファイル）</li>
+            <li><strong>毎週月曜朝8時にメールで通知</strong>（リンクが届く）</li>
+        </ul>
+        <br>
+        <p><strong>コードは一切自分で書く必要はありません。</strong>Claude Code（AI）に指示を出すだけで、全てのプログラムを自動生成してもらいます。</p>
+    </div>
+
+    <div class="callout callout-info">
+        <strong>このガイドの例</strong>: 「塗装・塗装設備業界」のニュースを収集するツールを作成します。キーワードを変えれば、どの業界にも応用できます。
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 2. 全体像                                                      -->
+<!-- ============================================================ -->
+<section class="section" id="sec2">
+    <div class="section-header">
+        <span class="section-num">2</span>
+        <h2>全体像を理解する</h2>
+    </div>
+
+    <p>ツールの仕組みを図で見てみましょう:</p>
+
+    <div class="flow-diagram">
+        <div class="flow-step">NewsAPI<br><small>ニュース収集</small></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">Claude API<br><small>翻訳・要約</small></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">HTML生成<br><small>Webページ化</small></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">GitHub Pages<br><small>自動公開</small></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">SendGrid<br><small>メール通知</small></div>
+    </div>
+
+    <h3>使用するサービス一覧</h3>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>サービス</th><th>役割</th><th>費用</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Claude Code</strong></td><td>AIにコードを書いてもらう</td><td>Claudeプランに含まれる</td></tr>
+                <tr><td><strong>NewsAPI</strong></td><td>世界のニュースを取得</td><td>無料（月1,000回まで）</td></tr>
+                <tr><td><strong>Claude API</strong></td><td>翻訳・要約を実行</td><td>月100〜200円程度</td></tr>
+                <tr><td><strong>SendGrid</strong></td><td>メール送信</td><td>無料（月100通まで）</td></tr>
+                <tr><td><strong>GitHub</strong></td><td>コード管理・自動実行・Webページ公開</td><td>無料</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 3. 事前準備                                                    -->
+<!-- ============================================================ -->
+<section class="section" id="sec3">
+    <div class="section-header">
+        <span class="section-num">3</span>
+        <h2>事前準備（Windows環境構築）</h2>
+    </div>
+
+    <p>4つのソフトウェアをインストールします。既にインストール済みのものは飛ばしてください。</p>
+
+    <!-- 3-1 Node.js -->
+    <h3 id="sec3-1">3-1. Node.js をインストール</h3>
+    <div class="step-card">
+        <span class="step-label label-blue">必須</span>
+        <h4>Claude Code の実行に必要です</h4>
+        <ol>
+            <li><a href="https://nodejs.org/ja" target="_blank" rel="noopener">https://nodejs.org/ja</a> にアクセス</li>
+            <li>左側の <strong>「LTS（推奨版）」</strong> をダウンロード</li>
+            <li>ダウンロードしたインストーラーを実行し、<strong>全て「Next」で進む</strong></li>
+            <li>インストール完了後、PowerShell を開いて確認:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+node --version<br>
+npm --version
+        </div>
+        <p>バージョン番号が表示されれば成功です。</p>
+    </div>
+
+    <!-- 3-2 Python -->
+    <h3 id="sec3-2">3-2. Python をインストール</h3>
+    <div class="step-card step-green">
+        <span class="step-label label-green">必須</span>
+        <h4>ツール本体の実行に必要です</h4>
+        <ol>
+            <li><a href="https://www.python.org/downloads/" target="_blank" rel="noopener">https://www.python.org/downloads/</a> にアクセス</li>
+            <li><strong>「Download Python 3.x.x」</strong> をクリック</li>
+            <li>インストーラーを実行</li>
+            <li class="callout callout-danger" style="list-style:none;margin:8px 0;">
+                <strong>重要!</strong> 最初の画面で <strong>「Add Python to PATH」にチェック</strong>を入れてから「Install Now」
+            </li>
+            <li>完了後、PowerShell で確認:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+python --version
+        </div>
+    </div>
+
+    <!-- 3-3 Git -->
+    <h3 id="sec3-3">3-3. Git をインストール</h3>
+    <div class="step-card step-orange">
+        <span class="step-label label-orange">必須</span>
+        <h4>コードをGitHubにアップロードするために必要です</h4>
+        <ol>
+            <li><a href="https://git-scm.com/download/win" target="_blank" rel="noopener">https://git-scm.com/download/win</a> にアクセス</li>
+            <li><strong>「64-bit Git for Windows Setup」</strong> をダウンロード</li>
+            <li>インストーラーを実行し、<strong>全てデフォルト設定のまま「Next」</strong>で進む</li>
+            <li>完了後、PowerShell で確認:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+git --version
+        </div>
+    </div>
+
+    <!-- 3-4 Claude Code -->
+    <h3 id="sec3-4">3-4. Claude Code をインストール</h3>
+    <div class="step-card step-purple">
+        <span class="step-label label-purple">メインツール</span>
+        <h4>AIがコードを書いてくれるツールです</h4>
+        <ol>
+            <li>PowerShell を<strong>管理者として実行</strong>（スタートメニューで「PowerShell」を検索 → 右クリック → 「管理者として実行」）</li>
+            <li>以下のコマンドを実行:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+npm install -g @anthropic-ai/claude-code
+        </div>
+        <ol start="3">
+            <li>インストール完了後、確認:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+claude --version
+        </div>
+        <ol start="4">
+            <li>初回起動して認証を行います:</li>
+        </ol>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+claude
+        </div>
+        <p>ブラウザが開き、Anthropicアカウントでのログインを求められます。ログインすると Claude Code が使えるようになります。</p>
+    </div>
+
+    <div class="callout callout-success">
+        <strong>ここまでの確認:</strong> PowerShell で <code>node --version</code>、<code>python --version</code>、<code>git --version</code>、<code>claude --version</code> がすべてバージョン番号を返せば準備完了です。
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 4. APIキー取得                                                 -->
+<!-- ============================================================ -->
+<section class="section" id="sec4">
+    <div class="section-header">
+        <span class="section-num">4</span>
+        <h2>外部サービスのAPIキーを取得する</h2>
+    </div>
+
+    <p>3つの外部サービスに登録し、APIキー（サービスを利用するための「鍵」）を取得します。</p>
+
+    <div class="callout callout-warn">
+        <strong>APIキーとは？</strong><br>
+        APIキーは、外部サービスにアクセスするための「パスワード」のようなものです。他人に教えないでください。このガイドでは、APIキーをGitHub Secretsという安全な場所に保管します。
+    </div>
+
+    <!-- 4-1 NewsAPI -->
+    <h3 id="sec4-1">4-1. NewsAPI キーの取得（無料）</h3>
+    <div class="step-card">
+        <h4>世界のニュースを検索・取得するためのAPIです</h4>
+        <ol>
+            <li><a href="https://newsapi.org/" target="_blank" rel="noopener">https://newsapi.org/</a> にアクセス</li>
+            <li><strong>「Get API Key」</strong> ボタンをクリック</li>
+            <li>名前・メールアドレス・パスワードを入力して登録</li>
+            <li>ダッシュボードに表示される <strong>APIキー</strong>（英数字の文字列）をメモ帳にコピー</li>
+        </ol>
+        <div class="callout callout-info">無料プラン: 月1,000リクエストまで。週1回の使用なら十分です。</div>
+    </div>
+
+    <!-- 4-2 Anthropic -->
+    <h3 id="sec4-2">4-2. Anthropic（Claude）API キーの取得</h3>
+    <div class="step-card">
+        <h4>AIによる翻訳・要約に使います</h4>
+        <ol>
+            <li><a href="https://console.anthropic.com/" target="_blank" rel="noopener">https://console.anthropic.com/</a> にアクセス</li>
+            <li>Googleアカウント等でサインアップ/ログイン</li>
+            <li>左メニューの <strong>「API Keys」</strong> をクリック</li>
+            <li><strong>「Create Key」</strong> をクリック → 名前を入力（例: <code>paint-news</code>）</li>
+            <li>表示されたキー <code>sk-ant-...</code> をメモ帳にコピー</li>
+            <li>左メニューの <strong>「Billing」</strong> で支払い方法を登録</li>
+        </ol>
+        <div class="callout callout-danger">
+            <strong>APIキーは一度しか表示されません！</strong> 必ずその場でコピーしてメモ帳に保存してください。
+        </div>
+        <div class="callout callout-info">費用目安: 週1回20記事の翻訳で月100〜200円程度です。</div>
+    </div>
+
+    <!-- 4-3 SendGrid -->
+    <h3 id="sec4-3">4-3. SendGrid API キーの取得（無料）</h3>
+    <div class="step-card">
+        <h4>メール送信に使います</h4>
+        <ol>
+            <li><a href="https://sendgrid.com/" target="_blank" rel="noopener">https://sendgrid.com/</a> にアクセス</li>
+            <li><strong>「Start For Free」</strong> でアカウント作成</li>
+            <li>ログイン後、左メニュー <strong>Settings &rarr; API Keys</strong></li>
+            <li><strong>「Create API Key」</strong> をクリック</li>
+            <li>名前を入力、パーミッションは <strong>「Full Access」</strong> を選択</li>
+            <li>表示されたキー <code>SG.xxxx...</code> をメモ帳にコピー</li>
+        </ol>
+        <br>
+        <h4>送信元メールアドレスの認証（必須！）</h4>
+        <ol>
+            <li>左メニュー <strong>Settings &rarr; Sender Authentication</strong></li>
+            <li><strong>「Single Sender Verification」</strong> をクリック</li>
+            <li>送信元にしたいメールアドレスを登録</li>
+            <li>確認メールが届くので、メール内のリンクをクリックして認証完了</li>
+        </ol>
+    </div>
+
+    <div class="callout callout-success">
+        <strong>ここまでの確認:</strong> メモ帳に以下の3つのキーが保存されていればOKです。
+        <ul style="margin-top:6px;">
+            <li>NewsAPIキー</li>
+            <li>Anthropic APIキー（<code>sk-ant-...</code>）</li>
+            <li>SendGrid APIキー（<code>SG....</code>）</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 5. Claude Code の使い方                                        -->
+<!-- ============================================================ -->
+<section class="section" id="sec5">
+    <div class="section-header">
+        <span class="section-num">5</span>
+        <h2>Claude Code の基本操作</h2>
+    </div>
+
+    <h3 id="sec5-1">5-1. 起動と基本コマンド</h3>
+
+    <div class="card">
+        <p class="card-title">起動方法</p>
+        <p>PowerShell で作業フォルダに移動してから <code>claude</code> と入力するだけです。</p>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+<span class="comment"># 1. 作業フォルダを作成して移動</span><br>
+mkdir C:\Projects\paint-news-app<br>
+cd C:\Projects\paint-news-app<br>
+<br>
+<span class="comment"># 2. Claude Code を起動</span><br>
+claude
+        </div>
+        <p>起動すると入力プロンプトが表示され、自然な日本語で指示を出せます。</p>
+    </div>
+
+    <div class="card">
+        <p class="card-title">基本的な操作</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>操作</th><th>方法</th></tr></thead>
+                <tbody>
+                    <tr><td>指示を出す</td><td>日本語で入力して Enter</td></tr>
+                    <tr><td>実行を許可する</td><td>Claude が確認を求めたら <code>y</code> を入力</td></tr>
+                    <tr><td>終了する</td><td><code>/exit</code> と入力、または Ctrl+C を2回</td></tr>
+                    <tr><td>新しい会話を始める</td><td><code>/clear</code> と入力</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <h3 id="sec5-2">5-2. 効果的なプロンプトの書き方</h3>
+
+    <p>Claude Code に良い結果を出してもらうための <strong>5つのコツ</strong> です:</p>
+
+    <!-- コツ1 -->
+    <div class="step-card">
+        <span class="step-label label-blue">コツ 1</span>
+        <h4>最初に「全体像」を伝え、すぐに作業させない</h4>
+        <p>いきなり「作って」ではなく、まず要件を整理してもらいましょう。</p>
+        <div class="prompt-box">
+            <div class="prompt-label">良いプロンプト例</div>
+            <div class="prompt-text">業界ニュース自動まとめツールを作成して。
+世界の塗装及び塗装設備業界のニュースを毎週自動で収集しHTMLファイルにまとめて、日本語に翻訳して毎週月曜の日本時間8時に、HTMLリンクをメールで通知するツールを作成してください。
+<strong>まだ作業は行わず、まずは内容を確認してまとめてください、不明点は質問してください。</strong></div>
+        </div>
+        <div class="callout callout-success">
+            <strong>ポイント:</strong> 末尾の「まだ作業は行わず〜」が重要です。これにより Claude は要件を整理し、不明点を質問してくれます。認識のズレを防げます。
+        </div>
+    </div>
+
+    <!-- コツ2 -->
+    <div class="step-card">
+        <span class="step-label label-green">コツ 2</span>
+        <h4>具体的な数字・技術・条件を含める</h4>
+        <p>曖昧な表現を避け、具体的に指定するほど良い結果が得られます。</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th style="color:var(--red);">曖昧な指示</th><th style="color:var(--green);">具体的な指示</th></tr></thead>
+                <tbody>
+                    <tr><td>ニュースを集めて</td><td>NewsAPIを使って過去7日間のニュースを最大20件収集して</td></tr>
+                    <tr><td>日本語にして</td><td>Claude APIで日本語に翻訳し、3〜5行で要約して</td></tr>
+                    <tr><td>定期的に実行して</td><td>GitHub Actionsで毎週月曜の日本時間8:00に自動実行して</td></tr>
+                    <tr><td>きれいに表示して</td><td>シンプル・ミニマルなデザインのHTMLファイルにまとめて</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- コツ3 -->
+    <div class="step-card">
+        <span class="step-label label-orange">コツ 3</span>
+        <h4>品質を重視する場合は明示する</h4>
+        <p>品質やこだわりポイントは、はっきりと伝えましょう。</p>
+        <div class="prompt-box">
+            <div class="prompt-label">効果的な一文</div>
+            <div class="prompt-text">時間はいくらかけても良いので品質を優先してください。</div>
+        </div>
+        <p>この一文を添えると、Claude はより丁寧にコードを書き、エラーハンドリングやコメントも充実させます。</p>
+    </div>
+
+    <!-- コツ4 -->
+    <div class="step-card">
+        <span class="step-label label-purple">コツ 4</span>
+        <h4>段階的に進める（一度に全部頼まない）</h4>
+        <p>大きなタスクは段階的に分けると、品質が上がります。</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>段階</th><th>指示の例</th></tr></thead>
+                <tbody>
+                    <tr><td>1. 要件整理</td><td>「まず要件をまとめて、不明点を質問して」</td></tr>
+                    <tr><td>2. 作成指示</td><td>「この内容で作業を進めてください」</td></tr>
+                    <tr><td>3. テスト</td><td>「ドライランで動作確認してください」</td></tr>
+                    <tr><td>4. 修正</td><td>「メール送信でエラーが出ます。ログはこちらです: ...」</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- コツ5 -->
+    <div class="step-card">
+        <span class="step-label label-red">コツ 5</span>
+        <h4>エラーが出たら「ログをそのまま貼る」</h4>
+        <p>問題が起きた時は、自分で解釈せず、エラーメッセージやログをそのままコピー&ペーストしてください。</p>
+        <div class="prompt-box">
+            <div class="prompt-label">エラー報告の例</div>
+            <div class="prompt-text">メールが届きません。GitHubのActionsのログは以下の通りです:
+
+SendGrid API エラー: HTTP Error 401: Unauthorized</div>
+        </div>
+        <div class="callout callout-success">
+            <strong>ポイント:</strong> エラーの原因は Claude が判断します。あなたはログを貼るだけでOKです。
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 6. ツールを作成する                                             -->
+<!-- ============================================================ -->
+<section class="section" id="sec6">
+    <div class="section-header">
+        <span class="section-num">6</span>
+        <h2>ツールを作成する（プロンプト全文）</h2>
+    </div>
+
+    <p>いよいよツールを作成します。以下のプロンプトを <strong>順番に</strong> Claude Code に送信してください。</p>
+
+    <!-- プロンプト1 -->
+    <div class="step-card">
+        <span class="step-label label-blue">プロンプト 1 / 4</span>
+        <h4>Claude Code を起動して、要件を伝える</h4>
+        <p>まず PowerShell で作業フォルダに移動し、Claude Code を起動します:</p>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+mkdir C:\Projects\paint-news-app<br>
+cd C:\Projects\paint-news-app<br>
+claude
+        </div>
+        <p>起動したら、以下のプロンプトを送信:</p>
+        <div class="prompt-box">
+            <div class="prompt-label">プロンプト 1 をコピー</div>
+            <div class="prompt-text">業界ニュース自動まとめツールを作成して。
+世界の塗装及び塗装設備業界のニュースを毎週自動で収集しHTMLファイルにまとめて、日本語に翻訳して毎週月曜の日本時間8時に、HTMLリンクをメールで通知するツールを作成してください。
+
+技術スタック:
+- ニュース収集: NewsAPI
+- 翻訳・要約: Claude API
+- 定期実行・ホスティング: GitHub Actions + GitHub Pages
+- メール送信: SendGrid
+- 言語: Python
+
+まだ作業は行わず、まずは内容を確認してまとめてください。不明点は質問してください。</div>
+        </div>
+        <p>Claude が質問してくるので、以下のように回答してください:</p>
+        <ul>
+            <li>ニュース収集キーワード → <strong>業界全般</strong>（幅広く収集）</li>
+            <li>記事数 → <strong>20件程度</strong></li>
+            <li>デザイン → <strong>シンプル・ミニマル</strong></li>
+            <li>要約レベル → <strong>3〜5行の標準要約</strong></li>
+        </ul>
+    </div>
+
+    <!-- プロンプト2 -->
+    <div class="step-card step-green">
+        <span class="step-label label-green">プロンプト 2 / 4</span>
+        <h4>作成を指示する</h4>
+        <p>Claude が要件をまとめてくれたら、作成を指示します:</p>
+        <div class="prompt-box">
+            <div class="prompt-label">プロンプト 2 をコピー</div>
+            <div class="prompt-text">はい、この内容で作業を進めてください。時間はいくらかけても良いので品質を優先してください。</div>
+        </div>
+        <p>Claude がファイルを作成し始めます。途中で<strong>「許可しますか？」</strong>と聞かれたら <code>y</code> を入力してください。</p>
+        <div class="callout callout-info">
+            <strong>所要時間:</strong> 10〜20分ほどかかります。Claude が全てのファイルを自動で作成します。
+        </div>
+    </div>
+
+    <!-- プロンプト3 -->
+    <div class="step-card step-orange">
+        <span class="step-label label-orange">プロンプト 3 / 4</span>
+        <h4>ドライランでテストする</h4>
+        <p>ファイル作成が完了したら、テスト実行を依頼します:</p>
+        <div class="prompt-box">
+            <div class="prompt-label">プロンプト 3 をコピー</div>
+            <div class="prompt-text">ドライランで動作確認してください。APIは使わず、ダミーデータでHTMLが正しく生成されるか確認したいです。</div>
+        </div>
+    </div>
+
+    <!-- プロンプト4 -->
+    <div class="step-card step-purple">
+        <span class="step-label label-purple">プロンプト 4 / 4</span>
+        <h4>セットアップガイドを聞く</h4>
+        <p>テストが成功したら、デプロイ手順を聞きます:</p>
+        <div class="prompt-box">
+            <div class="prompt-label">プロンプト 4 をコピー</div>
+            <div class="prompt-text">運用開始手順を詳しく教えてください。GitHubリポジトリの作成からGitHub Pages有効化、GitHub Secretsの設定、テスト実行まで、Gitに不慣れなので全てのコマンドを省略せず教えてください。</div>
+        </div>
+    </div>
+
+    <div class="callout callout-warn">
+        <strong>業界を変えたい場合は？</strong><br>
+        プロンプト1の「塗装及び塗装設備業界」を「半導体業界」「食品加工業界」など、お好みの業界に置き換えるだけです。Claude が適切なキーワードを自動で設定してくれます。
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 7. GitHubにデプロイ                                            -->
+<!-- ============================================================ -->
+<section class="section" id="sec7">
+    <div class="section-header">
+        <span class="section-num">7</span>
+        <h2>GitHubにデプロイする</h2>
+    </div>
+
+    <p>Claude Code が手順を教えてくれますが、ここでも流れをまとめておきます。</p>
+
+    <h3>7-1. GitHubアカウントの準備</h3>
+    <div class="step-card">
+        <p>アカウントをお持ちでない場合は <a href="https://github.com/" target="_blank" rel="noopener">github.com</a> で無料登録してください。</p>
+    </div>
+
+    <h3>7-2. リポジトリの作成とプッシュ</h3>
+    <div class="step-card">
+        <ol>
+            <li><a href="https://github.com/new" target="_blank" rel="noopener">https://github.com/new</a> にアクセス</li>
+            <li>Repository name: <code>paint-news-app</code></li>
+            <li><strong>「Public」</strong> を選択（GitHub Pages無料利用のため）</li>
+            <li>「Add a README file」にはチェック<strong>しない</strong></li>
+            <li>「Create repository」をクリック</li>
+        </ol>
+        <br>
+        <p>次に PowerShell で以下を実行:</p>
+        <div class="code-block">
+            <span class="code-lang">PowerShell</span>
+cd C:\Projects\paint-news-app<br>
+<br>
+git init<br>
+git add .<br>
+git commit -m "初回コミット"<br>
+git branch -M main<br>
+<br>
+<span class="comment"># あなたのユーザー名に書き換えてください</span><br>
+git remote add origin https://github.com/<span class="highlight">あなたのユーザー名</span>/paint-news-app.git<br>
+<br>
+git push -u origin main
+        </div>
+    </div>
+
+    <h3>7-3. GitHub Secrets の登録</h3>
+    <div class="step-card">
+        <p>GitHubリポジトリ &rarr; <strong>Settings &rarr; Secrets and variables &rarr; Actions</strong> &rarr; <strong>「New repository secret」</strong> で以下を登録:</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Name</th><th>登録する値</th></tr></thead>
+                <tbody>
+                    <tr><td><code>NEWSAPI_KEY</code></td><td>NewsAPIで取得したキー</td></tr>
+                    <tr><td><code>ANTHROPIC_API_KEY</code></td><td><code>sk-ant-...</code> のキー</td></tr>
+                    <tr><td><code>SENDGRID_API_KEY</code></td><td><code>SG....</code> のキー</td></tr>
+                    <tr><td><code>FROM_EMAIL</code></td><td>SendGridで認証した送信元メールアドレス</td></tr>
+                    <tr><td><code>NOTIFY_EMAIL</code></td><td>通知を受け取りたいメールアドレス</td></tr>
+                    <tr><td><code>PAGES_BASE_URL</code></td><td><code>https://あなたのユーザー名.github.io/paint-news-app/</code></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="callout callout-danger">
+            <strong>注意:</strong> Name の「GITHUB_」で始まる名前は使えません（GitHubの予約語）。<code>PAGES_BASE_URL</code> を使ってください。
+        </div>
+    </div>
+
+    <h3>7-4. GitHub Pages の有効化</h3>
+    <div class="step-card">
+        <ol>
+            <li>リポジトリの <strong>Settings &rarr; Pages</strong></li>
+            <li>Branch: <strong><code>main</code></strong> を選択</li>
+            <li>フォルダ: <strong><code>/docs</code></strong> を選択</li>
+            <li><strong>「Save」</strong> をクリック</li>
+        </ol>
+        <div class="callout callout-info">
+            リポジトリが Private になっている場合は、Settings 最下部の「Change visibility」から <strong>Public</strong> に変更してください。
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 8. 運用開始                                                    -->
+<!-- ============================================================ -->
+<section class="section" id="sec8">
+    <div class="section-header">
+        <span class="section-num">8</span>
+        <h2>運用開始・メンテナンス</h2>
+    </div>
+
+    <h3>8-1. テスト実行</h3>
+    <div class="step-card">
+        <ol>
+            <li>リポジトリの <strong>「Actions」</strong> タブをクリック</li>
+            <li>左側の <strong>「Weekly Paint Industry News」</strong> をクリック</li>
+            <li><strong>「Run workflow」</strong> ボタンをクリック</li>
+            <li>ドライラン: <code>true</code>、メール送信スキップ: <code>true</code> で最初のテスト</li>
+            <li>成功したら、両方 <code>false</code> にして本番テスト</li>
+        </ol>
+    </div>
+
+    <h3>8-2. 自動配信の確認</h3>
+    <div class="card">
+        <p>設定完了後は、<strong>毎週月曜 朝8時（日本時間）</strong> に自動で以下が実行されます:</p>
+        <ol>
+            <li>過去7日間のニュースを自動収集</li>
+            <li>AIが日本語に翻訳・要約</li>
+            <li>HTMLレポートを自動生成・公開</li>
+            <li>メールでリンクを通知</li>
+        </ol>
+        <p style="margin-top:8px;"><strong>あなたがやることは何もありません。毎週メールを確認するだけです。</strong></p>
+    </div>
+
+    <h3>8-3. カスタマイズしたいとき</h3>
+    <div class="card">
+        <p>設定を変えたい場合は、再度 Claude Code を起動して指示を出すだけです:</p>
+        <div class="prompt-box">
+            <div class="prompt-label">カスタマイズ例</div>
+            <div class="prompt-text">検索キーワードを変更して、「半導体製造装置」のニュースも含めるようにしてください。</div>
+        </div>
+        <div class="prompt-box">
+            <div class="prompt-label">カスタマイズ例</div>
+            <div class="prompt-text">記事の最大件数を30件に増やして、配信を水曜と月曜の週2回に変更してください。</div>
+        </div>
+        <p style="margin-top:8px;">変更後は <code>git add .</code> &rarr; <code>git commit -m "設定変更"</code> &rarr; <code>git push</code> でGitHubに反映します。</p>
+    </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- 9. トラブルシューティング                                       -->
+<!-- ============================================================ -->
+<section class="section" id="sec9">
+    <div class="section-header">
+        <span class="section-num">9</span>
+        <h2>トラブルシューティング</h2>
+    </div>
+
+    <details>
+        <summary>GitHub Actions が赤い ✗ で失敗する</summary>
+        <div class="details-content">
+            <p>Actions タブでエラーのあるジョブをクリックし、赤い行のログを確認してください。多くの場合、<strong>Secretsの設定ミス</strong>が原因です。</p>
+            <ul>
+                <li>Secret の Name が正しいか確認（大文字・アンダースコア注意）</li>
+                <li>Secret の値に余分なスペースが入っていないか確認</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>メールが届かない</summary>
+        <div class="details-content">
+            <ul>
+                <li><strong>迷惑メールフォルダ</strong>を確認</li>
+                <li>Actions ログの Step 4/4 を確認し、エラーメッセージを確認</li>
+                <li><code>401 Unauthorized</code> → SendGridのAPIキーを再生成して登録し直す</li>
+                <li>SendGridの<strong>送信元メール認証</strong>が完了しているか確認</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>ニュースが0件になる</summary>
+        <div class="details-content">
+            <ul>
+                <li>ニッチすぎるキーワードの場合、該当記事が無い週があります</li>
+                <li>Claude Code で検索キーワードを追加してもらいましょう</li>
+                <li>NewsAPIの無料枠（月1,000回）を超えていないか確認</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>GitHub Pages にアクセスできない</summary>
+        <div class="details-content">
+            <ul>
+                <li>リポジトリが <strong>Public</strong> になっているか確認</li>
+                <li>Settings &rarr; Pages で Branch が <code>main</code>、フォルダが <code>/docs</code> に設定されているか確認</li>
+                <li>デプロイ後、反映まで数分かかることがあります</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Claude Code でエラーが出る</summary>
+        <div class="details-content">
+            <ul>
+                <li>Node.js が正しくインストールされているか <code>node --version</code> で確認</li>
+                <li><code>npm install -g @anthropic-ai/claude-code</code> でインストールし直す</li>
+                <li>Anthropicアカウントのログインが切れている場合は再度 <code>claude</code> で起動してログイン</li>
+            </ul>
+        </div>
+    </details>
+
+    <div class="callout callout-success" style="margin-top:24px;">
+        <strong>どんな問題でも、Claude Code に聞けば解決策を教えてもらえます。</strong><br>
+        エラーメッセージやスクリーンショットをそのまま貼り付けて「これを解決して」と伝えるだけでOKです。
+    </div>
+</section>
+
+</main>
+
+
+<!-- ============================================================ -->
+<!-- フッター                                                       -->
+<!-- ============================================================ -->
+<footer class="footer">
+    <div class="container">
+        <p>このガイドは Claude Code により作成されました。</p>
+        <p>最終更新: 2026年2月</p>
+    </div>
+</footer>
+
+</body>
+</html>

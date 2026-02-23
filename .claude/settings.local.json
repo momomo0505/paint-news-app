@@ -3,7 +3,11 @@
     "allow": [
       "Bash(python -m pip install:*)",
       "Bash(python3 -m pip install:*)",
-      "Bash(python3 -m scripts.main:*)"
+      "Bash(python3 -m scripts.main:*)",
+      "Bash(gh run list:*)",
+      "Bash(brew list:*)",
+      "WebFetch(domain:momomo0505.github.io)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
