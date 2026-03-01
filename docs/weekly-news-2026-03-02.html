@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年03月02日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年03月02日</span>
+            <span>📰 9件の記事</span>
+            <span>🌍 対象期間: 2026/02/23 〜 2026/03/02</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-equipment"></span>
+            塗装設備: 2件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-technology"></span>
+            塗装技術: 1件
+        </span>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-other"></span>
+            その他: 6件
+        </span>
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">TAXA Outdoors Cricket：4人が眠れるNASA設計のコンパクトキャンパー</h2>
+            </div>
+            <p class="article-summary">TAXA OutdoorsのCricketキャンパーは、コンパクトな設計ながら4人が宿泊可能で、暖房・冷房機能、全天候対応キッチン、パノラマ窓、耐久性の高い構造を備えています。NASAの技術を活用した設計により、年間を通じたアウトドア活動に対応する高品質なキャンパーとして注目されています。</p>
+            <div class="article-footer">
+                <span class="article-source">Tinyhousetalk.com — 2026年02月27日</span>
+                <a href="https://tinyhousetalk.com/taxa-outdoors-cricket-compact-camper/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1976年式BMW R90/6がノーリザーブで出品</h2>
+            </div>
+            <p class="article-summary">1976年式BMW R90/6がオークションサイトBring a Trailerでノーリザーブ出品されています。現オーナーが2016年に購入したこの車両は、898cc水平対向2気筒エンジンとリビルト済み5速ミッションを搭載し、ハバナゴールドで塗装されています。密閉式ドライブシャフトや電動スターターなどを装備した1970年代のクラシックBMWです。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年02月26日</span>
+                <a href="https://bringatrailer.com/listing/1976-bmw-r90-6-49/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-equipment">
+                    塗装設備
+                </span>
+                <h2 class="article-title">TILSWALL ポータブル塗装ブーステント（床材・固定杭付き）が特価25.99ドルで販売中</h2>
+            </div>
+            <p class="article-summary">Wootにて、TILSWALL製のポータブル塗装ブーステント（サイズ：9フィート×6フィート×5.6フィート）が25.99ドルで販売されている。床材と風除け用固定杭が付属し、Amazonプライム会員は送料無料となる。通常の送料は6ドル。小規模な塗装作業やDIY用途に適した製品として注目される。</p>
+            <div class="article-footer">
+                <span class="article-source">Slickdeals.net — 2026年02月24日</span>
+                <a href="https://slickdeals.net/f/19243150-tilswall-portable-paint-booth-tent-w-floor-wind-stakes-9-x-6-x-5-6-25-99-free-shipping-w-prime" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">金製「スプラボール」が太陽光スペクトラムの約90%を捕獲</h2>
+            </div>
+            <p class="article-summary">地球表面に到達する89,000テラワットの太陽エネルギーを効率的に活用する新技術が開発された。従来の太陽光発電技術では太陽光スペクトラム全体を捕獲できない限界があったが、金製のプラズモニック「スプラボール」により約90%の太陽光スペクトラムを捕獲することが可能になった。この革新的な技術は太陽光エネルギー利用効率の大幅な向上をもたらす可能性がある。</p>
+            <div class="article-footer">
+                <span class="article-source">New Atlas — 2026年02月24日</span>
+                <a href="https://newatlas.com/energy/plasmonic-supraballs-solar-spectrum/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">舞台美術における質感表現技術</h2>
+            </div>
+            <p class="article-summary">イェール大学の舞台美術家たちが、偽木材から古い石材まで、舞台上のあらゆる質感を創造している。創造性と精密さを融合させ、大学の演劇制作を支える専門技術について紹介。舞台セットにおける多様な素材表現技法と、それを実現する職人技の重要性が描かれている。</p>
+            <div class="article-footer">
+                <span class="article-source">Yale.edu — 2026年02月24日</span>
+                <a href="https://your.yale.edu/youryale/2026-02-23-setting-the-stage" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-equipment">
+                    塗装設備
+                </span>
+                <h2 class="article-title">Hurricane 12インチ板金折り曲げツールが16ドル（送料無料）</h2>
+            </div>
+            <p class="article-summary">Amazon でHurricane製の12インチ板金折り曲げツールが16ドルで販売中（Prime会員送料無料）。3/8インチと1インチの折り曲げ深度に対応し、16ゲージスチール製で防錆パウダーコーティング仕様。HVAC用途に最適とされ、他社より4ドル安い最安価格での提供。</p>
+            <div class="article-footer">
+                <span class="article-source">Dealnews.com — 2026年02月24日</span>
+                <a href="https://www.dealnews.com/products/Hurricane/Hurricane-12-Folding-Tool-for-Sheet-Metal/497765.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">Samsung Galaxy S26 Ultra: あなたが見逃した隠れた詳細</h2>
+            </div>
+            <p class="article-summary">この記事はスマートフォンのSamsung Galaxy S26 Ultraに関する内容で、カメラ機能の改良について述べています。塗装業界とは直接的な関連がない消費者向け電子製品のニュースです。塗装設備、技術、自動車塗装、環境規制、市場動向、企業ニュースのいずれにも該当しない内容となっています。</p>
+            <div class="article-footer">
+                <span class="article-source">Geeky Gadgets — 2026年02月23日</span>
+                <a href="https://www.geeky-gadgets.com/samsung-galaxy-s26-ultra-hidden-details/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">108cc改良エンジン搭載1983年式ホンダATC 70 ノーリザーブ出品</h2>
+            </div>
+            <p class="article-summary">1983年式ホンダATC 70三輪車が2024年頃に購入され、その後108ccストローカーキットで改良された。4ストローク単気筒エンジンに自動クラッチと4速トランスミッションが組み合わされている。追加作業にはパウダーコーティング塗装も含まれており、車両の外観品質も向上している。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年02月23日</span>
+                <a href="https://bringatrailer.com/listing/1983-honda-atc-70-11/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1974年式ホンダCR125Mエルシノア ノーリザーブ出品</h2>
+            </div>
+            <p class="article-summary">1974年式ホンダCR125Mエルシノアが2024年に現オーナーによって取得され、その後123cc2ストロークエンジン、京浜キャブレター、6速トランスミッションのオーバーホールが実施された。フレームのパウダーコーティング、燃料タンクライニング、その他部品交換も行われている。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年02月23日</span>
+                <a href="https://bringatrailer.com/listing/1974-honda-cr125m-elsinore-11/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
