@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年03月30日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年03月30日</span>
+            <span>📰 15件の記事</span>
+            <span>🌍 対象期間: 2026/03/23 〜 2026/03/30</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-technology"></span>
+            塗装技術: 1件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-automotive"></span>
+            自動車塗装: 1件
+        </span>
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-market"></span>
+            市場動向: 1件
+        </span>
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-other"></span>
+            その他: 12件
+        </span>
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-automotive">
+                    自動車塗装
+                </span>
+                <h2 class="article-title">1985年式トヨタピックアップ XtraCab SR5 4×4 5速マニュアル</h2>
+            </div>
+            <p class="article-summary">現在のオーナーが2025年に購入した1985年式トヨタピックアップトラックで、レストア作業が実施されました。車体は白色に再塗装され、15インチスチールホイールの研磨、ブレーキのオーバーホール、ドライブトレイン部品のパウダーコーティング、エンジンの再構築などが行われています。XtraCabモデルの4輪駆動仕様で5速マニュアルトランスミッションを搭載しています。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年03月29日</span>
+                <a href="https://bringatrailer.com/listing/1985-toyota-pickup-83/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">レガシーPaint Shop Proファイル（.pspおよび.pspimage）をSVGに変換するコンバーター</h2>
+            </div>
+            <p class="article-summary">古いPaint Shop Proの.pspおよび.pspimageファイルをSVG形式に変換するオープンソースツールがGitHubで公開されました。このコンバーターにより、レガシーファイル形式で保存された塗装設計データや図面を現代的なSVG形式に移行することが可能になります。塗装業界で過去に作成されたデザインファイルの活用や保存に役立つツールとして注目されています。</p>
+            <div class="article-footer">
+                <span class="article-source">Github.com — 2026年03月28日</span>
+                <a href="https://github.com/waruyama/psp-converter/tree/main" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">フューエルインジェクション搭載1972年シボレーK5ブレザーCST 4×4</h2>
+            </div>
+            <p class="article-summary">1972年製シボレーK5ブレザーCST 4×4が2023年にボディオフによる本格的なレストアを実施。ブルーでの再塗装、フレームのパウダーコーティング、白いビニールとチェック柄生地による内装の張り替えが行われた。交換された350ci V8エンジンと3速オートマチックトランスミッションを搭載している。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年03月28日</span>
+                <a href="https://bringatrailer.com/listing/1972-chevrolet-k5-blazer-102-2-2/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">Samyang、Sony Eマウント用軽量・手頃価格のAF 35mm f/1.8 Primaを発表</h2>
+            </div>
+            <p class="article-summary">SamyangがコンパクトなPrima シリーズの最新モデルとして、Sony Eマウント用AF 35mm f/1.8 P FEレンズを発表した。同シリーズには既に16mm f/2.8、35mm f/1.4 P、85mm f/1.8が含まれており、軽量で手頃な価格のレンズラインナップとして展開されている。</p>
+            <div class="article-footer">
+                <span class="article-source">imaging resource — 2026年03月28日</span>
+                <a href="https://www.imaging-resource.com/news/samyang-unveils-lightweight-and-affordable-af-35mm-f-1-8-prima-for-sony-e-mount/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">IKEA Is Selling a Smart, Small Storage Caddy for Only $6</h2>
+            </div>
+            <p class="article-summary">It’s so versatile!
+READ MORE...</p>
+            <div class="article-footer">
+                <span class="article-source">Apartment Therapy — 2026年03月28日</span>
+                <a href="https://www.apartmenttherapy.com/ikea-valvardad-organizer-2-37545288" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">Samyang AF 35mm F1.8 P FE：Sony FE用軽量プライムレンズ</h2>
+            </div>
+            <p class="article-summary">Samyangが新たに発表したSony FEマウント用の35mm F1.8プライムレンズは、明るいF1.8開放値、アップグレードされた光学系、高速オートフォーカス、実用的な機能を軽量でポータブルなデザインに組み込んだ製品です。このレンズはPrimaシリーズのラインナップを拡充し、常に手軽に持ち運べる明るい標準プライムレンズとして位置づけられています。</p>
+            <div class="article-footer">
+                <span class="article-source">Provideocoalition.com — 2026年03月27日</span>
+                <a href="https://www.provideocoalition.com/samyang-af-35mm-f1-8-p-fe-a-lightweight-prime-for-sony-fe/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">世界を席巻したビデオゲームへのオマージュ — Krayon × パックマンで遊びたいですか？</h2>
+            </div>
+            <p class="article-summary">この記事は時計メーカーKrayonとパックマンのコラボレーション時計について紹介している。1980年代から90年代に多くの時間を費やしたであろう、最も象徴的なアーケードゲームであるパックマンをテーマにした特別な時計の発表について報じている。塗装業界とは直接関係のない時計・ゲーム業界のニュースである。</p>
+            <div class="article-footer">
+                <span class="article-source">Fratellowatches.com — 2026年03月27日</span>
+                <a href="https://www.fratellowatches.com/play-with-the-pac-man-x-krayon/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">LKサムヤンがPrimaシリーズの新型AF 35mm f/1.8 P FEレンズを発表</h2>
+            </div>
+            <p class="article-summary">LKサムヤンがPrimaシリーズから新型AF 35mm f/1.8 P FEレンズを正式発表しました。米国ではロキノンブランドでも販売され、欧州ではFoto ErhardtとWEX Photoで取り扱われます。このレンズは写真撮影用の光学機器であり、塗装業界とは直接的な関連性がありません。</p>
+            <div class="article-footer">
+                <span class="article-source">Photorumors.com — 2026年03月27日</span>
+                <a href="https://photorumors.com/2026/03/26/lk-samyang-announced-a-new-af-35mm-f-1-8-p-fe-lens-from-the-prima-series/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">サムヤンがAF 35mm F1.8 P FEレンズを発表</h2>
+            </div>
+            <p class="article-summary">この記事はカメラレンズの新製品発表に関するニュースです。サムヤンのAF 35mm F1.8 P FEレンズがUMC II（Ultra Multi Coating II）という次世代コーティング技術を搭載し、フレアやゴーストを効果的に軽減することを紹介しています。塗装業界とは直接的な関連性がない内容です。</p>
+            <div class="article-footer">
+                <span class="article-source">Sonyalpharumors.com — 2026年03月26日</span>
+                <a href="https://www.sonyalpharumors.com/just-announced-new-samyang-af-35mm-f1-8-p-fe/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1995年式日産スカイラインGT-R V-Spec N1</h2>
+            </div>
+            <p class="article-summary">1995年から1998年にかけて87台のみ製造されたとされる希少な日産スカイラインGT-R V-Spec N1の1台で、2025年に現在のオーナーによって米国に輸入された。ホワイトのボディカラーにツートーングレーのクロス内装を持ち、ツインターボエンジンを搭載している。BringATrailerでオークション出品されている車両。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年03月26日</span>
+                <a href="https://bringatrailer.com/listing/1995-nissan-skyline-gt-r-26/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">ドライコート電池用カーボンナノファイバーがテスラのエネルギー密度を20%向上</h2>
+            </div>
+            <p class="article-summary">シカゴ大学の2026年3月の論文で、ドライ電極カソード設計にカーボンナノファイバーを適用する革新的手法が発表された。この技術により、テスラの電池におけるエネルギー密度が21.8%向上することが実証された。ドライコーティング技術と組み合わせることで、従来の湿式プロセスと比較して大幅な性能改善が期待される。</p>
+            <div class="article-footer">
+                <span class="article-source">Next Big Future — 2026年03月26日</span>
+                <a href="https://www.nextbigfuture.com/2026/03/carbon-nanofibers-in-dry-coated-batteries-will-boost-energy-density-by-20-for-tesla.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">コインバトールでLPG不足により中小企業の30%が操業停止、業界団体が政府介入を要請</h2>
+            </div>
+            <p class="article-summary">インド・コインバトール地区でLPG（液化石油ガス）の供給不足により、中小零細企業（MSME）の約30%が操業停止に追い込まれている。同地区は月間12万本の19kgボンベを消費しており、うち6万本が製造業、レーザー切断、粉体塗装、繊維加工に使用されている。地元工業会のCodissiaは中央政府に緊急介入を求めている。粉体塗装を含む製造業への深刻な影響が懸念される。</p>
+            <div class="article-footer">
+                <span class="article-source">The Times of India — 2026年03月26日</span>
+                <a href="https://timesofindia.indiatimes.com/city/coimbatore/30-msmes-shut-in-coimbatore-due-to-lpg-shortage-codissia-seeks-centres-intervention/articleshow/129806416.cms" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-market">
+                    市場動向
+                </span>
+                <h2 class="article-title">酸化鉄顔料市場、2035年に41億ドル突破予測 - 建設業成長と耐久性コーティング需要が牽引</h2>
+            </div>
+            <p class="article-summary">酸化鉄顔料市場は、耐久性、UV耐性、環境配慮型着色剤の需要拡大により着実に成長している。米国市場は2025年の5.4億ドルから2035年には8.7億ドルまで拡大する見込み。建設業界の成長と耐久性の高いコーティング材への需要増加が市場拡大の主要因となっている。SNS Insiderのレポートによると、世界の酸化鉄顔料市場は2035年までに41億ドルを超える規模に達すると予測されている。</p>
+            <div class="article-footer">
+                <span class="article-source">GlobeNewswire — 2026年03月25日</span>
+                <a href="https://www.globenewswire.com/news-release/2026/03/25/3262037/0/en/Iron-Oxide-Pigments-Market-to-Surpass-USD-4-10-Billion-by-2035-Driven-by-Construction-Growth-and-Demand-for-Durable-Coatings-Report-by-SNS-Insider.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">俳優アラン・リッチソンが近隣住民との暴力事件で告発される</h2>
+            </div>
+            <p class="article-summary">テネシー州で俳優のアラン・リッチソンが近隣住民男性を殴打したとされる事件が発生。被害者は、危険なバイク運転について苦情を言った後に俳優から暴行を受けたと主張している。この事件は動画に記録されており、現在法的な問題に発展している可能性がある。</p>
+            <div class="article-footer">
+                <span class="article-source">Radaronline.com — 2026年03月24日</span>
+                <a href="https://radaronline.com/p/alan-ritchson-victim-speaks-out-actor-beat-him-up-motorcycle-riding/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">アート再構築：カスタムMVアグスタのお気に入り5選</h2>
+            </div>
+            <p class="article-summary">オートバイ界において、MVアグスタは特別な地位を占める名前です。ヴァレーゼ工場は単なるオートバイではなく「モーターサイクルアート」を製造していると主張しており、その統計的に比類のない実績がその主張を裏付けています。1956年から続く歴史を持つMVアグスタの中から、特に印象的なカスタム車両5台を紹介する記事です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bikeexif.com — 2026年03月23日</span>
+                <a href="https://www.bikeexif.com/5-favorite-mv-agustas" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
