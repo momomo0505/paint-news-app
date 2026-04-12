@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年04月13日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年04月13日</span>
+            <span>📰 11件の記事</span>
+            <span>🌍 対象期間: 2026/04/06 〜 2026/04/13</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-equipment"></span>
+            塗装設備: 2件
+        </span>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-market"></span>
+            市場動向: 1件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-company"></span>
+            企業ニュース: 1件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-other"></span>
+            その他: 7件
+        </span>
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-equipment">
+                    塗装設備
+                </span>
+                <h2 class="article-title">世界の環境試験チャンバー市場、自動車・電子機器需要により成長加速</h2>
+            </div>
+            <p class="article-summary">世界の環境試験チャンバー市場が自動車業界と電子機器業界の需要拡大により成長している。製品の品質検証と信頼性試験に対するニーズが高まっており、特に自動車塗装工程における耐久性試験や環境適合性テストの重要性が増している。工学研究室では製品開発競争が激化し、より厳密な環境試験が求められている。</p>
+            <div class="article-footer">
+                <span class="article-source">PR Newswire UK — 2026年04月10日</span>
+                <a href="https://www.prnewswire.co.uk/news-releases/global-environmental-test-chambers-market-fueled-by-automotive-and-electronics-demand--valuates-reports-302739298.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1986年ヤマハV-Max 1200 リザーブ価格なしでオークション出品</h2>
+            </div>
+            <p class="article-summary">1986年式ヤマハV-Maxオートバイがオークションサイトに出品されています。水冷1,198cc DOHC V4エンジンと5速トランスミッションを搭載し、ダークレッドメタリックの塗装にツートンアクセントが施されています。ヤマハ独自のV-Boostインテークシステムなどの装備を備えたクラシックバイクです。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月09日</span>
+                <a href="https://bringatrailer.com/listing/1986-yamaha-v-max/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1986年式ドゥカティF1 750（リザーブなし）</h2>
+            </div>
+            <p class="article-summary">1986年式ドゥカティF1 750がオークションに出品されています。現在のオーナーが2015年頃に展示用として購入し、売却準備としてキャブレターの再構築、Malossiエアフィルターの取り付け、ブレーキの洗浄、パウダーコーティングなどの整備が実施されました。この記事は塗装業界向けの内容ではなく、オートバイのオークション情報です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月09日</span>
+                <a href="https://bringatrailer.com/listing/1986-ducati-f1-750-4/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-equipment">
+                    塗装設備
+                </span>
+                <h2 class="article-title">WorkPro 17インチ水道メーターキー（4方向ユーティリティキー付）が14ドル</h2>
+            </div>
+            <p class="article-summary">AmazonでWorkPro製の17インチ水道メーターキー（4方向ユーティリティキー付）が14ドルで販売中。通常価格から9ドル割引となっており、Prime会員は送料無料。17インチの延長リーチと重厚な鍛造鋼製で耐久性に優れている。水道関連設備のメンテナンス作業に適した工具として、塗装設備の水回り管理にも活用できる。</p>
+            <div class="article-footer">
+                <span class="article-source">Dealnews.com — 2026年04月09日</span>
+                <a href="https://www.dealnews.com/Work-Pro-17-Water-Meter-Key-with-4-Way-Utility-Key-for-14-free-shipping-w-Prime/21820849.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-market">
+                    市場動向
+                </span>
+                <h2 class="article-title">鉄鋼各社、熱延コイル価格を1トン当たり3,500ルピー値上げへ</h2>
+            </div>
+            <p class="article-summary">インドの鉄鋼メーカー各社が、原材料費とエネルギーコストの上昇を受けて、熱延コイル（HR coil）の価格を1トン当たり3,500ルピー引き上げる計画を発表した。この価格改定は、鉄鋼業界全体に影響を与え、自動車や建設業界など下流産業のコスト増加要因となる見込み。鉄鋼素材の価格上昇は、塗装業界にとっても重要な基材コストの変動要因となる。</p>
+            <div class="article-footer">
+                <span class="article-source">BusinessLine — 2026年04月08日</span>
+                <a href="https://www.thehindubusinessline.com/news/steel-cos-plan-to-raise-coil-prices-by-3500-per-tonne/article70838908.ece" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1984年式ポルシェ928S ノーリザーブオークション</h2>
+            </div>
+            <p class="article-summary">2023年にミズーリ州で不動車として購入された1984年式ポルシェ928Sの再生プロジェクト。パワーシート張り替え、ダッシュボードの再トリム等の内装修復が実施されている。現在ノーリザーブでオークション出品中。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月08日</span>
+                <a href="https://bringatrailer.com/listing/1984-porsche-928s-109/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">安全効果があったカーカム通りの道路狭窄化、サンフランシスコが撤去</h2>
+            </div>
+            <p class="article-summary">サンフランシスコ市がカーカム通りに設置した道路狭窄化（ネックダウン）は安全性向上に効果があったにも関わらず、ドライバーからの苦情を受けて撤去された。この決定は、政治家が運転者の不満に屈した際にビジョンゼロ（交通死亡事故ゼロ）の公約が無意味になることを示している。安全対策として機能していた交通改善施設が、市民の反対により取り除かれた事例として注目されている。</p>
+            <div class="article-footer">
+                <span class="article-source">Streetsblog.org — 2026年04月08日</span>
+                <a href="https://sf.streetsblog.org/2026/04/07/the-kirkham-neck-down-worked-for-safety-so-san-francisco-removed-it" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-company">
+                    企業ニュース
+                </span>
+                <h2 class="article-title">ヘルマン社、オンタリオ州の新工場で製造工程を改善</h2>
+            </div>
+            <p class="article-summary">ドイツの産業用ドア大手ヘルマン社が、カナダ・オンタリオ州に12万平方フィートの新工場を開設。同施設では管理サービス、営業・技術サポート、エンジニアリング部門に加え、ラバードアの最先端製造ラインを設置。ヘルマン北米は製造プロセスの改善に注力し、地域での生産能力強化を図っている。新工場により、北米市場での競争力向上と顧客サービスの充実を目指す。</p>
+            <div class="article-footer">
+                <span class="article-source">Gbdmagazine.com — 2026年04月07日</span>
+                <a href="https://gbdmagazine.com/hormann-new-factory/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1966年製ジャト・ウォーカー エグゼクティブ360シリーズ ゴルフカートが無準備価格で出品</h2>
+            </div>
+            <p class="article-summary">1966年製のジャト・ウォーカー エグゼクティブ360シリーズのゴルフカートがBring a Trailerで出品されています。売主は2017年1月に同サイトで購入し、その後2年間にわたりメリーランド州ハンプステッドのRalph&#39;s Auto Serviceで修復を実施。48ボルト、5馬力モーターの搭載などの改良が施されています。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月07日</span>
+                <a href="https://bringatrailer.com/listing/1966-jato-walker/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">ロサンゼルスが2026年のAI技術革新をリードする主要企業10社と共に人工知能ハブとして台頭</h2>
+            </div>
+            <p class="article-summary">ハリウッドとエンターテイメント業界で知られていたロサンゼルスが、2026年に人工知能イノベーションの主要拠点としての地位を確立した。最先端技術を融合させる意欲的なスタートアップ企業が人材と投資を集め、AI分野での存在感を高めている。10の注目企業が同地域のAI技術革新を牽引し、エンターテイメント産業の伝統と最新のAI技術が融合した新たな産業エコシステムを形成している。</p>
+            <div class="article-footer">
+                <span class="article-source">Ibtimes.com.au — 2026年04月06日</span>
+                <a href="https://www.ibtimes.com.au/los-angeles-emerges-major-ai-hub-10-standout-companies-leading-innovation-2026-1865508" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1967年式アルファロメオ1600スパイダー・デュエット ノーリザーブオークション</h2>
+            </div>
+            <p class="article-summary">1971年から2018年まで同一オーナーがカリフォルニアで所有していた1967年式アルファロメオ1600スパイダー・デュエットがオークションに出品されています。1,570ccツインカムエンジンはリビルド済みで、ウェーバー風FAJSキャブレターが装着されています。クラシックカーのレストア・メンテナンス事例として注目される車両です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月06日</span>
+                <a href="https://bringatrailer.com/listing/1967-alfa-romeo-1600-spider-duetto-11/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
