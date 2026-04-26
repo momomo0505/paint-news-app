@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年04月27日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年04月27日</span>
+            <span>📰 14件の記事</span>
+            <span>🌍 対象期間: 2026/04/20 〜 2026/04/27</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-technology"></span>
+            塗装技術: 2件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-automotive"></span>
+            自動車塗装: 3件
+        </span>
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-market"></span>
+            市場動向: 2件
+        </span>
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-other"></span>
+            その他: 7件
+        </span>
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1962年型 BMW R50/2 レストア完了車両</h2>
+            </div>
+            <p class="article-summary">2022年に現オーナーが取得した1962年製BMW R50/2が2024年にフルレストアされました。作業内容にはボディワークの塗装、フレームのパウダーコーティング、ホイールとサスペンションの再構築、シャシーベアリングの交換が含まれています。494ccの水平対向2気筒エンジンも再構築されており、クラシックバイクの完全復活を果たした一台として注目されています。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月26日</span>
+                <a href="https://bringatrailer.com/listing/1962-bmw-r50-2-8/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-automotive">
+                    自動車塗装
+                </span>
+                <h2 class="article-title">BMW 7シリーズ LCI、ブランド初の技術を多数搭載</h2>
+            </div>
+            <p class="article-summary">BMWの最新7シリーズ LCI（ライフサイクル・インプルーブメント）が、従来のフルモデルチェンジを待たずに革新的な新技術を複数導入したことが発表された。通常BMWは世代交代のタイミングで新技術を投入するが、今回は異例のアプローチを取った。この新型車には、ブランド初となる複数の先進技術が搭載されており、BMWの技術革新への積極的な姿勢を示している。</p>
+            <div class="article-footer">
+                <span class="article-source">BMWBLOG — 2026年04月25日</span>
+                <a href="https://www.bmwblog.com/2026/04/24/bmw-7-series-lci-wave-of-brand-firsts/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">デザイン性に優れた屋根瓦型ソーラーパネルが登場</h2>
+            </div>
+            <p class="article-summary">従来の黒いブロック状ソーラーパネルは建物のデザインを損なうことが多かったが、フラウンホーファー研究所が開発した新しい屋根瓦型ソーラーパネルは、建築美観を保ちながら効率的な発電を実現する。この技術により、住宅や商業建築物において太陽光発電システムの導入がより柔軟になり、建物の外観デザインと環境技術の両立が可能となった。</p>
+            <div class="article-footer">
+                <span class="article-source">New Atlas — 2026年04月25日</span>
+                <a href="https://newatlas.com/engineering/roof-tiles-solar-panels-fraunhofer-shadecut/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">トランプ大統領がリンカーン記念堂反射プールの改修で2億9800万ドル節約と発表</h2>
+            </div>
+            <p class="article-summary">トランプ大統領が、リンカーン記念堂反射プールの改修工事について、政府官僚が提案した3億ドル・3年以上の計画を却下し、150万～200万ドル・2週間で完了させたことで2億9800万ドルを節約したと発表。この歴史的なプールは、マーティン・ルーサー・キング牧師が「私には夢がある」演説を行った場所として知られている。工事費用の大幅削減と工期短縮を実現したとしている。</p>
+            <div class="article-footer">
+                <span class="article-source">Freerepublic.com — 2026年04月24日</span>
+                <a href="https://freerepublic.com/focus/f-chat/4376182/posts" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">カスタム仕様2021年ハーレーダビッドソン・ソフテイルスタンダード（リザーブなし）</h2>
+            </div>
+            <p class="article-summary">2021年製ハーレーダビッドソン・ソフテイルスタンダードが、カリフォルニア州テメキュラのCafes Customsによるカスタムビルドを受けて出品されました。同じくテメキュラのHot Dog Kustomsによるカスタムペイントとエンジンワークが施されており、初回オーナーから2024年に現オーナーが取得した車両です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月23日</span>
+                <a href="https://bringatrailer.com/listing/2021-harley-davidson-softail-standard/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-automotive">
+                    自動車塗装
+                </span>
+                <h2 class="article-title">2027年式BMW 7シリーズおよびi7がよりクリーンなデザインと新インテリアでデビュー</h2>
+            </div>
+            <p class="article-summary">BMWが高級セダンのフラッグシップモデルである7シリーズとi7のフェイスリフト版を北京モーターショーでの一般公開に先駆けて発表した。今回は2つのモデルが同時に世界初公開される形となり、よりクリーンなエクステリアデザインと刷新されたインテリアが特徴となっている。BMWの最上級セダンラインナップの進化を示す重要な発表となった。</p>
+            <div class="article-footer">
+                <span class="article-source">BMWBLOG — 2026年04月22日</span>
+                <a href="https://www.bmwblog.com/2026/04/22/2027-bmw-7-series-i7-debut/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-automotive">
+                    自動車塗装
+                </span>
+                <h2 class="article-title">BMW フラッグシップ7シリーズが「ノイエクラッセ」アップグレードを獲得</h2>
+            </div>
+            <p class="article-summary">BMWが2021年に発表した次世代電気自動車アーキテクチャ「ノイエクラッセ」が、同社のフラッグシップモデルである7シリーズにも採用されることが明らかになった。この新技術の導入により、7シリーズの電動化と先進技術の搭載が大幅に進化する見込み。ファンが長らく待ち望んでいたフラッグシップモデルへの新世代技術適用が実現する。</p>
+            <div class="article-footer">
+                <span class="article-source">The Verge — 2026年04月22日</span>
+                <a href="https://www.theverge.com/transportation/915630/bmw-7-series-neue-klasse-range-price-specs" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1974年ホンダCB750カフェレーサー ノーリザーブ出品</h2>
+            </div>
+            <p class="article-summary">1974年製ホンダCB750が2025年12月に分解されたカフェレーサープロジェクトとして売主に取得され、その後ボディワークの塗装、フレームとホイールのパウダーコーティング、キャブレターの再構築、オーバーホールなどの作業が行われて完成された。現在ノーリザーブでオークション出品されている。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月22日</span>
+                <a href="https://bringatrailer.com/listing/1974-honda-cb750-58/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-market">
+                    市場動向
+                </span>
+                <h2 class="article-title">世界の水素燃料電池車市場、2035年までに284億7000万ドル規模に成長予測 - 年平均成長率18.7%</h2>
+            </div>
+            <p class="article-summary">カスタムマーケットインサイツ社の最新調査によると、世界の水素燃料電池車市場は2025年に約41億8000万ドルと評価され、年平均成長率18.7%で成長し、2035年までに284億7000万ドルに達する見込みです。この成長は環境規制の強化や脱炭素化への取り組み加速が主要因となっています。220ページ超の包括的レポートには市場分析、展望、主要企業、トレンド予測、セグメンテーション分析が含まれています。</p>
+            <div class="article-footer">
+                <span class="article-source">GlobeNewswire — 2026年04月21日</span>
+                <a href="https://www.globenewswire.com/news-release/2026/04/21/3277807/0/en/Latest-Global-Hydrogen-Fuel-Cell-Vehicle-Market-Size-Share-Worth-USD-28-47-Billion-by-2035-at-a-18-7-CAGR-Custom-Market-Insights-Analysis-Outlook-Leaders-Report-Trends-Forecast-Seg.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-market">
+                    市場動向
+                </span>
+                <h2 class="article-title">装飾フィルム市場、2030年までに32億9100万ドルに成長予測 - 年平均成長率4.8%</h2>
+            </div>
+            <p class="article-summary">MarketsandMarkets™の最新調査によると、装飾フィルム市場は2025年の25億9980万ドルから年平均成長率4.8%で成長し、2030年までに32億9100万ドルに達すると予測されています。装飾フィルムは建築、自動車、家具などの分野で表面装飾に使用される材料で、デザイン性と機能性を両立した製品需要の拡大が市場成長を牽引しています。</p>
+            <div class="article-footer">
+                <span class="article-source">GlobeNewswire — 2026年04月20日</span>
+                <a href="https://www.globenewswire.com/news-release/2026/04/20/3277134/0/en/Decorative-Foils-Market-worth-3-291-0-million-by-2030-at-CAGR-4-8-says-MarketsandMarkets.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">2026年4月のEDCアイテム5選：ポケットスペースに見合う価値のある製品</h2>
+            </div>
+            <p class="article-summary">この記事は2026年4月のEveryday Carry（EDC）製品5選を紹介していますが、塗装業界に直接関連する内容ではありません。EDCアイテムとは日常的に携帯する道具類を指し、デザイン関連のメディアYanko Designが取り上げたものです。塗装業界の設備、技術、市場動向とは異なる分野の製品レビュー記事と判断されます。</p>
+            <div class="article-footer">
+                <span class="article-source">Yanko Design — 2026年04月20日</span>
+                <a href="https://www.yankodesign.com/2026/04/20/5-best-edc-drops-for-april-2026-that-are-actually-worth-the-pocket-space/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">AA2219アルミニウム合金上の電析Ni-CeO2およびNi-ZrO2ナノコンポジットコーティングの電気化学的腐食性能とマイクロ硬度</h2>
+            </div>
+            <p class="article-summary">AA2219アルミニウム合金基材に対する電析によるニッケル系ナノコンポジットコーティング（Ni-CeO2、Ni-ZrO2）の研究論文。セリウム酸化物やジルコニウム酸化物をナノ粒子として分散させたニッケルコーティングの電気化学的腐食耐性とマイクロ硬度特性を評価。航空宇宙産業で使用されるアルミニウム合金の表面改質技術として、耐食性向上と機械的特性強化の両立を目指した研究成果。</p>
+            <div class="article-footer">
+                <span class="article-source">Royal Society of Chemistry — 2026年04月20日</span>
+                <a href="https://pubs.rsc.org/en/content/articlelanding/2026/ra/d6ra00980h" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">アンディ・マレー流戦術：クレーコートでラファエル・ナダルを倒した方法</h2>
+            </div>
+            <p class="article-summary">クレーコートでラファエル・ナダルを倒すことは、テニス界、そしてスポーツ界全体でも最も困難な挑戦の一つとされてきました。スペインの王者は同サーフェスで記録的な63タイトルを獲得し、クレーコートでの勝率90%という驚異的な成績でキャリアを終えました。この記事では、そんなナダルをクレーで破ったアンディ・マレーの戦術について分析しています。</p>
+            <div class="article-footer">
+                <span class="article-source">Yahoo Entertainment — 2026年04月19日</span>
+                <a href="https://consent.yahoo.com/v2/collectConsent?sessionId=1_cc-session_cfd37a2f-ebc8-435d-951f-eba2e50a364f" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">SWELECT Energy、ウェーハ製造事業への参入を検討</h2>
+            </div>
+            <p class="article-summary">SWELECT Energyが太陽光パネル用ウェーハ製造事業への参入を評価している。この計画は、インドの累積生産能力が15GW規模となる2028年6月1日から、新・再生可能エネルギー省（MNRE）が太陽光ウェーハを承認モデル・製造業者リスト（ALMM）に含める提案を行ったタイミングで発表された。</p>
+            <div class="article-footer">
+                <span class="article-source">BusinessLine — 2026年04月19日</span>
+                <a href="https://www.thehindubusinessline.com/companies/swelect-energy-evaluates-entry-into-wafer-manufacturing-business/article70880520.ece" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
