@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年05月04日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <div class="header-meta">
+            <span>📅 2026年05月04日</span>
+            <span>📰 9件の記事</span>
+            <span>🌍 対象期間: 2026/04/27 〜 2026/05/04</span>
+        </div>
+    </div>
+</header>
+
+<!-- カテゴリ統計 -->
+
+<div class="stats-bar">
+    <div class="stats-inner">
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-technology"></span>
+            塗装技術: 2件
+        </span>
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-automotive"></span>
+            自動車塗装: 1件
+        </span>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <span class="stat-badge">
+            <span class="dot dot-other"></span>
+            その他: 6件
+        </span>
+        
+        
+    </div>
+</div>
+
+
+<!-- 記事一覧 -->
+<main class="articles">
+    
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1971年式スズキT500タイタン ノーリザーブオークション</h2>
+            </div>
+            <p class="article-summary">35年間単一オーナーの下で保管されていた1971年式スズキT500タイタンのオートバイ。2000年代中頃に所有者が変わり、レストレーションが実施された。作業にはボディワークの再塗装、フレームのパウダーコーティング、クロームメッキ、研磨などが含まれている。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年05月02日</span>
+                <a href="https://bringatrailer.com/listing/1971-suzuki-t500-titan-6/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1982年式ヤマハXV920ビラーゴ カスタム車両 ノーリザーブオークション</h2>
+            </div>
+            <p class="article-summary">2017年に購入された1982年式ヤマハXV920ビラーゴが、カフェレーサーとボバースタイルの要素でカスタマイズされて出品されています。パウダーコーティングされたフレーム、XV750ビラーゴ由来の黒とサテングレー仕上げの燃料タンクに白い塗装が施されているのが特徴です。Bringatrailer.comでノーリザーブオークションとして販売されています。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年05月02日</span>
+                <a href="https://bringatrailer.com/listing/1982-yamaha-virago-920-2/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">ダルバンガで塗装工が塗料店主に殺害される事件発生</h2>
+            </div>
+            <p class="article-summary">インド・ビハール州ダルバンガのベラドゥラー地区で、48歳の塗装工が塗料店の倉庫内で店主により殺害されたと報じられています。事件は大学警察署管轄内で発生し、現在捜査が進められています。塗装業界関係者間でのトラブルが背景にあると見られ、業界内の安全管理体制や労働環境の見直しが求められる可能性があります。</p>
+            <div class="article-footer">
+                <span class="article-source">The Times of India — 2026年04月30日</span>
+                <a href="https://timesofindia.indiatimes.com/city/patna/painter-killed-by-shop-owner-in-darbhanga/articleshow/130616070.cms" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-automotive">
+                    自動車塗装
+                </span>
+                <h2 class="article-title">BMW iX3の予約が5月6日開始、航続距離も向上</h2>
+            </div>
+            <p class="article-summary">BMW USAが2027年型iX3の予約受付を5月6日から開始すると発表。同時にBMWは公式サイトで航続距離の推定値を400マイルから434マイルに静かに更新した。電気自動車市場における競争力強化の一環として、航続距離の改善が図られている。</p>
+            <div class="article-footer">
+                <span class="article-source">BMWBLOG — 2026年04月30日</span>
+                <a href="https://www.bmwblog.com/2026/04/29/2027-bmw-ix3-reservations-may-6-range-434-miles/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1978年製BMW R100RSのレストレーション完了</h2>
+            </div>
+            <p class="article-summary">1978年製BMW R100RSがMAX BMW モーターサイクル・ヘリテージサービスセンターで2年間にわたるレストレーションを受けました。2013年頃に完成したこのプロジェクトでは、ボディワークをシルバーブルーに再塗装し、フレームの粉体塗装、メーター類のオーバーホール、そして新しいパーツの取り付けが行われました。クラシックバイクの専門的な塗装技術と表面処理技術が活用された事例です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月30日</span>
+                <a href="https://bringatrailer.com/listing/1978-bmw-r100rs-22/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1978年式ハスクバーナ390CR ノーリザーブでオークション出品</h2>
+            </div>
+            <p class="article-summary">2011年頃に現オーナーが取得した1978年式ハスクバーナ390CRが、2022年にレストアされてオークションに出品されています。384cc2ストロークエンジンのリフレッシュ、ミクニキャブレターのオーバーホール、チェーン・スプロケット・グリップ・フェンダー・タイヤ・ホイールベアリングの交換など包括的な整備が実施されました。ノーリザーブでの出品となっており、クラシックバイク愛好家にとって魅力的な1台です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月29日</span>
+                <a href="https://bringatrailer.com/listing/1978-husqvarna-390cr/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">化学分野の生成AI市場、2035年までに128.4億ドル規模へ成長予測</h2>
+            </div>
+            <p class="article-summary">Custom Market Insightsの調査によると、化学業界における生成AI市場は2025年の9.8億ドルから年平均成長率24.9%で拡大し、2035年には128.4億ドルの市場規模に達する見込み。化学分野での新材料開発や製造プロセス最適化における生成AI技術の活用が市場成長の主要因となっている。塗料・コーティング業界においても、新しい配合設計や品質予測での応用が期待される。</p>
+            <div class="article-footer">
+                <span class="article-source">GlobeNewswire — 2026年04月29日</span>
+                <a href="https://www.globenewswire.com/news-release/2026/04/28/3283146/0/en/Latest-Global-Generative-AI-in-Chemical-Market-Size-Share-Worth-USD-12-84-Billion-by-2035-at-a-24-9-CAGR-Custom-Market-Insights-Analysis-Outlook-Leaders-Report-Trends-Forecast-Segm.html" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-technology">
+                    塗装技術
+                </span>
+                <h2 class="article-title">Evo80テンキーレスメカニカルキーボード PPプレート + Oatスイッチ（スカーレット）$229.46送料込み</h2>
+            </div>
+            <p class="article-summary">Evo80メカニカルキーボードは超微細粉体塗装と220メッシュサンドブラスト研磨後の陽極酸化処理による優れた表面処理を特徴としています。オーストラリアのBerserkeys経由でAmazonから購入可能で、PPプレートとOatスイッチのスカーレットカラーモデルが$229.46（送料込み）で販売されています。この製品は高品質な表面処理技術により優れた仕上がりを実現しています。</p>
+            <div class="article-footer">
+                <span class="article-source">Ozbargain.com.au — 2026年04月28日</span>
+                <a href="https://www.ozbargain.com.au/node/957139" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+        <article class="article-card">
+            <div class="article-card-header">
+                <span class="category-tag tag-other">
+                    その他
+                </span>
+                <h2 class="article-title">1998年フェラーリ550マラネロ（日本市場向けモデル）がノーリザーブで出品</h2>
+            </div>
+            <p class="article-summary">この記事は1998年製フェラーリ550マラネロの車両販売に関する内容で、塗装業界とは直接関係がありません。日本市場向けの左ハンドル車で、英国でのメンテナンス後に2025年末に米国に輸入されたとの記載があります。5.5リッターV12エンジンと6速マニュアルトランスアクスルを搭載した自動車の個別販売案件です。</p>
+            <div class="article-footer">
+                <span class="article-source">Bringatrailer.com — 2026年04月28日</span>
+                <a href="https://bringatrailer.com/listing/1998-ferrari-550-maranello-32/" target="_blank" rel="noopener noreferrer" class="article-link">
+                    原文を読む →
+                </a>
+            </div>
+        </article>
+        
+    
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
