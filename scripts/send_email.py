@@ -54,55 +54,60 @@ def _build_email_html(
     preview_items = ""
     for article in articles[:5]:
         preview_items += (
-            f'<li style="margin-bottom:6px;">'
-            f'<a href="{article.url}" style="color:#2563eb;text-decoration:none;">'
-            f"{article.title_ja}</a></li>\n"
+            '<li style="margin-bottom:6px;">'
+            '<a href="' + article.url + '" style="color:#2563eb;text-decoration:none;">'
+            + article.title_ja + "</a></li>\n"
         )
 
-    return f"""\
-<!DOCTYPE html>
-<html lang="ja">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8f9fa;font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif;">
-  <div style="max-width:600px;margin:40px auto;padding:0 16px;">
+    # 条件付きブロックを事前に文字列として組み立てる（Python 3.11 でネストf-string非対応のため）
+    cat_summary_html = (
+        '<p style="margin:0 0 20px;font-size:0.85rem;color:#6b7280;">' + cat_summary + "</p>"
+        if cat_summary else ""
+    )
 
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:32px;">
-      <p style="margin:0 0 4px;font-size:0.85rem;color:#6b7280;">塗装業界ウィークリーニュース</p>
-      <h1 style="margin:0 0 20px;font-size:1.4rem;font-weight:700;color:#1a1a2e;">
-        🎨 {issue_date}号
-      </h1>
+    more_articles_html = (
+        '<p style="margin:10px 0 0;font-size:0.8rem;color:#6b7280;">他 '
+        + str(len(articles) - 5) + " 件の記事...</p>"
+        if len(articles) > 5 else ""
+    )
 
-      <p style="margin:0 0 8px;color:#374151;">
-        今週は <strong>{len(articles)}件</strong> の記事を収集しました。
-      </p>
-      {f'<p style="margin:0 0 20px;font-size:0.85rem;color:#6b7280;">{cat_summary}</p>' if cat_summary else ''}
+    preview_block_html = (
+        '<div style="background:#f9fafb;border-radius:6px;padding:16px 20px;margin-bottom:24px;">'
+        '<p style="margin:0 0 10px;font-weight:600;color:#1a1a2e;">今週の注目記事</p>'
+        '<ul style="margin:0;padding-left:18px;color:#374151;font-size:0.9rem;">'
+        + preview_items
+        + "</ul>"
+        + more_articles_html
+        + "</div>"
+        if articles else ""
+    )
 
-      {f"""
-      <div style="background:#f9fafb;border-radius:6px;padding:16px 20px;margin-bottom:24px;">
-        <p style="margin:0 0 10px;font-weight:600;color:#1a1a2e;">今週の注目記事</p>
-        <ul style="margin:0;padding-left:18px;color:#374151;font-size:0.9rem;">
-          {preview_items}
-        </ul>
-        {f'<p style="margin:10px 0 0;font-size:0.8rem;color:#6b7280;">他 {len(articles)-5} 件の記事...</p>' if len(articles) > 5 else ''}
-      </div>
-      """ if articles else ''}
-
-      <div style="text-align:center;">
-        <a href="{report_url}"
-           style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;
-                  border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">
-          レポートを読む →
-        </a>
-      </div>
-    </div>
-
-    <p style="text-align:center;margin-top:20px;font-size:0.75rem;color:#9ca3af;">
-      このメールは塗装業界ニュース自動まとめツールにより送信されています。<br>
-      <a href="{PAGES_BASE_URL}" style="color:#9ca3af;">過去のレポート一覧</a>
-    </p>
-  </div>
-</body>
-</html>"""
+    return (
+        "<!DOCTYPE html>\n"
+        '<html lang="ja">\n'
+        '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>\n'
+        '<body style="margin:0;padding:0;background:#f8f9fa;font-family:-apple-system,BlinkMacSystemFont,\'Hiragino Sans\',\'Noto Sans JP\',sans-serif;">\n'
+        '  <div style="max-width:600px;margin:40px auto;padding:0 16px;">\n'
+        '    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:32px;">\n'
+        '      <p style="margin:0 0 4px;font-size:0.85rem;color:#6b7280;">塗装業界ウィークリーニュース</p>\n'
+        '      <h1 style="margin:0 0 20px;font-size:1.4rem;font-weight:700;color:#1a1a2e;">'
+        "🎨 " + issue_date + "号</h1>\n"
+        '      <p style="margin:0 0 8px;color:#374151;">今週は <strong>' + str(len(articles)) + "件</strong> の記事を収集しました。</p>\n"
+        + cat_summary_html + "\n"
+        + preview_block_html + "\n"
+        '      <div style="text-align:center;">'
+        '<a href="' + report_url + '" '
+        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
+        'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
+        "レポートを読む →</a></div>\n"
+        "    </div>\n"
+        '    <p style="text-align:center;margin-top:20px;font-size:0.75rem;color:#9ca3af;">'
+        "このメールは塗装業界ニュース自動まとめツールにより送信されています。<br>"
+        '<a href="' + PAGES_BASE_URL + '" style="color:#9ca3af;">過去のレポート一覧</a></p>\n'
+        "  </div>\n"
+        "</body>\n"
+        "</html>"
+    )
 
 
 # ──────────────────────────────────────────────
