@@ -66,13 +66,18 @@ def _prepare_article_data(articles: list[Article]) -> list[dict[str, Any]]:
 def generate_weekly_report(
     articles: list[Article],
     output_filename: str | None = None,
+    *,
+    competitor_items: list[dict] | None = None,
+    domestic_articles: list[Article] | None = None,
 ) -> Path:
     """
     週間レポートのHTMLファイルを生成する。
 
     Args:
-        articles: 翻訳済みの記事リスト
+        articles: 翻訳済みの海外記事リスト
         output_filename: 出力ファイル名（省略時は日付ベースで自動生成）
+        competitor_items: 競合他社ニュース項目リスト
+        domestic_articles: 国内ニュース記事リスト
 
     Returns:
         Path: 生成したHTMLファイルのパス
@@ -82,23 +87,33 @@ def generate_weekly_report(
     if output_filename is None:
         output_filename = f"weekly-news-{now_jst.strftime('%Y-%m-%d')}.html"
 
-    # 出力ディレクトリの確保
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     output_path = DOCS_DIR / output_filename
 
-    # Jinja2 環境セットアップ
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
         autoescape=True,
     )
     template = env.get_template("weekly_report.html")
 
-    # テンプレート変数の構築
     period_end = now_jst
     period_start = period_end - timedelta(days=7)
 
+    # 競合ニュースを会社別にグループ化
+    competitor_by_company: dict[str, list[dict]] = {}
+    for item in (competitor_items or []):
+        company = item["company"]
+        competitor_by_company.setdefault(company, []).append(item)
+
     context = {
+        # 海外ニュース
         "articles": _prepare_article_data(articles),
+        # 国内ニュース
+        "domestic_articles": _prepare_article_data(domestic_articles or []),
+        # 競合ニュース（生の dict リスト）
+        "competitor_items": competitor_items or [],
+        "competitor_by_company": competitor_by_company,
+        # 共通
         "issue_date": now_jst.strftime("%Y年%m月%d日"),
         "period_start": period_start.strftime("%Y/%m/%d"),
         "period_end": period_end.strftime("%Y/%m/%d"),
@@ -106,16 +121,14 @@ def generate_weekly_report(
         "category_counts": _count_categories(articles),
         "category_labels": CATEGORIES,
         "total_articles": len(articles),
+        "total_domestic": len(domestic_articles or []),
+        "total_competitor": len(competitor_items or []),
     }
 
-    # HTML レンダリング
     html_content = template.render(**context)
-
-    # ファイル書き出し
     output_path.write_text(html_content, encoding="utf-8")
     logger.info("HTMLレポート生成: %s", output_path)
 
-    # インデックスページも更新
     _update_index_page(now_jst)
 
     return output_path

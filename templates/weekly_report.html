@@ -245,61 +245,112 @@
 <!-- ヘッダー -->
 <header class="header">
     <div class="header-inner">
-        <h1>🎨 塗装業界ウィークリーニュース</h1>
+        <h1>🎨 塗装業界ニュースレポート</h1>
         <div class="header-meta">
             <span>📅 {{ issue_date }}</span>
-            <span>📰 {{ articles | length }}件の記事</span>
-            <span>🌍 対象期間: {{ period_start }} 〜 {{ period_end }}</span>
+            <span>🏭 競合: {{ total_competitor }}件</span>
+            <span>🇯🇵 国内: {{ total_domestic }}件</span>
+            <span>🌍 海外: {{ total_articles }}件</span>
+            <span>📆 対象: {{ period_start }} 〜 {{ period_end }}</span>
         </div>
     </div>
 </header>
 
-<!-- カテゴリ統計 -->
-{% if category_counts %}
-<div class="stats-bar">
-    <div class="stats-inner">
-        {% for cat_key, cat_info in category_counts.items() %}
-        {% if cat_info.count > 0 %}
-        <span class="stat-badge">
-            <span class="dot dot-{{ cat_key }}"></span>
-            {{ cat_info.label }}: {{ cat_info.count }}件
-        </span>
-        {% endif %}
-        {% endfor %}
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+{% if competitor_items %}
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+{% for item in competitor_items %}
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">{{ item.company }}</span>
+        <h2 class="article-title">{{ item.title }}</h2>
     </div>
+    <div class="article-footer">
+        <span class="article-source">{{ item.date.strftime('%Y年%m月%d日') }}</span>
+        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
+            {% if item.language == 'en' %}翻訳して読む →{% else %}詳細を読む →{% endif %}
+        </a>
+    </div>
+</article>
+{% endfor %}
+{% endif %}
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+{% if domestic_articles %}
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+{% for article in domestic_articles %}
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">{{ article.title_ja or article.title }}</h2>
+    </div>
+    {% if article.summary_ja %}
+    <p class="article-summary">{{ article.summary_ja }}</p>
+    {% endif %}
+    <div class="article-footer">
+        <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
+        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+{% endfor %}
+{% endif %}
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+{% if articles %}
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #7c3aed;padding-left:12px;margin-bottom:16px;">
+        3. 海外塗装業界ニュース
+    </h2>
+</div>
+{% for article in articles %}
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-{{ article.category }}">
+            {{ category_labels.get(article.category, 'その他') }}
+        </span>
+        <h2 class="article-title">{{ article.title_ja }}</h2>
+    </div>
+    <p class="article-summary">{{ article.summary_ja }}</p>
+    <div class="article-footer">
+        <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u={{ article.url }}"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+{% endfor %}
+{% endif %}
+
+{% if not competitor_items and not domestic_articles and not articles %}
+<div class="empty-state">
+    <p>今週の該当ニュースは見つかりませんでした。</p>
 </div>
 {% endif %}
 
-<!-- 記事一覧 -->
-<main class="articles">
-    {% if articles %}
-        {% for article in articles %}
-        <article class="article-card">
-            <div class="article-card-header">
-                <span class="category-tag tag-{{ article.category }}">
-                    {{ category_labels.get(article.category, 'その他') }}
-                </span>
-                <h2 class="article-title">{{ article.title_ja }}</h2>
-            </div>
-            <p class="article-summary">{{ article.summary_ja }}</p>
-            <div class="article-footer">
-                <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
-                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
-                    原文を読む →
-                </a>
-            </div>
-        </article>
-        {% endfor %}
-    {% else %}
-        <div class="empty-state">
-            <p>今週の該当ニュースは見つかりませんでした。</p>
-        </div>
-    {% endif %}
 </main>
 
 <!-- フッター -->
 <footer class="footer">
-    <p>このレポートは NewsAPI + Claude AI により自動生成されています。</p>
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
     <p>© {{ year }} 塗装業界ニュース自動まとめツール</p>
 </footer>
 

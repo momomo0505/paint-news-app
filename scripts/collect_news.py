@@ -7,6 +7,7 @@
 - 重複記事の排除（URL ベース + タイトル類似度）
 - 記事品質のフィルタリング（タイトル・説明文の存在チェック）
 - 公開日の新しい順でソート
+- 国内ニュース収集（NewsAPI の日本語検索）
 """
 
 from __future__ import annotations
@@ -22,8 +23,10 @@ from scripts.config import (
     NEWSAPI_KEY,
     NEWSAPI_BASE_URL,
     SEARCH_KEYWORD_GROUPS,
+    DOMESTIC_KEYWORD_GROUPS,
     ARTICLES_PER_QUERY,
     MAX_ARTICLES,
+    MAX_DOMESTIC_ARTICLES,
     SEARCH_DAYS_BACK,
     EXCLUDED_DOMAINS,
 )
@@ -250,11 +253,92 @@ def collect_news() -> list[Article]:
     return result
 
 
+def collect_domestic_news() -> list[Article]:
+    """
+    国内塗装業界ニュースを NewsAPI から収集する。
+    日本語キーワードで検索し、重複排除・ソート済みの記事リストを返す。
+
+    Returns:
+        list[Article]: 最大 MAX_DOMESTIC_ARTICLES 件の記事リスト（新しい順）
+    """
+    if not NEWSAPI_KEY:
+        logger.error("NEWSAPI_KEY が設定されていません。")
+        raise ValueError("環境変数 NEWSAPI_KEY を設定してください。")
+
+    now = datetime.now(timezone.utc)
+    from_date = (now - timedelta(days=SEARCH_DAYS_BACK)).strftime("%Y-%m-%d")
+    to_date = now.strftime("%Y-%m-%d")
+
+    all_articles: list[Article] = []
+
+    for query in DOMESTIC_KEYWORD_GROUPS:
+        params: dict[str, Any] = {
+            "q": query,
+            "from": from_date,
+            "to": to_date,
+            "language": "ja",
+            "sortBy": "publishedAt",
+            "pageSize": ARTICLES_PER_QUERY,
+            "apiKey": NEWSAPI_KEY,
+        }
+        logger.info("国内ニュース検索: q=%s", query)
+        try:
+            response = requests.get(NEWSAPI_BASE_URL, params=params, timeout=30)
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            logger.error("NewsAPI 国内検索エラー: %s", exc)
+            continue
+
+        data = response.json()
+        if data.get("status") != "ok":
+            logger.error("NewsAPI 国内エラーレスポンス: %s — %s", data.get("code"), data.get("message"))
+            continue
+
+        raw_articles = data.get("articles", [])
+        logger.info("国内取得件数: %d 件 (キーワード: %s)", len(raw_articles), query[:40])
+
+        for raw in raw_articles:
+            if not _is_valid_article(raw):
+                continue
+            all_articles.append(
+                Article(
+                    title=raw["title"].strip(),
+                    description=(raw.get("description") or "").strip(),
+                    url=raw["url"].strip(),
+                    source=(raw.get("source", {}).get("name") or "Unknown").strip(),
+                    published_at=raw.get("publishedAt", ""),
+                    image_url=raw.get("urlToImage"),
+                )
+            )
+
+    logger.info("国内全キーワードグループ合計: %d 件", len(all_articles))
+
+    unique_articles = _deduplicate_articles(all_articles)
+    logger.info("国内重複排除後: %d 件", len(unique_articles))
+
+    def _parse_date(article: Article) -> datetime:
+        try:
+            return datetime.fromisoformat(article.published_at.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            return datetime.min.replace(tzinfo=timezone.utc)
+
+    unique_articles.sort(key=_parse_date, reverse=True)
+    result = unique_articles[:MAX_DOMESTIC_ARTICLES]
+    logger.info("国内最終記事数: %d 件", len(result))
+    return result
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    print("=== 海外ニュース ===")
     articles = collect_news()
     for i, a in enumerate(articles, 1):
         print(f"{i}. [{a.source}] {a.title}")
         print(f"   {a.url}")
-        print(f"   {a.published_at}")
+        print()
+    print("=== 国内ニュース ===")
+    domestic = collect_domestic_news()
+    for i, a in enumerate(domestic, 1):
+        print(f"{i}. [{a.source}] {a.title}")
+        print(f"   {a.url}")
         print()

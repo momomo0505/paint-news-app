@@ -3,10 +3,12 @@
 =====================================================
 
 全モジュールを統合して以下のパイプラインを実行する:
-1. ニュース収集 (NewsAPI)
-2. 翻訳・要約 (Claude API)
-3. HTML生成
-4. メール通知 (SendGrid)
+1. 競合他社ニュース監視 (Webスクレイピング)
+2. 国内ニュース収集 (NewsAPI 日本語)
+3. 海外ニュース収集 (NewsAPI 英語)
+4. 翻訳・要約 (Claude API)
+5. HTML生成
+6. メール通知 (Gmail SMTP)
 
 使い方:
     python -m scripts.main              # 全パイプライン実行
@@ -23,7 +25,8 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from scripts.collect_news import Article, collect_news
+from scripts.check_competitors import check_all_competitors
+from scripts.collect_news import Article, collect_domestic_news, collect_news
 from scripts.config import DOCS_DIR, LOG_LEVEL
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
@@ -130,7 +133,7 @@ def run_pipeline(
     save_json: bool = True,
 ) -> None:
     """
-    ニュース収集→翻訳→HTML生成→メール送信のパイプラインを実行する。
+    競合監視→国内ニュース→海外ニュース→翻訳→HTML生成→メール送信のパイプラインを実行する。
 
     Args:
         send_email: メール送信を行うか
@@ -144,77 +147,113 @@ def run_pipeline(
     logger.info("モード: %s", "ドライラン" if dry_run else "本番")
     logger.info("=" * 60)
 
-    # ────────────────────────
-    # Step 1: ニュース収集
-    # ────────────────────────
+    # ────────────────────────────────────────
+    # Step 1: 競合他社ニュース監視
+    # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 1/4: ニュース収集 ━━━")
+    logger.info("━━━ Step 1/5: 競合他社ニュース監視 ━━━")
+
+    if dry_run:
+        competitor_items = []
+        logger.info("ドライラン: 競合監視スキップ")
+    else:
+        try:
+            competitor_items = check_all_competitors()
+            logger.info("競合監視完了: %d 件", len(competitor_items))
+        except Exception as exc:
+            logger.error("競合監視エラー: %s", exc)
+            competitor_items = []
+
+    # ────────────────────────────────────────
+    # Step 2: 国内ニュース収集
+    # ────────────────────────────────────────
+    logger.info("")
+    logger.info("━━━ Step 2/5: 国内ニュース収集 ━━━")
+
+    if dry_run:
+        domestic_articles: list[Article] = []
+        logger.info("ドライラン: 国内ニュース収集スキップ")
+    else:
+        try:
+            domestic_articles = collect_domestic_news()
+            logger.info("国内ニュース収集完了: %d 件", len(domestic_articles))
+        except Exception as exc:
+            logger.error("国内ニュース収集エラー: %s", exc)
+            domestic_articles = []
+
+    # ────────────────────────────────────────
+    # Step 3: 海外ニュース収集
+    # ────────────────────────────────────────
+    logger.info("")
+    logger.info("━━━ Step 3/5: 海外ニュース収集 ━━━")
 
     if dry_run:
         logger.info("ドライラン: ダミーデータを使用します")
-        articles = _create_dummy_articles()
+        overseas_articles = _create_dummy_articles()
     else:
-        articles = collect_news()
+        try:
+            overseas_articles = collect_news()
+            logger.info("海外ニュース収集完了: %d 件", len(overseas_articles))
+        except Exception as exc:
+            logger.error("海外ニュース収集エラー: %s", exc)
+            overseas_articles = []
 
-    if not articles:
-        logger.warning("ニュースが見つかりませんでした。処理を終了します。")
+    if not competitor_items and not domestic_articles and not overseas_articles:
+        logger.warning("全カテゴリでニュースが見つかりませんでした。処理を終了します。")
         return
 
-    logger.info("収集完了: %d 件", len(articles))
-
-    # ────────────────────────
-    # Step 2: 翻訳・要約
-    # ────────────────────────
+    # ────────────────────────────────────────
+    # Step 4: 翻訳・要約（海外ニュースのみ）
+    # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 2/4: 翻訳・要約 ━━━")
+    logger.info("━━━ Step 4/5: 翻訳・要約 ━━━")
 
     if dry_run:
         logger.info("ドライラン: 翻訳済みダミーデータを使用します")
     else:
-        articles = translate_and_summarize(articles)
+        if overseas_articles:
+            overseas_articles = translate_and_summarize(overseas_articles)
+        logger.info("翻訳完了: %d 件", len(overseas_articles))
 
-    logger.info("翻訳完了: %d 件", len(articles))
-
-    # ────────────────────────
-    # Step 3: HTML生成
-    # ────────────────────────
+    # ────────────────────────────────────────
+    # Step 5: HTML生成
+    # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 3/4: HTML生成 ━━━")
+    logger.info("━━━ Step 5/5: HTML生成・メール送信 ━━━")
 
-    report_path = generate_weekly_report(articles)
+    report_path = generate_weekly_report(
+        overseas_articles,
+        competitor_items=competitor_items,
+        domestic_articles=domestic_articles,
+    )
     report_filename = report_path.name
-
     logger.info("HTML生成完了: %s", report_path)
 
-    # JSON保存（デバッグ用）
     if save_json:
-        _save_articles_json(articles)
+        _save_articles_json(overseas_articles)
 
-    # ────────────────────────
-    # Step 4: メール送信
-    # ────────────────────────
-    logger.info("")
-    logger.info("━━━ Step 4/4: メール送信 ━━━")
-
+    # ────────────────────────────────────────
+    # Step 6: メール送信
+    # ────────────────────────────────────────
     if not send_email:
         logger.info("メール送信はスキップされました (--no-email)")
     elif dry_run:
         logger.info("ドライラン: メール送信をスキップします")
     else:
         try:
-            success = send_notification(articles, report_filename)
+            success = send_notification(
+                overseas_articles,
+                report_filename,
+                competitor_items=competitor_items,
+                domestic_articles=domestic_articles,
+            )
             if success:
                 logger.info("メール送信完了")
             else:
                 logger.error("メール送信に失敗しました")
         except Exception as exc:
             logger.error("メール送信エラー: %s", exc)
-            # メール送信の失敗はパイプライン全体を止めない
-            # HTML は生成済みなので、レポート自体は利用可能
 
-    # ────────────────────────
-    # 完了
-    # ────────────────────────
     logger.info("")
     logger.info("=" * 60)
     logger.info("パイプライン完了")
