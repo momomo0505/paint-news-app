@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from config import COMPETITOR_SITES, SEARCH_DAYS_BACK
+from scripts.config import COMPETITOR_SITES, SEARCH_DAYS_BACK
 
 logger = logging.getLogger(__name__)
 
