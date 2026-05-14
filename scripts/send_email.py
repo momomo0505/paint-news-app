@@ -209,6 +209,7 @@ def send_notification(
     *,
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
+    no_articles: bool = False,
 ) -> bool:
     """
     週間レポートの通知メールを Gmail SMTP で送信する。
@@ -234,15 +235,30 @@ def send_notification(
     report_url = f"{PAGES_BASE_URL.rstrip('/')}/{report_filename}"
 
     total_count = len(articles) + len(domestic_articles or []) + len(competitor_items or [])
-    subject = f"🎨 塗装業界ニュース {issue_date}号 — {total_count}件"
 
-    html_body = _build_email_html(
-        articles,
-        report_url,
-        issue_date,
-        competitor_items=competitor_items,
-        domestic_articles=domestic_articles,
-    )
+    if no_articles or total_count == 0:
+        subject = f"🎨 塗装業界ニュース {issue_date}号 — 本日の取得件数: 0件"
+        html_body = (
+            "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'></head>"
+            "<body style='font-family:sans-serif;padding:32px;'>"
+            "<h2>🎨 塗装業界ニュース — " + issue_date + "号</h2>"
+            "<p>本日は各ソース（競合サイト・国内RSS・NewsAPI）からの記事取得件数が 0件 でした。</p>"
+            "<ul>"
+            "<li>Google News RSSが一時的に結果を返さなかった可能性があります。</li>"
+            "<li>明日以降は通常通り配信される見込みです。</li>"
+            "</ul>"
+            "<p style='color:#6b7280;font-size:0.85rem;'>このメールは自動送信です。スケジュール実行確認用です。</p>"
+            "</body></html>"
+        )
+    else:
+        subject = f"🎨 塗装業界ニュース {issue_date}号 — {total_count}件"
+        html_body = _build_email_html(
+            articles,
+            report_url,
+            issue_date,
+            competitor_items=competitor_items,
+            domestic_articles=domestic_articles,
+        )
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject

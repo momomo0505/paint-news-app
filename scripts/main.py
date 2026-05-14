@@ -213,8 +213,18 @@ def run_pipeline(
             logger.error("海外ニュース収集エラー: %s", exc)
             overseas_articles = []
 
-    if not competitor_items and not domestic_articles and not overseas_articles:
-        logger.warning("全カテゴリでニュースが見つかりませんでした。処理を終了します。")
+    total_found = len(competitor_items) + len(domestic_articles) + len(overseas_articles)
+    logger.info("収集合計: 競合=%d 国内=%d 海外=%d", len(competitor_items), len(domestic_articles), len(overseas_articles))
+
+    if total_found == 0:
+        logger.warning("全カテゴリでニュースが見つかりませんでした。「記事なし」通知メールを送信します。")
+        # 記事0件でもメール送信（cron実行の確認のため）
+        if send_email and not dry_run:
+            try:
+                send_notification([], f"no-news-{now_jst.strftime('%Y-%m-%d')}.html",
+                                  competitor_items=[], domestic_articles=[], no_articles=True)
+            except Exception as exc:
+                logger.error("通知メール送信エラー: %s", exc)
         return
 
     # ────────────────────────────────────────

@@ -130,21 +130,49 @@ jobs:
       - name: Job summary
         if: always()
         run: |
-          echo "## 🎨 塗装業界ニュース生成結果" >> $GITHUB_STEP_SUMMARY
+          TRIGGER="${{ github.event_name }}"
+          STATUS="${{ job.status }}"
+          RUN_TIME=$(TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M:%S JST')
+
+          echo "## 🎨 塗装業界ニュース — 実行結果" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
+          # 実行情報
+          if [ "$TRIGGER" = "schedule" ]; then
+            echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| トリガー | ⏰ スケジュール自動実行 |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| トリガー | 👤 手動実行 |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "| 実行時刻 | ${RUN_TIME} |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$STATUS" = "success" ]; then
+            echo "| ステータス | ✅ 成功 |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ステータス | ❌ 失敗 (${STATUS}) |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # レポートファイル情報
           if [ -d "docs" ]; then
-            FILE_COUNT=$(ls docs/weekly-news-*.html 2>/dev/null | wc -l)
-            echo "- 📄 レポートファイル数: ${FILE_COUNT}" >> $GITHUB_STEP_SUMMARY
+            FILE_COUNT=$(ls docs/weekly-news-*.html 2>/dev/null | wc -l | tr -d ' ')
+            echo "- 📄 累積レポート数: ${FILE_COUNT} 件" >> $GITHUB_STEP_SUMMARY
 
             LATEST=$(ls -t docs/weekly-news-*.html 2>/dev/null | head -1)
             if [ -n "$LATEST" ]; then
               echo "- 📝 最新レポート: \`$(basename $LATEST)\`" >> $GITHUB_STEP_SUMMARY
             fi
-          else
-            echo "- ⚠️ docs/ ディレクトリが見つかりません" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "_実行時刻: $(TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M:%S JST')_" >> $GITHUB_STEP_SUMMARY
+
+          # 失敗時の注意メッセージ
+          if [ "$STATUS" != "success" ]; then
+            echo "### ⚠️ エラー内容を確認してください" >> $GITHUB_STEP_SUMMARY
+            echo "「Run news pipeline」ステップのログを確認してください。" >> $GITHUB_STEP_SUMMARY
+          fi
