@@ -7,6 +7,11 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# ローカル開発時は .env を自動読み込み（GitHub Actions では環境変数が直接設定される）
+load_dotenv()
+
 # ──────────────────────────────────────────────
 # プロジェクトパス
 # ──────────────────────────────────────────────
@@ -64,11 +69,11 @@ CLAUDE_MODEL = "claude-sonnet-4-20250514"
 CLAUDE_MAX_TOKENS = 1024
 
 # ──────────────────────────────────────────────
-# SendGrid 設定
+# メール送信設定 (Gmail SMTP)
 # ──────────────────────────────────────────────
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "")
 NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
 
 # ──────────────────────────────────────────────
 # GitHub Pages 設定
