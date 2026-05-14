@@ -25,22 +25,31 @@ TEMPLATES_DIR = PROJECT_ROOT / "templates"
 NEWSAPI_KEY = os.environ.get("NEWSAPI_KEY", "")
 NEWSAPI_BASE_URL = "https://newsapi.org/v2/everything"
 
-# 検索キーワードグループ（OR 結合で使用）
+# 海外ニュース検索キーワードグループ（自動車補修・工業塗装に特化）
 SEARCH_KEYWORD_GROUPS = [
-    '"paint booth" OR "spray booth" OR "coating booth"',
-    '"industrial coating" OR "powder coating" OR "surface finishing"',
-    '"automotive painting" OR "automotive coating" OR "paint shop"',
-    '"paint technology" OR "coating technology" OR "painting equipment"',
-    '"paint VOC" OR "coating regulation" OR "paint emission"',
+    # 塗装ブース・設備（最も業界固有）
+    '"paint booth" OR "spray booth" OR "coating booth" OR "finishing booth"',
+    # 自動車補修塗装（板金塗装業界の中心）
+    '"automotive refinish" OR "automotive refinishing" OR "collision repair" coating',
+    # 工業塗装（産業用）
+    '"industrial coatings" OR "industrial painting" OR "powder coating" industry',
+    # 塗料メーカー・主要ブランド
+    'Axalta OR "PPG Refinish" OR "BASF Coatings" OR Sikkens OR Glasurit OR Standox coatings',
+    # 塗装業界の環境・技術動向
+    '"coatings industry" (VOC OR regulation OR innovation OR "electric vehicle" OR waterborne)',
 ]
 
-# 日本国内ニュース用キーワードグループ
-DOMESTIC_KEYWORD_GROUPS = [
-    "塗装ブース 塗装設備 板金塗装",
-    "自動車補修塗装 補修塗料 塗装業界",
-    "塗装規制 VOC規制 塗料市場",
-    "板金 塗装 ニュース 新製品",
-    "自動車補修 塗料 材料 価格",
+# 国内ニュース収集用 Google News RSS キーワード
+# （APIキー不要・日本語対応 ◎）
+DOMESTIC_RSS_KEYWORDS = [
+    "塗装ブース 自動車",
+    "板金塗装 業界",
+    "補修塗料 塗装",
+    "塗装設備 メーカー",
+    "VOC規制 塗装",
+    "塗料市場 自動車補修",
+    "スプレーブース 工業塗装",
+    "アネスト岩田 OR 大気社 OR パーカーエンジニアリング",
 ]
 
 # 1キーワードグループあたりの最大取得件数

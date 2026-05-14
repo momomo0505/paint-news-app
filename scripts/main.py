@@ -30,7 +30,7 @@ from scripts.collect_news import Article, collect_domestic_news, collect_news
 from scripts.config import DOCS_DIR, LOG_LEVEL
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
-from scripts.translate_summarize import translate_and_summarize
+from scripts.translate_summarize import filter_relevant_articles, translate_and_summarize
 
 # 日本時間
 JST = timezone(timedelta(hours=9))
@@ -203,16 +203,20 @@ def run_pipeline(
         return
 
     # ────────────────────────────────────────
-    # Step 4: 翻訳・要約（海外ニュースのみ）
+    # Step 4: 関連性フィルタ → 翻訳・要約（海外ニュースのみ）
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 4/5: 翻訳・要約 ━━━")
+    logger.info("━━━ Step 4/5: 関連性フィルタ → 翻訳・要約 ━━━")
 
     if dry_run:
         logger.info("ドライラン: 翻訳済みダミーデータを使用します")
     else:
         if overseas_articles:
-            overseas_articles = translate_and_summarize(overseas_articles)
+            logger.info("関連性フィルタ実行中（%d件）...", len(overseas_articles))
+            overseas_articles = filter_relevant_articles(overseas_articles)
+            logger.info("フィルタ後: %d件 → 翻訳・要約開始", len(overseas_articles))
+            if overseas_articles:
+                overseas_articles = translate_and_summarize(overseas_articles)
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 
     # ────────────────────────────────────────

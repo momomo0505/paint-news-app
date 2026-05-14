@@ -178,6 +178,91 @@ def _call_claude_with_retry(
 
 
 # ──────────────────────────────────────────────
+# 関連性フィルタ（海外ニュース用）
+# ──────────────────────────────────────────────
+def filter_relevant_articles(articles: list[Article]) -> list[Article]:
+    """
+    Claude API を使って塗装業界に無関係な記事を一括除外する。
+    全記事をまとめて1回のAPIコールで判定するため低コスト。
+
+    対象業界: 自動車補修塗装・工業塗装・塗装設備・塗料製造
+    除外対象: 住宅塗料・ネイル・アート・化粧品・一般建築 など
+
+    Args:
+        articles: フィルタ対象の記事リスト
+
+    Returns:
+        list[Article]: 業界関連記事のみ
+    """
+    if not articles:
+        return []
+
+    if not ANTHROPIC_API_KEY:
+        logger.warning("ANTHROPIC_API_KEY 未設定のため関連性フィルタをスキップ")
+        return articles
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    # 記事リストをプロンプト用にフォーマット
+    items_text = "\n".join(
+        f"{i + 1}. {a.title} | {a.description[:120]}"
+        for i, a in enumerate(articles)
+    )
+
+    prompt = f"""以下の記事リストを確認し、「自動車補修塗装」「工業塗装」「塗装ブース・塗装設備」「塗料製造業界」のいずれかに明確に関連する記事番号を選んでください。
+
+【除外してほしい記事の例】
+- 住宅・内装・外壁の塗装・DIY
+- ネイルポリッシュ・ネイルアート
+- アート・絵画・水彩・キャンバス
+- フェイスペイント・ボディペイント
+- PCアプリ（Microsoft Paint等）
+- 化粧品・スキンケア
+
+【含めてほしい記事の例】
+- スプレーブース・塗装ブースの技術・製品
+- 自動車補修塗装・板金塗装業界のニュース
+- 工業用粉体塗装・液体塗装
+- Axalta / PPG / BASF / Sikkens 等の業界ブランド
+- 塗装業界のVOC規制・環境対応
+- 自動車メーカーの塗装ラインや塗装技術
+
+記事リスト（番号|タイトル|説明）:
+{items_text}
+
+関連性の高い記事番号のみをカンマ区切りで返してください。
+例: 1,3,5,7
+番号のみ返してください。他の文言は不要です。"""
+
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        numbers_text = response.content[0].text.strip()
+        logger.info("関連性フィルタ結果: %s", numbers_text)
+
+        indices = [
+            int(n.strip()) - 1
+            for n in numbers_text.split(",")
+            if n.strip().isdigit()
+        ]
+        filtered = [articles[i] for i in indices if 0 <= i < len(articles)]
+        logger.info(
+            "関連性フィルタ: %d件 → %d件（除外: %d件）",
+            len(articles),
+            len(filtered),
+            len(articles) - len(filtered),
+        )
+        return filtered
+
+    except Exception as exc:
+        logger.error("関連性フィルタエラー（フォールバック: 全件返却）: %s", exc)
+        return articles
+
+
+# ──────────────────────────────────────────────
 # メイン関数
 # ──────────────────────────────────────────────
 def translate_and_summarize(

@@ -1,29 +1,34 @@
 """
-ニュース収集モジュール — NewsAPI から塗装業界ニュースを取得する
+ニュース収集モジュール
 ================================================================
 
 機能:
-- 複数キーワードグループで検索し、網羅性を高める
+- 海外ニュース: NewsAPI（英語）で塗装業界ニュースを取得
+- 国内ニュース: Google News RSS（feedparser）で日本語ニュースを取得
 - 重複記事の排除（URL ベース + タイトル類似度）
-- 記事品質のフィルタリング（タイトル・説明文の存在チェック）
+- 記事品質のフィルタリング
 - 公開日の新しい順でソート
-- 国内ニュース収集（NewsAPI の日本語検索）
 """
 
 from __future__ import annotations
 
+import calendar
 import logging
+import re
+import time
+import urllib.parse
 from datetime import datetime, timedelta, timezone
-from typing import Any
 from difflib import SequenceMatcher
+from typing import Any
 
+import feedparser
 import requests
 
 from scripts.config import (
     NEWSAPI_KEY,
     NEWSAPI_BASE_URL,
     SEARCH_KEYWORD_GROUPS,
-    DOMESTIC_KEYWORD_GROUPS,
+    DOMESTIC_RSS_KEYWORDS,
     ARTICLES_PER_QUERY,
     MAX_ARTICLES,
     MAX_DOMESTIC_ARTICLES,
@@ -253,76 +258,104 @@ def collect_news() -> list[Article]:
     return result
 
 
+def _parse_rss_date(entry: Any) -> datetime:
+    """RSS エントリの公開日を datetime に変換する。"""
+    JST = timezone(timedelta(hours=9))
+    published = getattr(entry, "published_parsed", None)
+    if published:
+        try:
+            ts = calendar.timegm(published)
+            return datetime.fromtimestamp(ts, tz=timezone.utc).astimezone(JST)
+        except Exception:
+            pass
+    return datetime.now(JST)
+
+
+def _clean_rss_summary(html: str) -> str:
+    """Google News RSSの要約HTMLからテキストを抽出する。"""
+    text = re.sub(r"<[^>]+>", "", html)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:300]
+
+
 def collect_domestic_news() -> list[Article]:
     """
-    国内塗装業界ニュースを NewsAPI から収集する。
-    日本語キーワードで検索し、重複排除・ソート済みの記事リストを返す。
+    国内塗装業界ニュースを Google News RSS で収集する。
+    feedparser を使用し、APIキー不要で日本語ニュースを取得する。
 
     Returns:
         list[Article]: 最大 MAX_DOMESTIC_ARTICLES 件の記事リスト（新しい順）
     """
-    if not NEWSAPI_KEY:
-        logger.error("NEWSAPI_KEY が設定されていません。")
-        raise ValueError("環境変数 NEWSAPI_KEY を設定してください。")
-
-    now = datetime.now(timezone.utc)
-    from_date = (now - timedelta(days=SEARCH_DAYS_BACK)).strftime("%Y-%m-%d")
-    to_date = now.strftime("%Y-%m-%d")
+    JST = timezone(timedelta(hours=9))
+    cutoff = datetime.now(JST) - timedelta(days=SEARCH_DAYS_BACK)
+    base_url = "https://news.google.com/rss/search"
 
     all_articles: list[Article] = []
 
-    for query in DOMESTIC_KEYWORD_GROUPS:
-        params: dict[str, Any] = {
-            "q": query,
-            "from": from_date,
-            "to": to_date,
-            "language": "ja",
-            "sortBy": "publishedAt",
-            "pageSize": ARTICLES_PER_QUERY,
-            "apiKey": NEWSAPI_KEY,
+    for keyword in DOMESTIC_RSS_KEYWORDS:
+        params = {
+            "q": keyword,
+            "hl": "ja",
+            "gl": "JP",
+            "ceid": "JP:ja",
         }
-        logger.info("国内ニュース検索: q=%s", query)
+        url = base_url + "?" + urllib.parse.urlencode(params)
+        logger.info("Google News RSS 検索: %s", keyword)
+
         try:
-            response = requests.get(NEWSAPI_BASE_URL, params=params, timeout=30)
-            response.raise_for_status()
-        except requests.RequestException as exc:
-            logger.error("NewsAPI 国内検索エラー: %s", exc)
+            feed = feedparser.parse(url)
+        except Exception as exc:
+            logger.warning("RSS 取得エラー (%s): %s", keyword, exc)
             continue
 
-        data = response.json()
-        if data.get("status") != "ok":
-            logger.error("NewsAPI 国内エラーレスポンス: %s — %s", data.get("code"), data.get("message"))
-            continue
+        entries = getattr(feed, "entries", [])
+        logger.info("  取得: %d 件", len(entries))
 
-        raw_articles = data.get("articles", [])
-        logger.info("国内取得件数: %d 件 (キーワード: %s)", len(raw_articles), query[:40])
-
-        for raw in raw_articles:
-            if not _is_valid_article(raw):
+        for entry in entries:
+            pub_dt = _parse_rss_date(entry)
+            if pub_dt < cutoff:
                 continue
+
+            title = getattr(entry, "title", "").strip()
+            if not title:
+                continue
+
+            summary_html = getattr(entry, "summary", "") or ""
+            description = _clean_rss_summary(summary_html)
+
+            link = getattr(entry, "link", "") or ""
+
+            source_info = getattr(entry, "source", None)
+            if source_info and hasattr(source_info, "title"):
+                source = source_info.title
+            else:
+                source = "Google News"
+
             all_articles.append(
                 Article(
-                    title=raw["title"].strip(),
-                    description=(raw.get("description") or "").strip(),
-                    url=raw["url"].strip(),
-                    source=(raw.get("source", {}).get("name") or "Unknown").strip(),
-                    published_at=raw.get("publishedAt", ""),
-                    image_url=raw.get("urlToImage"),
+                    title=title,
+                    description=description,
+                    url=link,
+                    source=source,
+                    published_at=pub_dt.isoformat(),
                 )
             )
 
-    logger.info("国内全キーワードグループ合計: %d 件", len(all_articles))
+        # Google に負荷をかけないよう短い待機
+        time.sleep(0.5)
+
+    logger.info("国内合計（重複排除前）: %d 件", len(all_articles))
 
     unique_articles = _deduplicate_articles(all_articles)
     logger.info("国内重複排除後: %d 件", len(unique_articles))
 
-    def _parse_date(article: Article) -> datetime:
+    def _sort_key(article: Article) -> datetime:
         try:
-            return datetime.fromisoformat(article.published_at.replace("Z", "+00:00"))
+            return datetime.fromisoformat(article.published_at)
         except (ValueError, AttributeError):
             return datetime.min.replace(tzinfo=timezone.utc)
 
-    unique_articles.sort(key=_parse_date, reverse=True)
+    unique_articles.sort(key=_sort_key, reverse=True)
     result = unique_articles[:MAX_DOMESTIC_ARTICLES]
     logger.info("国内最終記事数: %d 件", len(result))
     return result
