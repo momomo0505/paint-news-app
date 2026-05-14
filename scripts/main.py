@@ -30,7 +30,11 @@ from scripts.collect_news import Article, collect_domestic_news, collect_news
 from scripts.config import DOCS_DIR, LOG_LEVEL
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
-from scripts.translate_summarize import filter_relevant_articles, translate_and_summarize
+from scripts.translate_summarize import (
+    filter_relevant_articles,
+    summarize_domestic_articles,
+    translate_and_summarize,
+)
 
 # 日本時間
 JST = timezone(timedelta(hours=9))
@@ -165,7 +169,7 @@ def run_pipeline(
             competitor_items = []
 
     # ────────────────────────────────────────
-    # Step 2: 国内ニュース収集
+    # Step 2: 国内ニュース収集 → フィルタ → 要約
     # ────────────────────────────────────────
     logger.info("")
     logger.info("━━━ Step 2/5: 国内ニュース収集 ━━━")
@@ -177,6 +181,17 @@ def run_pipeline(
         try:
             domestic_articles = collect_domestic_news()
             logger.info("国内ニュース収集完了: %d 件", len(domestic_articles))
+
+            if domestic_articles:
+                logger.info("国内ニュース関連性フィルタ実行中（%d件）...", len(domestic_articles))
+                domestic_articles = filter_relevant_articles(domestic_articles, language="ja")
+                logger.info("フィルタ後: %d件", len(domestic_articles))
+
+            if domestic_articles:
+                logger.info("国内ニュース一括要約中...")
+                domestic_articles = summarize_domestic_articles(domestic_articles)
+                logger.info("国内ニュース要約完了: %d件", len(domestic_articles))
+
         except Exception as exc:
             logger.error("国内ニュース収集エラー: %s", exc)
             domestic_articles = []

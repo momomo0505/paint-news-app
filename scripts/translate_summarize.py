@@ -180,16 +180,17 @@ def _call_claude_with_retry(
 # ──────────────────────────────────────────────
 # 関連性フィルタ（海外ニュース用）
 # ──────────────────────────────────────────────
-def filter_relevant_articles(articles: list[Article]) -> list[Article]:
+def filter_relevant_articles(
+    articles: list[Article],
+    language: str = "en",
+) -> list[Article]:
     """
     Claude API を使って塗装業界に無関係な記事を一括除外する。
     全記事をまとめて1回のAPIコールで判定するため低コスト。
 
-    対象業界: 自動車補修塗装・工業塗装・塗装設備・塗料製造
-    除外対象: 住宅塗料・ネイル・アート・化粧品・一般建築 など
-
     Args:
         articles: フィルタ対象の記事リスト
+        language: "en"（海外）または "ja"（国内）
 
     Returns:
         list[Article]: 業界関連記事のみ
@@ -203,13 +204,37 @@ def filter_relevant_articles(articles: list[Article]) -> list[Article]:
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    # 記事リストをプロンプト用にフォーマット
     items_text = "\n".join(
         f"{i + 1}. {a.title} | {a.description[:120]}"
         for i, a in enumerate(articles)
     )
 
-    prompt = f"""以下の記事リストを確認し、「自動車補修塗装」「工業塗装」「塗装ブース・塗装設備」「塗料製造業界」のいずれかに明確に関連する記事番号を選んでください。
+    if language == "ja":
+        prompt = f"""以下の日本語ニュース記事リストを確認し、「自動車補修塗装」「工業塗装」「塗装ブース・塗装設備」「塗料製造業界」「板金塗装・自動車整備業界」のいずれかに明確に関連する記事番号のみを選んでください。
+
+【必ず除外する記事】
+- スポーツ（野球・サッカー・競馬など）
+- 芸能・エンタメ・グルメ・旅行
+- 政治・一般社会ニュース（塗装業界と無関係なもの）
+- 住宅リフォーム・DIY塗装・インテリア
+- ネイルアート・化粧品・美容
+
+【含めてよい記事】
+- 塗装ブース・スプレーブースの新製品・技術
+- 板金塗装・自動車補修塗装業界のニュース
+- 工業用塗料・粉体塗装・液体塗装
+- 塗料メーカー（アクサルタ、関西ペイント、日本ペイント等）の動向
+- 自動車塗装関連の規制・環境対応
+- 整備士・鈑金塗装業者向けの業界情報
+
+記事リスト（番号|タイトル|説明）:
+{items_text}
+
+塗装業界に関連する記事番号のみをカンマ区切りで返してください。
+例: 1,3,5
+番号のみ返してください。"""
+    else:
+        prompt = f"""以下の記事リストを確認し、「自動車補修塗装」「工業塗装」「塗装ブース・塗装設備」「塗料製造業界」のいずれかに明確に関連する記事番号を選んでください。
 
 【除外してほしい記事の例】
 - 住宅・内装・外壁の塗装・DIY
@@ -241,7 +266,7 @@ def filter_relevant_articles(articles: list[Article]) -> list[Article]:
             messages=[{"role": "user", "content": prompt}],
         )
         numbers_text = response.content[0].text.strip()
-        logger.info("関連性フィルタ結果: %s", numbers_text)
+        logger.info("関連性フィルタ（%s）結果: %s", language, numbers_text)
 
         indices = [
             int(n.strip()) - 1
@@ -250,7 +275,8 @@ def filter_relevant_articles(articles: list[Article]) -> list[Article]:
         ]
         filtered = [articles[i] for i in indices if 0 <= i < len(articles)]
         logger.info(
-            "関連性フィルタ: %d件 → %d件（除外: %d件）",
+            "関連性フィルタ（%s）: %d件 → %d件（除外: %d件）",
+            language,
             len(articles),
             len(filtered),
             len(articles) - len(filtered),
@@ -260,6 +286,83 @@ def filter_relevant_articles(articles: list[Article]) -> list[Article]:
     except Exception as exc:
         logger.error("関連性フィルタエラー（フォールバック: 全件返却）: %s", exc)
         return articles
+
+
+def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
+    """
+    国内ニュース記事を Claude API で一括要約する（1〜2文）。
+    title_ja と summary_ja を設定して返す。
+
+    Args:
+        articles: 国内ニュース記事リスト（日本語）
+
+    Returns:
+        list[Article]: summary_ja が設定された記事リスト
+    """
+    if not articles:
+        return []
+
+    if not ANTHROPIC_API_KEY:
+        logger.warning("ANTHROPIC_API_KEY 未設定のため要約をスキップ")
+        for a in articles:
+            a.title_ja = a.title
+            a.summary_ja = a.description[:120] if a.description else ""
+        return articles
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    items_text = "\n".join(
+        f"{i + 1}. タイトル: {a.title}\n   詳細: {a.description[:200]}"
+        for i, a in enumerate(articles)
+    )
+
+    prompt = f"""以下の日本語ニュース記事を各1〜2文で要約してください。
+塗装業界の専門家向けに、記事の要点を分かりやすく伝えてください。
+文末は「。」で締めてください。
+
+記事リスト:
+{items_text}
+
+以下のJSON形式のみで返してください（説明文は不要）:
+[{{"id": 1, "summary": "1〜2文の要約"}}, {{"id": 2, "summary": "1〜2文の要約"}}]"""
+
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = response.content[0].text.strip()
+
+        # コードブロックを除去
+        if "```" in text:
+            lines = text.split("\n")
+            json_lines = []
+            in_block = False
+            for line in lines:
+                if line.startswith("```"):
+                    in_block = not in_block
+                    continue
+                if in_block:
+                    json_lines.append(line)
+            text = "\n".join(json_lines)
+
+        summaries = json.loads(text)
+        summary_map = {int(s["id"]): s["summary"] for s in summaries}
+
+        for i, article in enumerate(articles):
+            article.title_ja = article.title
+            article.summary_ja = summary_map.get(i + 1, article.description[:120] or "")
+
+        logger.info("国内記事要約完了: %d件", len(articles))
+
+    except Exception as exc:
+        logger.error("国内記事要約エラー（フォールバック使用）: %s", exc)
+        for article in articles:
+            article.title_ja = article.title
+            article.summary_ja = article.description[:150] if article.description else ""
+
+    return articles
 
 
 # ──────────────────────────────────────────────

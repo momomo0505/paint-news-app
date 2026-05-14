@@ -51,11 +51,15 @@ def _build_competitor_section(competitor_items: list[dict]) -> str:
         url = item.get("url", "#")
         title = item.get("title", "（タイトルなし）")
         company = item.get("company", "")
+        read_label = "翻訳して読む →" if item.get("language") == "en" else "詳細を読む →"
         rows += (
-            '<li style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;">'
+            '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">'
+            '<div style="margin-bottom:4px;">'
             '<span style="font-size:0.75rem;color:#9ca3af;margin-right:6px;">' + date_str + "</span>"
-            '<span style="font-size:0.8rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:3px;margin-right:6px;">' + company + "</span>"
-            '<a href="' + url + '" style="color:#1d4ed8;text-decoration:none;font-size:0.9rem;">' + title[:70] + "</a>"
+            '<span style="font-size:0.8rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:3px;">' + company + "</span>"
+            "</div>"
+            '<p style="margin:0 0 4px;font-size:0.9rem;color:#1a1a2e;font-weight:500;">' + title[:80] + "</p>"
+            '<a href="' + url + '" style="font-size:0.8rem;color:#2563eb;text-decoration:none;">' + read_label + "</a>"
             "</li>\n"
         )
 
@@ -82,9 +86,15 @@ def _build_domestic_section(domestic_articles: list[Article]) -> str:
     for article in domestic_articles[:8]:
         url = article.url
         title = article.title_ja or article.title
+        summary = article.summary_ja or article.description[:100] or ""
         rows += (
-            '<li style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;">'
-            '<a href="' + url + '" style="color:#1d4ed8;text-decoration:none;font-size:0.9rem;">' + title[:80] + "</a>"
+            '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">'
+            '<p style="margin:0 0 4px;font-size:0.9rem;color:#1a1a2e;font-weight:500;">' + title[:80] + "</p>"
+            + (
+                '<p style="margin:0 0 6px;font-size:0.85rem;color:#4b5563;line-height:1.5;">' + summary[:150] + "</p>"
+                if summary else ""
+            )
+            + '<a href="' + url + '" style="font-size:0.8rem;color:#2563eb;text-decoration:none;">記事を読む →</a>'
             "</li>\n"
         )
 
@@ -111,10 +121,15 @@ def _build_overseas_section(articles: list[Article]) -> str:
     for article in articles[:8]:
         translated_url = _google_translate_url(article.url)
         title = article.title_ja or article.title
+        summary = article.summary_ja or ""
         rows += (
-            '<li style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;">'
-            '<a href="' + translated_url + '" style="color:#1d4ed8;text-decoration:none;font-size:0.9rem;">' + title[:80] + "</a>"
-            '<span style="font-size:0.75rem;color:#9ca3af;margin-left:6px;">[翻訳表示]</span>'
+            '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">'
+            '<p style="margin:0 0 4px;font-size:0.9rem;color:#1a1a2e;font-weight:500;">' + title[:80] + "</p>"
+            + (
+                '<p style="margin:0 0 6px;font-size:0.85rem;color:#4b5563;line-height:1.5;">' + summary[:150] + "</p>"
+                if summary else ""
+            )
+            + '<a href="' + translated_url + '" style="font-size:0.8rem;color:#2563eb;text-decoration:none;">翻訳して読む →</a>'
             "</li>\n"
         )
 

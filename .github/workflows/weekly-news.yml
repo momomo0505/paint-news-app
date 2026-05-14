@@ -37,6 +37,10 @@ concurrency:
   group: weekly-news
   cancel-in-progress: false
 
+# Node.js 24 への移行（警告対応）
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
   pages: write
