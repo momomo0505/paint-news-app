@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年05月15日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <h1>🎨 塗装業界ニュースレポート</h1>
+        <div class="header-meta">
+            <span>📅 2026年05月15日</span>
+            <span>🏭 競合: 2件</span>
+            <span>🇯🇵 国内: 12件</span>
+            <span>🌍 海外: 1件</span>
+            <span>📆 対象: 2026/05/08 〜 2026/05/15</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">2026年5月13日お知らせ【メディア掲載】日刊工業新聞（5月13日掲載）に弊社代表 三好と日刊工業新聞社 神阪社長の対談記事が掲載</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年05月13日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-05-13-0" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">2026年5月13日お知らせ創業100周年記念サイトを公開しました</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年05月13日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-05-13" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">シンナー不足が塗装業や板金業に打撃 完成間近で止まった工事現場も [千葉県] - 朝日新聞</h2>
+    </div>
+    
+    <p class="article-summary">千葉県内でシンナー不足が深刻化し、塗装業や板金業の現場で工事が中断される事態が発生している。完成間近の工事現場でも作業が止まるなど、業界に大きな影響を与えている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">朝日新聞 — 2026年05月14日</span>
+        <a href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE8yX3hqVXZ3Y2lISk5jLXpHR1Vna3UtZElTQ1N0Uk8tNlR2TnZvb0NJckNCOG1neFNjU2tVRTFyVlhQcE1WMnphNTM4ZmMweEdTZ054ZkJhRHRVMmtPQzIzZGZsRkVyeGs?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田を「図鑑」で紐解く、100周年記念サイトを公開 - PR TIMES</h2>
+    </div>
+    
+    <p class="article-summary">塗装機械メーカーのアネスト岩田が創立100周年を記念し、同社の歴史や製品を図鑑形式で紹介する特設サイトを公開した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">PR TIMES — 2026年05月13日</span>
+        <a href="https://news.google.com/rss/articles/CBMiakFVX3lxTE5SbHNGOFI4RS1sUVB4R0FsQ2N2UHUwYkJXLWJlME8zOGhOUmYwOXhaazdYdkhWQUNPWS02RXM2V0RGRnNfVkdJUXZjRFQ1S19BVW5zNE9uY3daVzZoNzJUTmxTMHowdHU5Ymc?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">水性自動車用塗料の世界市場（2026年～2032年）、市場規模（水分散性水性塗料、水溶性水性塗料、その他）・分析レポートを発表 - アットプレス</h2>
+    </div>
+    
+    <p class="article-summary">水性自動車用塗料の世界市場に関する2026年から2032年までの分析レポートが発表された。水分散性、水溶性などの分類別に市場規模の予測が示されている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">アットプレス — 2026年05月13日</span>
+        <a href="https://news.google.com/rss/articles/CBMiT0FVX3lxTE41U0tQZlpvVEROZ2R0N0xVSllXQlAxemlyLVdwX0NsTm83SkFEeDR2NTdjXzNKT2IwdEtjQnp6S1BiQVI1MHRCVmltbUFpTmc?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">【決算速報】アネスト岩田---26年3月期は増益、経常利益は8.1％増(フィスコ) - Yahoo!ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の2026年3月期決算は増益となり、経常利益が前年同期比8.1％増加した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Yahoo!ファイナンス — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxQQU5BU1ZHU04yM1pVaGNCTFFHenVfZ2d6WmFLa05pWEJzLW4wRlJJaHRuZFEweWhTb0NYeFJrTU1FUEJRUzFoUWVYSVdER3JFM3RhZnQtVHRBUGp0RE5nWXNqUG9OVzVHWjRTZ29BUWhLbzY4bU1xR2lNamdfSy1XelNENjM0MW8?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田[6381] : アネスト岩田の2027年3月期、純利益26.3%減 予想平均下回る：日経会社情報DIGITAL - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の2027年3月期業績予想では純利益が26.3％減となる見通しで、市場予想平均を下回る結果となっている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxOZmxKeE5qWkU2a2RGX3pWU2ZQY0FpNWF3bHprbkZ4QkdmTkg1YkU1ZnhyaE5rUnVHTmY3Tk5uekx6TkhaNkxUUVFxczZrVTF6dC04Y2F3NWxPeXVFbnVUMGg5ekY3SmNzdmVMZnpKWmE4bzh6SFdFMEd0YUJ5TEJVZmdabmt5cklCWmJIRWJQOHJIQQ?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">【決算速報】アネスト岩田、今期経常は16％減益、前期配当を4円増額・今期は6円増配へ(株探ニュース) - Yahoo!ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の今期経常利益は16％減益の予想だが、前期配当を4円増額し、今期も6円の増配を予定している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Yahoo!ファイナンス — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxOUHQ2OGNwbWxNMEZ1UTE4UE1BT2d3bTJfakNRME0xWU5JQ2xMT0YyaW9mRmYtc0paOEpGMmZlUF9tdllfR19TQVQtSzgxZzN1QkxjMERjRGZrOHJxNG1EOXNxbkhZTHVJMl9PM09vTjBFRk9KSEM2a3ZYeGwyT3VkUlVpaHZyS2M?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田、自社株買いの実施を発表(株探ニュース) - Yahoo!ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">塗装機械メーカーのアネスト岩田が自社株買いの実施を発表した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Yahoo!ファイナンス — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxNRkhScnFsY1RROWl4eHdwTGlEUDQtSzVzZnNkbGlkSWlpby1IamZKRUhMa3AyVklvTlFkMDNTeUdpSk9WWVdrZU12R1VqSGVMXzJHUnFFRXZ0RGZlUTlkLTJ6NDFjenc1UktMQW9obmRjSkhmang5aEdELTAwRk5xUERXbWNsNFU?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">決算速報＞アネスト岩田、２６年３月期決算は純利益２５．２％増の大幅増益(ウエルスアドバイザー) - Yahoo!ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の2026年3月期決算は純利益が前年同期比25.2％増の大幅増益となった。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Yahoo!ファイナンス — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxNc0JFajRaYTFlZGd0SEhEd0xKRHFhbWI2YnJCUUR2MnBuaGVSNWxQaXA1OFZwNE9mYWxmM2hUejlPcm9PUnJ3V2dhbjdhZElZSTJ6eVNxdUQ0MTZfYUg5QUdsWHhDX1Y0VHE3MW9Zc0RIS0p1cnFjSXZ5ZXhrR18xV1RhQmpGQTA?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">【決算速報】アネスト岩田、経常8.1%増益。アナリスト予想を上回る(アイフィス株予報) - Yahoo!ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の決算で経常利益が8.1％増益となり、アナリスト予想を上回る好調な結果となった。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Yahoo!ファイナンス — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMihwFBVV95cUxOa3pEbFMxd1h4LXdqdEZhZUhvejdWdFJGRnVRUG1lYXNtbjVyNlBPNVMxc18zVEYwaXJIWDdDMDB5c2JVYno3RkttaFc2RUo2OXlhQ1VENjhvMkdLeVROTTkwQ3Z1YURXaFZjblBQUU5YLU13ZFZ2OTQ3c2ItMmItWkZGc1c0TWM?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田【6381】、今期経常は16％減益、前期配当を4円増額・今期は6円増配へ | 決算速報 - 株探ニュース - 株探</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田の今期経常利益は16％減益予想だが、株主還元として前期配当4円増額、今期6円増配を実施する。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">株探 — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMiUkFVX3lxTFBPN0RUeEZ3TnZPNkVTOFpzMUtGUHIxOXhIdGlDbVVEUkVSWjg4QnJ6a2tpYXY0dG13VWhnWVZSTzZXbGRZSzVneXYteG5xUDJKTGc?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田[6381]：2026年３月期決算短信〔日本基準〕(連結) 2026年5月12日(適時開示) ：日経会社情報DIGITAL - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">アネスト岩田が2026年3月期の連結決算短信を2026年5月12日に適時開示として発表した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年05月12日</span>
+        <a href="https://news.google.com/rss/articles/CBMizAFBVV95cUxPX3RlbjNPY1pjeDN5clV6VF9NeGJrNnNjNjNZWWNOVE1Ld0xRVjRzd3VjdndHRjVZeGFWcjF1T0NUNkpMcl9YSzVWYkJYWVhCWE9YbUhrNGZGOWJGaVk4S296emNzMnVOMC1XLUVVZ2p4RGpxQjFlQ2g4NG5WM2ROZDJBbzZZRXMzQU1yWjhfanRySzJoaWRNSUNwYnZVbzRtcWQxWDlubnctMzlHWHJnWUc1MmpzWEdtU1l0Z3h5Y2kwRlFzMnZGREhBd3g?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アネスト岩田、コンプレッサー製造販売のSANWAを子会社化 - コトラ</h2>
+    </div>
+    
+    <p class="article-summary">塗装機械メーカーのアネスト岩田がコンプレッサー製造販売のSANWAを子会社化することを発表した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">コトラ — 2026年05月08日</span>
+        <a href="https://news.google.com/rss/articles/CBMiX0FVX3lxTE5BcnpvaExvdnliNHJKY1NycXZfdFFaZ2VpRm9PSTRzNDFubVNtanNLaWlaQmlXVXg5ckk0UlpjcjZjNjdzQWF5QnVZbjRnYVJGRGRneFhaSnh5aWlBaEZN?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #7c3aed;padding-left:12px;margin-bottom:16px;">
+        3. 海外塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-technology">
+            塗装技術
+        </span>
+        <h2 class="article-title">新開発の超黒コーティングが系外惑星での生命探査を可能に</h2>
+    </div>
+    <p class="article-summary">NASAが開発した新しい超黒コーティングは、光を効率的に吸収するだけでなく、極めて薄く耐久性に優れている。この技術は将来的にスターシェード（星の光を遮る装置）に応用され、系外惑星の画像化や生命探査の実現を支援する可能性がある。従来の黒色コーティングを大幅に上回る性能により、宇宙望遠鏡の精度向上に貢献することが期待される。</p>
+    <div class="article-footer">
+        <span class="article-source">NASA — 2026年05月12日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://science.nasa.gov/science-research/science-enabling-technology/technology-highlights/new-ultra-black-coating-could-enable-the-search-for-life-on-exoplanets/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+
+
+
+
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
