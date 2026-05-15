@@ -229,7 +229,27 @@ COMPETITOR_SITES = [
         "url": "https://www.taikisha.co.jp/news/",
         "language": "ja",
     },
+    {
+        "name": "トリニティ工業",
+        "url": "https://www.trinityind.co.jp/news/",
+        "language": "ja",
+    },
+    {
+        "name": "明々工業（キュービックシステム）",
+        "url": "https://www.cubicsystem.co.jp/news/",
+        "language": "ja",
+    },
+    {
+        "name": "ヲサメ工業",
+        "url": "https://www.osame.co.jp/index.html",
+        "language": "ja",
+    },
     # ── 海外メーカー ──────────────────────────
+    {
+        "name": "WLD（広州ウェイロンダ）",
+        "url": "https://ja.wld-spraybooth.com/newslist-1",
+        "language": "ja",
+    },
     {
         "name": "Global Finishing Solutions",
         "url": "https://www.globalfinishing.com/news",
@@ -238,6 +258,11 @@ COMPETITOR_SITES = [
     {
         "name": "USI Italia",
         "url": "https://www.usiitalia.com/en/news/",
+        "language": "en",
+    },
+    {
+        "name": "Saicozero",
+        "url": "https://saicozero.com/blog/",
         "language": "en",
     },
 ]
