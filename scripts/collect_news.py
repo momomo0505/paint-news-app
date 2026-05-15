@@ -20,15 +20,19 @@ import urllib.parse
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 from typing import Any
+from urllib.parse import urljoin
 
 import feedparser
 import requests
+from bs4 import BeautifulSoup
 
 from scripts.config import (
     NEWSAPI_KEY,
     NEWSAPI_BASE_URL,
     SEARCH_KEYWORD_GROUPS,
     DOMESTIC_RSS_KEYWORDS,
+    DOMESTIC_SITE_SPECIFIC_KEYWORDS,
+    INDUSTRY_NEWS_SITES,
     ARTICLES_PER_QUERY,
     MAX_ARTICLES,
     MAX_DOMESTIC_ARTICLES,
@@ -53,6 +57,7 @@ class Article:
         source: str,
         published_at: str,
         image_url: str | None = None,
+        skip_filter: bool = False,
     ) -> None:
         self.title = title
         self.description = description
@@ -60,6 +65,9 @@ class Article:
         self.source = source
         self.published_at = published_at
         self.image_url = image_url
+        # True の場合、関連性フィルタをバイパスして必ずレポートに含める
+        # (塗装業界専門サイト・指定メディアのサイト特化検索記事に設定)
+        self.skip_filter: bool = skip_filter
 
         # 翻訳・要約後に設定されるフィールド
         self.title_ja: str = ""
@@ -74,6 +82,7 @@ class Article:
             "source": self.source,
             "published_at": self.published_at,
             "image_url": self.image_url,
+            "skip_filter": self.skip_filter,
             "title_ja": self.title_ja,
             "summary_ja": self.summary_ja,
             "category": self.category,
@@ -280,8 +289,12 @@ def _clean_rss_summary(html: str) -> str:
 
 def collect_domestic_news() -> list[Article]:
     """
-    国内塗装業界ニュースを Google News RSS で収集する。
-    feedparser を使用し、APIキー不要で日本語ニュースを取得する。
+    国内塗装業界ニュースを複数のソースから収集する。
+
+    収集元:
+    - Google News RSS（汎用キーワード検索）
+    - Google News RSS（日経・47ニュース・CBC・TBS・FNN サイト特化検索）
+    - WEB塗料報知・COATAZ 直接スクレイピング
 
     Returns:
         list[Article]: 最大 MAX_DOMESTIC_ARTICLES 件の記事リスト（新しい順）
@@ -292,6 +305,7 @@ def collect_domestic_news() -> list[Article]:
 
     all_articles: list[Article] = []
 
+    # ── 汎用キーワード検索（既存） ──
     for keyword in DOMESTIC_RSS_KEYWORDS:
         params = {
             "q": keyword,
@@ -344,6 +358,16 @@ def collect_domestic_news() -> list[Article]:
         # Google に負荷をかけないよう短い待機
         time.sleep(0.5)
 
+    # ── サイト特化検索（日経・47ニュース・CBC・TBS・FNN） ──
+    logger.info("--- サイト特化ニュース収集開始 ---")
+    site_articles = collect_site_specific_domestic_news()
+    all_articles.extend(site_articles)
+
+    # ── 業界専門サイト直接スクレイピング（塗料報知・COATAZ） ──
+    logger.info("--- 業界専門サイト収集開始 ---")
+    industry_articles = collect_industry_site_news()
+    all_articles.extend(industry_articles)
+
     logger.info("国内合計（重複排除前）: %d 件", len(all_articles))
 
     unique_articles = _deduplicate_articles(all_articles)
@@ -359,6 +383,174 @@ def collect_domestic_news() -> list[Article]:
     result = unique_articles[:MAX_DOMESTIC_ARTICLES]
     logger.info("国内最終記事数: %d 件", len(result))
     return result
+
+
+_SCRAPE_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "ja,en;q=0.9",
+}
+
+_DATE_PATTERNS = [
+    r"(\d{4})[./年](\d{1,2})[./月](\d{1,2})",  # 2026.05.14 / 2026/05/14 / 2026年5月14日
+    r"(\d{4})-(\d{1,2})-(\d{1,2})",              # 2026-05-14
+]
+
+
+def _scrape_parse_date(text: str) -> datetime | None:
+    """テキストから日付を抽出して datetime を返す。"""
+    JST = timezone(timedelta(hours=9))
+    for pattern in _DATE_PATTERNS:
+        m = re.search(pattern, text)
+        if not m:
+            continue
+        try:
+            y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            return datetime(y, mo, d, tzinfo=JST)
+        except ValueError:
+            continue
+    return None
+
+
+def collect_site_specific_domestic_news() -> list[Article]:
+    """
+    日経・47ニュース・CBC・TBS・FNN など指定ニュースサイトを対象に
+    Google News RSS で国内塗装業界関連ニュースを収集する。
+
+    Returns:
+        list[Article]: 取得した記事リスト（重複排除前）
+    """
+    JST = timezone(timedelta(hours=9))
+    cutoff = datetime.now(JST) - timedelta(days=SEARCH_DAYS_BACK)
+    base_url = "https://news.google.com/rss/search"
+    all_articles: list[Article] = []
+
+    for keyword in DOMESTIC_SITE_SPECIFIC_KEYWORDS:
+        params = {
+            "q": keyword,
+            "hl": "ja",
+            "gl": "JP",
+            "ceid": "JP:ja",
+        }
+        url = base_url + "?" + urllib.parse.urlencode(params)
+        logger.info("サイト特化 Google News RSS 検索: %s", keyword[:60])
+
+        try:
+            feed = feedparser.parse(url)
+        except Exception as exc:
+            logger.warning("RSS 取得エラー (%s): %s", keyword[:40], exc)
+            continue
+
+        entries = getattr(feed, "entries", [])
+        logger.info("  取得: %d 件", len(entries))
+
+        for entry in entries:
+            pub_dt = _parse_rss_date(entry)
+            if pub_dt < cutoff:
+                continue
+
+            title = getattr(entry, "title", "").strip()
+            if not title:
+                continue
+
+            summary_html = getattr(entry, "summary", "") or ""
+            description = _clean_rss_summary(summary_html)
+            link = getattr(entry, "link", "") or ""
+
+            source_info = getattr(entry, "source", None)
+            if source_info and hasattr(source_info, "title"):
+                source = source_info.title
+            else:
+                # キーワードの site: 部分からソース名を推定
+                site_match = re.search(r"site:([^\s]+)", keyword)
+                source = site_match.group(1) if site_match else "Google News"
+
+            all_articles.append(
+                Article(
+                    title=title,
+                    description=description,
+                    url=link,
+                    source=source,
+                    published_at=pub_dt.isoformat(),
+                    skip_filter=True,  # 指定メディアの記事はフィルタをバイパス
+                )
+            )
+
+        time.sleep(0.5)
+
+    logger.info("サイト特化ニュース取得（重複排除前）: %d 件", len(all_articles))
+    return all_articles
+
+
+def collect_industry_site_news() -> list[Article]:
+    """
+    塗装業界専門サイト（WEB塗料報知・COATAZ）を直接スクレイピングして
+    最新記事を収集する。
+
+    Returns:
+        list[Article]: 取得した記事リスト（重複排除前）
+    """
+    JST = timezone(timedelta(hours=9))
+    cutoff = datetime.now(JST) - timedelta(days=SEARCH_DAYS_BACK)
+    all_articles: list[Article] = []
+
+    for site in INDUSTRY_NEWS_SITES:
+        name = site["name"]
+        url = site["url"]
+        logger.info("業界専門サイト収集: %s (%s)", name, url)
+
+        try:
+            resp = requests.get(url, headers=_SCRAPE_HEADERS, timeout=20)
+            resp.raise_for_status()
+            resp.encoding = resp.apparent_encoding
+            soup = BeautifulSoup(resp.text, "lxml")
+        except Exception as exc:
+            logger.warning("%s: ページ取得失敗: %s", name, exc)
+            continue
+
+        # リンクと日付を含むアイテムを抽出（check_competitors.py と同様のアプローチ）
+        found = 0
+        seen_urls: set[str] = set()
+
+        for a_tag in soup.find_all("a", href=True):
+            href = a_tag["href"]
+            link = urljoin(url, href)
+            if link in seen_urls:
+                continue
+
+            title = a_tag.get_text(strip=True)
+            if len(title) < 5:
+                continue
+
+            # 周辺テキストから日付を探す
+            parent = a_tag.parent
+            parent_text = parent.get_text(separator=" ", strip=True) if parent else ""
+            date = _scrape_parse_date(parent_text) or _scrape_parse_date(title)
+
+            if date is None or date < cutoff:
+                continue
+
+            seen_urls.add(link)
+            all_articles.append(
+                Article(
+                    title=title[:200],
+                    description="",
+                    url=link,
+                    source=name,
+                    published_at=date.isoformat(),
+                    skip_filter=True,  # 業界専門サイトの記事はフィルタをバイパス
+                )
+            )
+            found += 1
+
+        logger.info("  %s: %d 件取得", name, found)
+        time.sleep(1.0)
+
+    logger.info("業界専門サイト取得（重複排除前）: %d 件", len(all_articles))
+    return all_articles
 
 
 if __name__ == "__main__":

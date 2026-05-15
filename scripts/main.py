@@ -184,9 +184,21 @@ def run_pipeline(
             logger.info("国内ニュース収集完了: %d 件", len(domestic_articles))
 
             if domestic_articles:
-                logger.info("国内ニュース関連性フィルタ実行中（%d件）...", len(domestic_articles))
-                domestic_articles = filter_relevant_articles(domestic_articles, language="ja")
-                logger.info("フィルタ後: %d件", len(domestic_articles))
+                # skip_filter=True の記事（指定メディア・業界専門サイト）はフィルタをバイパス
+                trusted = [a for a in domestic_articles if a.skip_filter]
+                to_filter = [a for a in domestic_articles if not a.skip_filter]
+                logger.info(
+                    "フィルタ対象: %d件 / バイパス（指定メディア）: %d件",
+                    len(to_filter),
+                    len(trusted),
+                )
+
+                if to_filter:
+                    logger.info("国内ニュース関連性フィルタ実行中（%d件）...", len(to_filter))
+                    to_filter = filter_relevant_articles(to_filter, language="ja")
+                    logger.info("フィルタ後: %d件", len(to_filter))
+
+                domestic_articles = trusted + to_filter
 
             if domestic_articles:
                 logger.info("国内ニュース重複除去中（%d件）...", len(domestic_articles))

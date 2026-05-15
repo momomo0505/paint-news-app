@@ -121,6 +121,8 @@ jobs:
           else
             DATE=$(TZ='Asia/Tokyo' date +%Y-%m-%d)
             git commit -m "📰 Weekly news report: ${DATE}"
+            # リモートに新しいコミットがある場合でも安全にプッシュできるようリベース
+            git pull --rebase origin main
             git push
           fi
 

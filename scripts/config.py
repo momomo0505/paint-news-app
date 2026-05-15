@@ -53,6 +53,35 @@ SEARCH_KEYWORD_GROUPS = [
     'Europe coatings OR "EU coatings" regulation OR "European paint" industry OR REACH coatings',
 ]
 
+# 特定ニュースサイトを対象にした Google News RSS 検索（国内一般メディア）
+# 各サイトの塗装・塗料業界関連記事を対象に絞り込む
+DOMESTIC_SITE_SPECIFIC_KEYWORDS = [
+    # 日本経済新聞（建設・不動産・素材・自動車業界を中心に塗装関連を収集）
+    "site:nikkei.com 塗装 OR 塗料 OR 板金 OR 建築塗装 OR 補修塗装",
+    # 47ニュース（地域の塗装業界・建設関連ニュース）
+    "site:47news.jp 塗装 OR 塗料 OR 板金 OR 建築塗装",
+    # CBCニュース（東海地域の自動車・整備・塗装業界）
+    "site:hicbc.com 塗装 OR 塗料 OR 自動車整備 OR 板金",
+    # TBSニュース
+    "site:newsdig.tbs.co.jp 塗装 OR 塗料 OR 板金 OR 補修",
+    # FNN（フジニュースネットワーク）
+    "site:fnn.jp 塗装 OR 塗料 OR 板金 OR 建築塗装",
+]
+
+# 塗装業界専門サイト（直接スクレイピングで全記事を収集）
+INDUSTRY_NEWS_SITES = [
+    {
+        "name": "WEB塗料報知",
+        "url": "https://www.e-toryo.co.jp/info/",
+        "language": "ja",
+    },
+    {
+        "name": "COATAZ",
+        "url": "https://coataz.com/",
+        "language": "ja",
+    },
+]
+
 # 国内ニュース収集用 Google News RSS キーワード
 # 営業・経営戦略立案に役立つ幅広い業界情報を収集
 DOMESTIC_RSS_KEYWORDS = [
@@ -85,8 +114,8 @@ DOMESTIC_RSS_KEYWORDS = [
 ARTICLES_PER_QUERY = 10
 
 # 最終的にまとめに含める記事数の上限（各カテゴリ）
-MAX_ARTICLES = 25           # 海外ニュース上限（拡充に伴い増加）
-MAX_DOMESTIC_ARTICLES = 20  # 国内ニュース上限（拡充に伴い増加）
+MAX_ARTICLES = 25           # 海外ニュース上限
+MAX_DOMESTIC_ARTICLES = 35  # 国内ニュース上限（新規ソース追加に伴い拡大）
 MAX_COMPETITOR_ITEMS = 30
 
 # 検索対象期間（日数 ─ 過去30日間）
