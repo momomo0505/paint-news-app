@@ -218,14 +218,16 @@ def filter_relevant_articles(
 - 政治・一般社会ニュース（塗装業界と無関係なもの）
 - 住宅リフォーム・DIY塗装・インテリア
 - ネイルアート・化粧品・美容
+- 株価・株式・投資・証券・IR情報（業績発表であっても株式市場に関するもの）
 
 【含めてよい記事】
 - 塗装ブース・スプレーブースの新製品・技術
 - 板金塗装・自動車補修塗装業界のニュース
 - 工業用塗料・粉体塗装・液体塗装
-- 塗料メーカー（アクサルタ、関西ペイント、日本ペイント等）の動向
+- 塗料メーカー（アクサルタ、関西ペイント、日本ペイント等）の事業・製品・技術動向
 - 自動車塗装関連の規制・環境対応
 - 整備士・鈑金塗装業者向けの業界情報
+- 中国・インド・EU等の塗装業界動向
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
@@ -234,30 +236,33 @@ def filter_relevant_articles(
 例: 1,3,5
 番号のみ返してください。"""
     else:
-        prompt = f"""以下の記事リストを確認し、「自動車補修塗装」「工業塗装」「塗装ブース・塗装設備」「塗料製造業界」のいずれかに明確に関連する記事番号を選んでください。
+        prompt = f"""Review the following article list and select ONLY articles clearly related to: automotive refinish coatings, industrial coatings, paint booths/finishing equipment, paint manufacturing industry, body shop business, or coatings market trends (including China, India, EU).
 
-【除外してほしい記事の例】
-- 住宅・内装・外壁の塗装・DIY
-- ネイルポリッシュ・ネイルアート
-- アート・絵画・水彩・キャンバス
-- フェイスペイント・ボディペイント
-- PCアプリ（Microsoft Paint等）
-- 化粧品・スキンケア
+【EXCLUDE these types of articles】
+- Stock price, stock market, investment, securities, shareholder information
+- Home/residential painting, DIY, interior decoration
+- Nail polish, nail art, cosmetics, skincare
+- Art, fine art, watercolor, canvas painting
+- Face paint, body paint
+- PC/software applications (e.g. Microsoft Paint)
+- General company financial reports unrelated to coatings business operations
 
-【含めてほしい記事の例】
-- スプレーブース・塗装ブースの技術・製品
-- 自動車補修塗装・板金塗装業界のニュース
-- 工業用粉体塗装・液体塗装
-- Axalta / PPG / BASF / Sikkens 等の業界ブランド
-- 塗装業界のVOC規制・環境対応
-- 自動車メーカーの塗装ラインや塗装技術
+【INCLUDE these types of articles】
+- Spray booth / paint booth technology and products
+- Automotive refinish / collision repair industry news
+- Industrial powder coating, liquid coating
+- Major brands: Axalta / PPG / BASF / Sikkens / Kansai Paint / Nippon Paint
+- VOC regulations, environmental compliance in coatings
+- Coatings market analysis, forecasts (global, China, India, EU, etc.)
+- EV impact on body shops and automotive coatings
+- Body shop management, collision repair business trends
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
 
-関連性の高い記事番号のみをカンマ区切りで返してください。
-例: 1,3,5,7
-番号のみ返してください。他の文言は不要です。"""
+Return ONLY the relevant article numbers as comma-separated values.
+Example: 1,3,5,7
+Return numbers only, no other text."""
 
     try:
         response = client.messages.create(

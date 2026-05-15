@@ -45,6 +45,12 @@ SEARCH_KEYWORD_GROUPS = [
     '"coatings industry" (VOC OR regulation OR innovation OR waterborne OR "carbon neutral")',
     # 水性・環境対応塗料の普及
     '"waterborne coatings" OR "water-based paint" automotive OR "low VOC" refinish',
+    # 中国の塗装業界動向（最大市場・競合動向）
+    'China coatings OR "Chinese paint" industry OR "China automotive refinish" OR "中国 塗料"',
+    # インドの塗装業界動向（急成長市場）
+    'India coatings OR "Indian paint" industry OR "India automotive" coatings market',
+    # EU・ヨーロッパの規制・技術動向
+    'Europe coatings OR "EU coatings" regulation OR "European paint" industry OR REACH coatings',
 ]
 
 # 国内ニュース収集用 Google News RSS キーワード
