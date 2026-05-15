@@ -288,6 +288,106 @@ def filter_relevant_articles(
         return articles
 
 
+def deduplicate_articles(
+    articles: list[Article],
+    language: str = "ja",
+) -> list[Article]:
+    """
+    Claude API を使って同一イベント・同一トピックの重複記事を除去する。
+
+    同じ決算発表・新製品・規制改正などを複数メディアが報道している場合、
+    最も情報量の多い1件のみ残してその他を除外する。
+
+    Args:
+        articles: 重複チェック対象の記事リスト
+        language: "ja"（国内）または "en"（海外）
+
+    Returns:
+        list[Article]: 重複除去後の記事リスト
+    """
+    if len(articles) <= 1:
+        return articles
+
+    # まず URL 完全一致で除去
+    seen_urls: set[str] = set()
+    url_unique: list[Article] = []
+    for a in articles:
+        if a.url not in seen_urls:
+            seen_urls.add(a.url)
+            url_unique.append(a)
+
+    if len(url_unique) <= 1:
+        return url_unique
+
+    if not ANTHROPIC_API_KEY:
+        logger.warning("ANTHROPIC_API_KEY 未設定のため重複除去をスキップ")
+        return url_unique
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    items_text = "\n".join(
+        f"{i + 1}. {a.title}"
+        for i, a in enumerate(url_unique)
+    )
+
+    if language == "ja":
+        prompt = f"""以下のニュース記事タイトルリストを確認し、同じ出来事・イベント・トピックを複数メディアが重複して報道しているグループを特定してください。
+各グループから最も情報量が多いと思われる記事を1件だけ残し、残りは除外します。
+
+【重複とみなす典型例】
+- 同一企業の同じ決算発表・業績報告（複数のニュースサイトが同じ発表を報道）
+- 同一製品・サービスの発表（複数媒体が同じニュースを転載）
+- 同一の法改正・規制変更
+- 同じ展示会・イベントの告知
+
+記事リスト:
+{items_text}
+
+残す記事の番号（重複を除去した後に残すもの）をカンマ区切りで返してください。
+例: 1,3,5,7,9
+番号のみ返してください。他の文言は不要です。"""
+    else:
+        prompt = f"""Review the following news article titles and identify groups of articles covering the exact same event, announcement, or topic (e.g., the same earnings report, product launch, or regulation covered by multiple outlets).
+
+For each duplicate group, keep only the most informative article (usually the one with the most specific or detailed title).
+
+Article list:
+{items_text}
+
+Return the numbers of articles to KEEP (after removing duplicates) as comma-separated values.
+Example: 1,3,5,7,9
+Return numbers only, no other text."""
+
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        numbers_text = response.content[0].text.strip()
+        logger.info("重複除去（%s）結果: %s", language, numbers_text)
+
+        indices = [
+            int(n.strip()) - 1
+            for n in numbers_text.replace("，", ",").split(",")
+            if n.strip().isdigit()
+        ]
+
+        deduplicated = [url_unique[i] for i in indices if 0 <= i < len(url_unique)]
+        logger.info(
+            "重複除去（%s）: %d件 → %d件（除外: %d件）",
+            language,
+            len(url_unique),
+            len(deduplicated),
+            len(url_unique) - len(deduplicated),
+        )
+        return deduplicated if deduplicated else url_unique
+
+    except Exception as exc:
+        logger.error("重複除去エラー（フォールバック: 全件返却）: %s", exc)
+        return url_unique
+
+
 def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
     """
     国内ニュース記事を Claude API で一括要約する（1〜2文）。

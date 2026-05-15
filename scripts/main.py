@@ -31,6 +31,7 @@ from scripts.config import DOCS_DIR, LOG_LEVEL
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
 from scripts.translate_summarize import (
+    deduplicate_articles,
     filter_relevant_articles,
     summarize_domestic_articles,
     translate_and_summarize,
@@ -188,6 +189,11 @@ def run_pipeline(
                 logger.info("フィルタ後: %d件", len(domestic_articles))
 
             if domestic_articles:
+                logger.info("国内ニュース重複除去中（%d件）...", len(domestic_articles))
+                domestic_articles = deduplicate_articles(domestic_articles, language="ja")
+                logger.info("重複除去後: %d件", len(domestic_articles))
+
+            if domestic_articles:
                 logger.info("国内ニュース一括要約中...")
                 domestic_articles = summarize_domestic_articles(domestic_articles)
                 logger.info("国内ニュース要約完了: %d件", len(domestic_articles))
@@ -239,9 +245,13 @@ def run_pipeline(
         if overseas_articles:
             logger.info("関連性フィルタ実行中（%d件）...", len(overseas_articles))
             overseas_articles = filter_relevant_articles(overseas_articles)
-            logger.info("フィルタ後: %d件 → 翻訳・要約開始", len(overseas_articles))
-            if overseas_articles:
-                overseas_articles = translate_and_summarize(overseas_articles)
+            logger.info("フィルタ後: %d件", len(overseas_articles))
+
+        if overseas_articles:
+            logger.info("海外ニュース重複除去中（%d件）...", len(overseas_articles))
+            overseas_articles = deduplicate_articles(overseas_articles, language="en")
+            logger.info("重複除去後: %d件 → 翻訳・要約開始", len(overseas_articles))
+            overseas_articles = translate_and_summarize(overseas_articles)
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 
     # ────────────────────────────────────────
