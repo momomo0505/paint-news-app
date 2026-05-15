@@ -475,7 +475,7 @@ def collect_site_specific_domestic_news() -> list[Article]:
                     url=link,
                     source=source,
                     published_at=pub_dt.isoformat(),
-                    skip_filter=True,  # 指定メディアの記事はフィルタをバイパス
+                    # 一般メディアの記事は広義フィルタを通す（skip_filter=False）
                 )
             )
 

@@ -46,11 +46,27 @@ SEARCH_KEYWORD_GROUPS = [
     # 水性・環境対応塗料の普及
     '"waterborne coatings" OR "water-based paint" automotive OR "low VOC" refinish',
     # 中国の塗装業界動向（最大市場・競合動向）
-    'China coatings OR "Chinese paint" industry OR "China automotive refinish" OR "中国 塗料"',
+    'China coatings OR "Chinese paint" industry OR "China automotive refinish"',
     # インドの塗装業界動向（急成長市場）
     'India coatings OR "Indian paint" industry OR "India automotive" coatings market',
     # EU・ヨーロッパの規制・技術動向
     'Europe coatings OR "EU coatings" regulation OR "European paint" industry OR REACH coatings',
+    # 航空機塗装（機体塗装・防食・航空宇宙）
+    '"aerospace coating" OR "aircraft painting" OR "aircraft coating" OR "aviation finish"',
+    # 鉄鋼・重防食・橋梁・船舶塗装
+    '"steel coating" OR "anti-corrosion coating" OR "marine coating" OR "bridge painting" OR "heavy-duty coating"',
+    # 風力発電・再生可能エネルギー向け塗装
+    '"wind turbine coating" OR "wind blade coating" OR "offshore coating" OR "renewable energy coating"',
+    # 建設機械・農業機械・産業機械塗装
+    '"construction equipment" coating OR "heavy equipment" painting OR "agricultural machinery" coating',
+    # 塗装ロボット・自動化・デジタル
+    '"painting robot" OR "coating robot" OR "automated painting" OR "robotic coating" OR "Industry 4.0" coating',
+    # 鉄道車両・バス塗装
+    '"rail coating" OR "railway painting" OR "train coating" OR "transit vehicle" painting',
+    # 電気機器・制御盤・配電盤塗装
+    '"electrical enclosure" coating OR "control panel" painting OR "switchgear" coating',
+    # 塗料原材料（ナフサ・樹脂・顔料）の市場動向
+    'paint raw material OR "titanium dioxide" market OR "resin coating" supply OR naphtha "paint industry"',
 ]
 
 # 特定ニュースサイトを対象にした Google News RSS 検索（国内一般メディア）
@@ -103,11 +119,36 @@ DOMESTIC_RSS_KEYWORDS = [
     # EV・次世代技術
     "EV 塗装 車体",
     "塗装 DX 自動化",
-    # 大手塗料メーカー動向（競合・仕入れ先情報）
+    # 大手塗料メーカー動向
     "関西ペイント OR 日本ペイント OR 中国塗料",
     # 業界経営・人材
     "板金塗装 人材 経営",
     "塗装業 採用 課題",
+    # 航空機・宇宙向け塗装
+    "航空機 塗装 防食",
+    "航空宇宙 コーティング",
+    # 鉄鋼・橋梁・船舶・重防食
+    "重防食塗料 鉄鋼",
+    "橋梁 塗装 メンテナンス",
+    "船舶塗料 防食",
+    # 風力発電・再生可能エネルギー
+    "風力発電 ブレード 塗装",
+    "洋上風力 防食 コーティング",
+    # 建設機械・農業機械
+    "建設機械 塗装 工業",
+    "農業機械 塗料 防錆",
+    # 塗装ロボット・自動化
+    "塗装ロボット 自動化",
+    "ロボット塗装 工場",
+    # 鉄道・バス車両
+    "鉄道車両 塗装 メンテナンス",
+    "バス 塗装 更新",
+    # 制御盤・電気機器
+    "制御盤 塗装 防錆",
+    "配電盤 コーティング",
+    # 原材料・ナフサ・顔料
+    "ナフサ 塗料 原材料",
+    "酸化チタン 塗料 市場",
 ]
 
 # 1キーワードグループあたりの最大取得件数

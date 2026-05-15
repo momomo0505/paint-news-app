@@ -32,6 +32,8 @@ CATEGORIES = {
     "equipment": "塗装設備",
     "technology": "塗装技術",
     "automotive": "自動車塗装",
+    "aerospace": "航空機・宇宙",
+    "industrial": "工業塗装",
     "regulation": "環境規制",
     "market": "市場動向",
     "company": "企業ニュース",
@@ -42,19 +44,21 @@ CATEGORIES = {
 # プロンプト
 # ──────────────────────────────────────────────
 SYSTEM_PROMPT = """\
-あなたは塗装業界の専門翻訳者兼アナリストです。
+あなたは塗装・コーティング業界の専門翻訳者兼アナリストです。
 英語のニュース記事を日本語に翻訳・要約する際、以下のルールに従ってください：
 
 1. タイトルは自然な日本語に翻訳する（意訳可）
 2. 要約は3〜5行で、記事の核心を的確に伝える
-3. 塗装業界の専門用語は適切な日本語訳を使用する
+3. 塗装・コーティング業界の専門用語は適切な日本語訳を使用する
 4. カテゴリは以下から1つ選択する:
-   - equipment: 塗装設備（ブース、乾燥炉、スプレーガン等）
-   - technology: 塗装技術（新工法、研究開発等）
-   - automotive: 自動車塗装（自動車メーカー、車体塗装等）
-   - regulation: 環境規制（VOC、排出規制、安全基準等）
-   - market: 市場動向（業界統計、需要予測等）
-   - company: 企業ニュース（買収、新製品、人事等）
+   - equipment: 塗装設備（ブース、乾燥炉、スプレーガン、ロボット等）
+   - technology: 塗装技術（新工法、防食技術、研究開発等）
+   - automotive: 自動車塗装（補修塗装、ボディショップ、EV車体等）
+   - aerospace: 航空機・宇宙・防衛向け塗装・コーティング
+   - industrial: 工業塗装（鉄鋼・船舶・橋梁・風力・建機・鉄道・制御盤等）
+   - regulation: 環境規制（VOC、排出規制、安全基準、カーボンニュートラル等）
+   - market: 市場動向（業界統計、需要予測、原材料市場等）
+   - company: 企業ニュース（買収、新製品、人事、業績等）
    - other: その他
 
 回答は必ず以下のJSON形式で返してください:
@@ -210,64 +214,92 @@ def filter_relevant_articles(
     )
 
     if language == "ja":
-        prompt = f"""以下の日本語ニュース記事リストを確認し、塗装業界・塗料業界・自動車業界・建設業界・製造業に関連する記事を幅広く選んでください。
+        prompt = f"""以下の日本語ニュース記事リストを確認し、塗装・塗料・コーティング業界またはその関連産業に関係する記事を選んでください。
 
-【必ず除外する記事（これらのみ除外）】
-- スポーツ（野球・サッカー・競馬・ゴルフなど）の試合結果・選手情報
-- 芸能・エンタメ（音楽・映画・ドラマ・お笑い）
-- グルメ・レシピ・旅行・観光
-- ネイルアート・化粧品・美容・ファッション
-- 天気・気象情報
-- 事件・事故・犯罪（塗装業界と全く無関係なもの）
+【除外する記事（以下のみ除外）】
+- スポーツの試合結果・選手移籍情報（野球・サッカー・競馬・ゴルフ等）
+- 芸能・エンタメ・音楽・映画・ドラマ（製造業との接点がないもの）
+- グルメ・レシピ・旅行・観光・天気
+- ネイルアート・美容・ファッション（工業用コーティングを除く）
+- 政治・選挙・外交（製造業・産業への影響がないもの）
 
-【必ず含める記事（少しでも関連があれば含める）】
-- 塗装ブース・スプレーブース・塗装設備の新製品・技術
-- 板金塗装・自動車補修塗装・自動車整備業界のニュース
-- 工業用塗料・粉体塗装・液体塗装・水性塗料
-- 建築塗装・防錆・防食・コーティング全般
+【含める記事（少しでも関連があれば積極的に含める）】
+塗装設備・技術:
+- 塗装ブース・スプレーブース・乾燥炉・塗装設備の新製品・技術
+- 塗装ロボット・自動塗装・工場自動化・DX
+- 粉体塗装・液体塗装・電着塗装・UV硬化塗装
+
+補修塗装・自動車:
+- 板金塗装・自動車補修塗装・自動車整備業界
+- EV普及・次世代車体・衝突修理業界への影響
+
+工業・産業向け塗装:
+- 航空機・宇宙機体の塗装・防食コーティング
+- 鉄鋼・橋梁・パイプライン・プラント向け重防食塗料
+- 船舶・海洋構造物の防食塗料
+- 風力発電ブレード・洋上設備のコーティング・防食
+- 建設機械・農業機械・重機の塗装
+- 鉄道車両・バス・公共交通車両の塗装・更新
+- 制御盤・配電盤・電気機器の防錆・塗装
+
+塗料市場・原材料:
 - 塗料メーカー（関西ペイント・日本ペイント・中国塗料・アクサルタ等）の事業・製品・業績
-- 原材料・ナフサ・石油化学・溶剤・顔料の価格動向（塗料原材料として重要）
-- 自動車生産・EV普及・車体修理・衝突修理業界のトレンド
-- 建設市場・建材コスト・住宅着工・リフォーム市場の動向（建築塗装需要に影響）
-- 環境規制・VOC・カーボンニュートラル・廃溶剤処理
-- 中東情勢・原油価格（塗料原材料コストに影響）
-- 労働力不足・人材採用・賃金動向（塗装業界の経営課題として重要）
-- デジタル化・DX・AI活用（製造・塗装業界のもの）
-- 中国・インド・EU等の塗装・自動車・製造業の動向
+- ナフサ・酸化チタン・樹脂・顔料・溶剤等の塗料原材料動向
+- 建設市場・建材コスト・住宅着工（建築塗装需要に影響）
+- 原油・石油化学・中東情勢（塗料原材料コストに影響）
+- 環境規制・VOC・カーボンニュートラル・廃液処理
+- 労働力不足・人材採用・賃金動向（塗装業界経営課題）
+- 中国・インド・EU・米国の塗装・製造業動向
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
 
-塗装業界・関連業界に関連する記事番号をカンマ区切りで返してください。
+塗装・塗料・関連産業に関係する記事番号をカンマ区切りで返してください。
 迷う場合は含める方向で判断してください。
 例: 1,3,5
 番号のみ返してください。"""
     else:
-        prompt = f"""Review the following article list and select ONLY articles clearly related to: automotive refinish coatings, industrial coatings, paint booths/finishing equipment, paint manufacturing industry, body shop business, or coatings market trends (including China, India, EU).
+        prompt = f"""Review the following article list and select articles related to coatings, painting, or finishing technology across ANY industry sector.
 
-【EXCLUDE these types of articles】
-- Stock price, stock market, investment, securities, shareholder information
-- Home/residential painting, DIY, interior decoration
-- Nail polish, nail art, cosmetics, skincare
-- Art, fine art, watercolor, canvas painting
-- Face paint, body paint
-- PC/software applications (e.g. Microsoft Paint)
-- General company financial reports unrelated to coatings business operations
+【EXCLUDE only these types (strict exclusions)】
+- Sports news (game results, player transfers)
+- Entertainment, celebrity gossip, music, film (unless directly about coating technology)
+- Food, recipes, travel, tourism
+- Nail polish / nail art (cosmetic only, not industrial)
+- PC software called "Paint" (e.g. Microsoft Paint)
+- Pure political news with no manufacturing/industry angle
 
-【INCLUDE these types of articles】
-- Spray booth / paint booth technology and products
-- Automotive refinish / collision repair industry news
-- Industrial powder coating, liquid coating
-- Major brands: Axalta / PPG / BASF / Sikkens / Kansai Paint / Nippon Paint
-- VOC regulations, environmental compliance in coatings
-- Coatings market analysis, forecasts (global, China, India, EU, etc.)
-- EV impact on body shops and automotive coatings
-- Body shop management, collision repair business trends
+【INCLUDE broadly — any article touching these topics】
+Core coatings industry:
+- Paint booths, spray booths, finishing equipment, drying ovens
+- Automotive refinish / collision repair / body shop
+- Industrial liquid coating, powder coating, electrodeposition
+- Major coating brands: Axalta, PPG, BASF, Sikkens, Glasurit, Standox, Kansai Paint, Nippon Paint, AkzoNobel, Sherwin-Williams
+
+Coatings by industry sector:
+- Aerospace / aircraft painting and protective coatings
+- Steel, metal, bridge, pipeline anti-corrosion coatings
+- Marine / shipbuilding coatings
+- Wind turbine / offshore / renewable energy coatings
+- Construction machinery, agricultural machinery, heavy equipment coatings
+- Railway / rail vehicle / transit coatings
+- Electrical enclosures, control panels, switchgear coatings
+
+Technology & innovation:
+- Painting robots, automated coating systems, Industry 4.0
+- Waterborne, UV-cure, high-solid, powder coatings technology
+- VOC regulations, environmental compliance, sustainability in coatings
+- Coating adhesion, corrosion protection, surface treatment
+
+Market & business:
+- Coatings market analysis, forecasts, M&A (global, China, India, EU, US)
+- Raw materials: naphtha, titanium dioxide, resins, pigments for paints
+- EV transition impact on automotive coatings and body shops
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
 
-Return ONLY the relevant article numbers as comma-separated values.
+Return the relevant article numbers as comma-separated values. When in doubt, include the article.
 Example: 1,3,5,7
 Return numbers only, no other text."""
 
