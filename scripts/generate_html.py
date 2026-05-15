@@ -19,7 +19,7 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
 from scripts.collect_news import Article
-from scripts.config import DOCS_DIR, TEMPLATES_DIR
+from scripts.config import DOCS_DIR, SEARCH_DAYS_BACK, TEMPLATES_DIR
 from scripts.translate_summarize import CATEGORIES
 
 logger = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ def generate_weekly_report(
     template = env.get_template("weekly_report.html")
 
     period_end = now_jst
-    period_start = period_end - timedelta(days=7)
+    period_start = period_end - timedelta(days=SEARCH_DAYS_BACK)
 
     # 競合ニュースを会社別にグループ化
     competitor_by_company: dict[str, list[dict]] = {}

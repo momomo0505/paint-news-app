@@ -83,8 +83,8 @@ MAX_ARTICLES = 25           # 海外ニュース上限（拡充に伴い増加�
 MAX_DOMESTIC_ARTICLES = 20  # 国内ニュース上限（拡充に伴い増加）
 MAX_COMPETITOR_ITEMS = 30
 
-# 検索対象期間（日数 ─ 過去7日間）
-SEARCH_DAYS_BACK = 7
+# 検索対象期間（日数 ─ 過去30日間）
+SEARCH_DAYS_BACK = 30
 
 # 除外するドメイン（低品質・無関係なソースを除外）
 EXCLUDED_DOMAINS = [
