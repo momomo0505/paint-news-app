@@ -180,26 +180,15 @@ def _fetch_articles_for_query(
 
     logger.info("NewsAPI 検索: q=%s, from=%s, to=%s", query, from_date, to_date)
 
-    max_retries = 2
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(NEWSAPI_BASE_URL, params=params, timeout=30)
-            if response.status_code == 429:
-                wait = 30 * (attempt + 1)
-                logger.warning("NewsAPI レート制限 (429)。%d秒待機してリトライ (%d/%d)...", wait, attempt + 1, max_retries)
-                time.sleep(wait)
-                continue
-            response.raise_for_status()
-            break
-        except requests.RequestException as exc:
-            if attempt < max_retries - 1:
-                logger.warning("NewsAPI リクエストエラー。リトライ (%d/%d): %s", attempt + 1, max_retries, exc)
-                time.sleep(5)
-                continue
-            logger.error("NewsAPI リクエストエラー: %s", exc)
-            return []
-    else:
-        logger.error("NewsAPI リクエスト失敗（全リトライ消費）: q=%s", query[:50])
+    try:
+        response = requests.get(NEWSAPI_BASE_URL, params=params, timeout=30)
+        if response.status_code == 429:
+            # フリープランの日次クオータ枯渇 — 待機しても回復しないためNoneを返して早期終了を促す
+            logger.warning("NewsAPI 日次クオータ超過 (429)。このクエリをスキップ: q=%s", query[:50])
+            return None  # type: ignore[return-value]
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        logger.error("NewsAPI リクエストエラー: %s", exc)
         return []
 
     data = response.json()
@@ -256,9 +245,13 @@ def collect_news() -> list[Article]:
 
     for i, query in enumerate(SEARCH_KEYWORD_GROUPS):
         if i > 0:
-            time.sleep(1.5)  # NewsAPI レート制限対策
-        articles = _fetch_articles_for_query(query, from_date, to_date)
-        all_articles.extend(articles)
+            time.sleep(1.0)
+        result = _fetch_articles_for_query(query, from_date, to_date)
+        if result is None:
+            # 429（日次クオータ枯渇）— 残りは全部スキップ
+            logger.warning("NewsAPI クオータ枯渇を検出。残りキーワードグループをスキップします。")
+            break
+        all_articles.extend(result)
 
     logger.info("全キーワードグループ合計: %d 件", len(all_articles))
 
