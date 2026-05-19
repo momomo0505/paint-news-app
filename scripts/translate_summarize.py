@@ -216,12 +216,16 @@ def filter_relevant_articles(
     if language == "ja":
         prompt = f"""以下の日本語ニュース記事リストを確認し、塗装・塗料・コーティング業界またはその関連産業に関係する記事を選んでください。
 
-【除外する記事（以下のみ除外）】
+【必ず除外する記事】
 - スポーツの試合結果・選手移籍情報（野球・サッカー・競馬・ゴルフ等）
 - 芸能・エンタメ・音楽・映画・ドラマ（製造業との接点がないもの）
 - グルメ・レシピ・旅行・観光・天気
 - ネイルアート・美容・ファッション（工業用コーティングを除く）
 - 政治・選挙・外交（製造業・産業への影響がないもの）
+- 株価・株式・証券・IRニュース（業界動向でないもの）
+- ★建築塗装・外壁塗装・屋根塗装・室内塗装・住宅リフォーム塗装（戸建て・マンション・ビルの外壁・屋根・内装を対象としたもの）
+- ★家庭向けDIY塗装・ペンキ塗り（消費者向け）
+- ★塗装業者の集客・見積もり・業者比較サービス（外壁塗装業者向け）
 
 【含める記事（少しでも関連があれば積極的に含める）】
 塗装設備・技術:
@@ -230,58 +234,66 @@ def filter_relevant_articles(
 - 粉体塗装・液体塗装・電着塗装・UV硬化塗装
 
 補修塗装・自動車:
-- 板金塗装・自動車補修塗装・自動車整備業界
+- 板金塗装・自動車補修塗装・自動車整備業界（※これは含める）
 - EV普及・次世代車体・衝突修理業界への影響
 
-工業・産業向け塗装:
+工業・産業向け塗装（※これらは含める）:
 - 航空機・宇宙機体の塗装・防食コーティング
 - 鉄鋼・橋梁・パイプライン・プラント向け重防食塗料
 - 船舶・海洋構造物の防食塗料
 - 風力発電ブレード・洋上設備のコーティング・防食
-- 建設機械・農業機械・重機の塗装
+- 建設機械・農業機械・重機の塗装（※機械の塗装であり建築塗装ではない）
 - 鉄道車両・バス・公共交通車両の塗装・更新
 - 制御盤・配電盤・電気機器の防錆・塗装
 
 塗料市場・原材料:
 - 塗料メーカー（関西ペイント・日本ペイント・中国塗料・アクサルタ等）の事業・製品・業績
 - ナフサ・酸化チタン・樹脂・顔料・溶剤等の塗料原材料動向
-- 建設市場・建材コスト・住宅着工（建築塗装需要に影響）
 - 原油・石油化学・中東情勢（塗料原材料コストに影響）
 - 環境規制・VOC・カーボンニュートラル・廃液処理
-- 労働力不足・人材採用・賃金動向（塗装業界経営課題）
+- 労働力不足・人材採用・賃金動向（製造・工業塗装業界の経営課題）
 - 中国・インド・EU・米国の塗装・製造業動向
+
+【判断が難しい場合の基準】
+「外壁塗装」「屋根塗装」「住宅塗装」「塗り替え」が主テーマ → 除外
+「板金塗装」「工業塗装」「防食塗装」「塗装設備」が主テーマ → 含める
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
 
 塗装・塗料・関連産業に関係する記事番号をカンマ区切りで返してください。
-迷う場合は含める方向で判断してください。
 例: 1,3,5
 番号のみ返してください。"""
     else:
-        prompt = f"""Review the following article list and select articles related to coatings, painting, or finishing technology across ANY industry sector.
+        prompt = f"""Review the following article list and select articles related to coatings, painting, or finishing technology across industrial/manufacturing sectors.
 
-【EXCLUDE only these types (strict exclusions)】
-- Sports news (game results, player transfers)
-- Entertainment, celebrity gossip, music, film (unless directly about coating technology)
+【EXCLUDE these types strictly】
+- Sports news (game results, player transfers, scores)
+- Entertainment, celebrity gossip, music, film (no manufacturing angle)
 - Food, recipes, travel, tourism
-- Nail polish / nail art (cosmetic only, not industrial)
+- Nail polish / nail art (cosmetic only)
 - PC software called "Paint" (e.g. Microsoft Paint)
 - Pure political news with no manufacturing/industry angle
+- Stock price / investment / shareholder news
+- ★ Architectural / building exterior painting, house painting, residential repainting
+  (Articles about painting homes, buildings, facades, roofs for homeowners or contractors)
+- ★ Consumer DIY painting / home improvement painting
+- ★ House painter services, residential painting contractors, painting estimates for homeowners
 
 【INCLUDE broadly — any article touching these topics】
 Core coatings industry:
 - Paint booths, spray booths, finishing equipment, drying ovens
-- Automotive refinish / collision repair / body shop
+- Automotive refinish / collision repair / body shop (INCLUDE - not architectural)
 - Industrial liquid coating, powder coating, electrodeposition
 - Major coating brands: Axalta, PPG, BASF, Sikkens, Glasurit, Standox, Kansai Paint, Nippon Paint, AkzoNobel, Sherwin-Williams
 
-Coatings by industry sector:
+Coatings by industry sector (all INCLUDE):
 - Aerospace / aircraft painting and protective coatings
 - Steel, metal, bridge, pipeline anti-corrosion coatings
 - Marine / shipbuilding coatings
 - Wind turbine / offshore / renewable energy coatings
 - Construction machinery, agricultural machinery, heavy equipment coatings
+  (NOTE: machinery coatings are industrial, NOT architectural — INCLUDE)
 - Railway / rail vehicle / transit coatings
 - Electrical enclosures, control panels, switchgear coatings
 
