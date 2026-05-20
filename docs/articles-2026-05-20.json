@@ -7,8 +7,8 @@
     "published_at": "2026-05-18T23:00:37Z",
     "image_url": "https://hackaday.com/wp-content/uploads/2026/05/electroplate_3d_print_hen3drik_youtube.jpg",
     "skip_filter": false,
-    "title_ja": "大きな槽を使わずに3Dプリント品を電気めっきする手法",
-    "summary_ja": "3Dプリント品の電気めっきは基本的なPLA部品でも優れたコーティングを得る有効な手法だが、従来は導電性コーティング後に大きな電解液槽に部品全体を浸漬する必要があった。この記事では、大型の電解液槽を必要としない新しいアプローチについて紹介している。この手法により、より小規模な設備でも効果的な電気めっきが可能になると考えられる。",
+    "title_ja": "大型槽不要の3Dプリント部品電気めっき技術",
+    "summary_ja": "従来の3Dプリント部品の電気めっきでは、導電性コーティング後に大型の電解液槽への浸漬が必要でした。この新しい手法では、大型槽を使わずに基本的なPLA部品でも高品質なめっき皮膜を形成できる技術が開発されています。小規模な設備で効率的な表面処理が可能となり、3Dプリント部品の表面仕上げ工程の簡素化が期待されます。",
     "category": "technology"
   },
   {
@@ -19,32 +19,20 @@
     "published_at": "2026-05-15T15:42:00Z",
     "image_url": null,
     "skip_filter": false,
-    "title_ja": "持続可能性と建築革新への転換により、世界のコーティング・ストーンペイント市場が持続的成長",
-    "summary_ja": "持続可能なコーティングと高性能ストーンペイントソリューションの急速な成長が、世界の建設市場を再構築している。この成長は規制圧力、都市化、そして進化する建築ニーズによって推進されている。環境配慮型塗料への需要増加と建築分野でのイノベーションが市場拡大の主要因となっており、持続可能性重視の市場トレンドを反映している。",
+    "title_ja": "持続可能性と建築革新への転換により、世界のコーティングおよびストーンペイント市場が持続的成長へ",
+    "summary_ja": "持続可能なコーティングと高性能ストーンペイント溶液の急速な成長が、世界の建設市場を再形成している。この成長は、規制圧力、都市化、そして進化する建築需要によって牽引されている。環境規制の強化と都市開発の拡大に伴い、建設業界では従来の塗装材料から環境に優しい高機能製品への移行が加速している。特にストーンペイント分野では、耐久性と美観性を両立した新世代製品の需要が急増している。",
     "category": "market"
   },
   {
-    "title": "In HelloNation, Collision Repair Expert Costa Tsiobanos Explains Iowa Drivers' Right to Choose an Independent Body Shop",
-    "description": "A New HelloNation Article Clarifies What Vehicle Owners Should Know About Insurance Preferred Shop Networks SIOUX CITY, Iowa, May 14, 2026 /PRNewswire/ -- After an accident, are Iowa drivers required to use the repair shop recommended by their insurance compa…",
-    "url": "https://www.prnewswire.com/news-releases/in-hellonation-collision-repair-expert-costa-tsiobanos-explains-iowa-drivers-right-to-choose-an-independent-body-shop-302772699.html",
-    "source": "PRNewswire",
-    "published_at": "2026-05-14T17:15:00Z",
-    "image_url": "https://i.ytimg.com/vi/yS_5-N6Jy7Y/hqdefault.jpg",
+    "title": "Honda’s hybrid future starts with new Accord and RDX prototypes",
+    "description": "Honda revealed prototypes of two new hybrid models, an Accord sedan and the Acura RDX SUV, during its annual business briefing this week, built on a platform that it says will begin launching next year. The RDX was announced earlier this year as Honda's first…",
+    "url": "https://www.theverge.com/transportation/931044/honda-hybrid-prototypes-accord-acura-rdx",
+    "source": "The Verge",
+    "published_at": "2026-05-14T22:46:55Z",
+    "image_url": "https://platform.theverge.com/wp-content/uploads/sites/2/2026/05/Acura-Hybrid-SUV-Prototype.jpg?quality=90&strip=all&crop=0%2C10.759144863285%2C100%2C78.48171027343&w=1200",
     "skip_filter": false,
-    "title_ja": "HelloNationにて衝突修理専門家コスタ・ツィオバノス氏がアイオワ州ドライバーの独立系ボディショップ選択権について解説",
-    "summary_ja": "アイオワ州のドライバーが事故後の修理において、保険会社推奨のショップではなく独立系ボディショップを選択する権利について専門家が解説。HelloNationの新記事で、車両所有者が保険会社の推奨ショップネットワークについて知っておくべき情報を明確化。ドライバーには修理店を自由に選択する権利があることを強調している。",
-    "category": "automotive"
-  },
-  {
-    "title": "Hybrid Vehicle Collision Claims Hit Record High in First Quarter as BEV Claims Level Off",
-    "description": "SAN DIEGO, May 14, 2026 /PRNewswire/ -- Mitchell, a leader in the development of innovative auto physical damage technology solutions, today released its Q1 2026 Plugged-In: EV Collision Insights report. The company's latest publication reveals a shift in ele…",
-    "url": "https://www.prnewswire.com/news-releases/hybrid-vehicle-collision-claims-hit-record-high-in-first-quarter-as-bev-claims-level-off-302771931.html",
-    "source": "PRNewswire",
-    "published_at": "2026-05-14T13:02:00Z",
-    "image_url": "https://mmx.prnewswire.com/media/MS976953/Mitchell-Logo.jpg?id=OA2637897&p=facebook",
-    "skip_filter": false,
-    "title_ja": "第1四半期のハイブリッド車事故保険金請求が過去最高を記録、BEV請求は横ばい",
-    "summary_ja": "自動車物理損害技術ソリューションのリーダーであるMitchell社が2026年第1四半期のEV事故洞察レポートを発表。ハイブリッド車の事故保険金請求が記録的な高水準に達した一方で、バッテリー電気自動車（BEV）の請求は横ばいとなり、電動車両市場における事故パターンの変化が明らかになった。この傾向は自動車補修業界、特に電動車両の修理技術や塗装工程に影響を与える可能性がある。",
+    "title_ja": "ホンダ、新型アコードとRDXプロトタイプでハイブリッド戦略を本格始動",
+    "summary_ja": "ホンダは年次事業説明会で、新型ハイブリッドモデルのアコードセダンとアキュラRDX SUVのプロトタイプを発表した。これらは来年から展開予定の新プラットフォームをベースとしており、RDXはホンダ初の完全電動化SUVとして今年初めに発表されていた。同社のハイブリッド技術の将来戦略を示す重要な車両となる。",
     "category": "automotive"
   }
 ]
