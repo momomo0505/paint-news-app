@@ -67,6 +67,18 @@ SEARCH_KEYWORD_GROUPS = [
     '"electrical enclosure" coating OR "control panel" painting OR "switchgear" coating',
     # 塗料原材料（ナフサ・樹脂・顔料）の市場動向
     'paint raw material OR "titanium dioxide" market OR "resin coating" supply OR naphtha "paint industry"',
+    # 自動車メーカーの生産・販売動向（塗装需要の最大顧客）
+    'Toyota OR Honda OR Nissan OR Volkswagen OR "General Motors" OR Stellantis production output OR "vehicle production" 2026',
+    # 航空機メーカーの受注・製造動向（機体塗装需要）
+    'Boeing OR Airbus aircraft orders OR production OR "aircraft manufacturing" 2026',
+    # 建設機械メーカーの市場動向（建機塗装需要）
+    'Komatsu OR Caterpillar OR "Hitachi Construction" OR "construction equipment" market OR demand 2026',
+    # 鉄道車両メーカーの受注・更新動向
+    'Alstom OR Siemens OR Bombardier OR CRRC "rolling stock" OR "railway vehicle" production OR order 2026',
+    # 風力発電の設備投資・導入動向（ブレード・タワー塗装需要）
+    '"wind power" OR "wind energy" installation OR "offshore wind" capacity 2026',
+    # 造船・船舶業界の景気動向（船体塗装需要）
+    'shipbuilding orders OR "ship construction" market OR "dry dock" 2026',
 ]
 
 # 特定ニュースサイトを対象にした Google News RSS 検索（国内一般メディア）
@@ -149,6 +161,32 @@ DOMESTIC_RSS_KEYWORDS = [
     # 原材料・ナフサ・顔料
     "ナフサ 塗料 原材料",
     "酸化チタン 塗料 市場",
+    # ── 需要先メーカーの景気動向（塗装需要に直結） ──────────
+    # 自動車メーカー（国内外）の生産・販売動向
+    "自動車メーカー 生産台数 動向",
+    "トヨタ 生産 販売 業績",
+    "ホンダ 日産 生産 動向",
+    "自動車 販売台数 国内",
+    "自動車産業 設備投資",
+    # 航空機メーカー・MRO（機体修理・塗装需要）
+    "航空機 受注 製造 国内",
+    "三菱航空機 川崎重工 航空",
+    "MRO 整備 航空機 市場",
+    # 建設機械メーカー（コマツ・日立建機等）
+    "建設機械 出荷 受注 動向",
+    "コマツ 日立建機 業績 市場",
+    "建機 需要 景気 市場",
+    # 鉄道車両メーカー（日本車輌・川崎車両等）
+    "鉄道車両 受注 製造 市場",
+    "日本車輌 川崎車両 鉄道",
+    "鉄道 車両更新 新造 動向",
+    # 風力発電・再生可能エネルギー設備投資
+    "洋上風力 国内 設備投資 導入",
+    "風力発電 新設 市場 動向",
+    "再生可能エネルギー 設備 市場",
+    # 造船・船舶業界（船体塗装需要）
+    "造船 受注 市場 動向",
+    "船舶 建造 国内 景気",
 ]
 
 # 1キーワードグループあたりの最大取得件数

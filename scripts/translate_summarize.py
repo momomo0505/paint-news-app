@@ -254,9 +254,18 @@ def filter_relevant_articles(
 - 労働力不足・人材採用・賃金動向（製造・工業塗装業界の経営課題）
 - 中国・インド・EU・米国の塗装・製造業動向
 
+需要先メーカーの景気動向（塗装需要に直結するため含める）:
+- 自動車メーカー（トヨタ・ホンダ・日産・VW・GM等）の生産台数・販売動向・設備投資
+- 航空機メーカー（ボーイング・エアバス・三菱・川崎重工等）の受注・製造動向・MRO市場
+- 建設機械メーカー（コマツ・キャタピラー・日立建機等）の出荷・受注・市場動向
+- 鉄道車両メーカー（日本車輌・川崎車両・アルストム・シーメンス等）の受注・車両更新動向
+- 風力発電・洋上風力の設備投資・新設・導入動向（国内外問わず）
+- 造船・船舶業界の受注・建造動向（国内外問わず）
+
 【判断が難しい場合の基準】
 「外壁塗装」「屋根塗装」「住宅塗装」「塗り替え」が主テーマ → 除外
 「板金塗装」「工業塗装」「防食塗装」「塗装設備」が主テーマ → 含める
+「自動車メーカー・航空・建機・鉄道・風力の生産/受注/景気」が主テーマ → 含める
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
@@ -307,6 +316,16 @@ Market & business:
 - Coatings market analysis, forecasts, M&A (global, China, India, EU, US)
 - Raw materials: naphtha, titanium dioxide, resins, pigments for paints
 - EV transition impact on automotive coatings and body shops
+
+Customer industry trends (INCLUDE — directly affects coating demand):
+- Automotive manufacturer production volumes, sales trends, capital investment
+  (Toyota, Honda, Nissan, Volkswagen, GM, Stellantis, Ford, Hyundai, etc.)
+- Aircraft manufacturer orders and production trends (Boeing, Airbus, Mitsubishi, Kawasaki)
+- MRO / aircraft maintenance, repair, overhaul market
+- Construction equipment manufacturer orders/shipments (Komatsu, Caterpillar, Hitachi Construction, CNH)
+- Railway vehicle manufacturer orders and fleet renewal (Alstom, Siemens, Bombardier, CRRC, Kawasaki, Nippon Sharyo)
+- Wind power / offshore wind installation and capacity investment trends (global)
+- Shipbuilding industry orders and vessel construction trends (global)
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
