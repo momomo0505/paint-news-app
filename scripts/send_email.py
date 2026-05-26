@@ -181,7 +181,12 @@ def _build_email_html(
         '      <p style="margin:0 0 4px;font-size:0.85rem;color:#6b7280;">塗装業界ニュースレポート</p>\n'
         '      <h1 style="margin:0 0 6px;font-size:1.4rem;font-weight:700;color:#1a1a2e;">'
         "🎨 " + issue_date + "号</h1>\n"
-        '      <p style="margin:0 0 24px;font-size:0.85rem;color:#6b7280;">' + summary_text + "</p>\n"
+        '      <p style="margin:0 0 16px;font-size:0.85rem;color:#6b7280;">' + summary_text + "</p>\n"
+        '      <div style="text-align:center;margin-bottom:28px;">'
+        '<a href="' + report_url + '" '
+        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
+        'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
+        "フルレポートを読む →</a></div>\n"
         + competitor_html
         + domestic_html
         + overseas_html
