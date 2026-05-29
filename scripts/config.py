@@ -316,8 +316,13 @@ CLAUDE_MAX_TOKENS = 1024
 # メール送信設定 (Gmail SMTP)
 # ──────────────────────────────────────────────
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "")
-NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
+# 送信先メールアドレス（カンマ区切りで複数指定可）
+# 例: "a@example.com,b@example.com,c@example.com"
+_notify_raw = os.environ.get("NOTIFY_EMAIL", "")
+NOTIFY_EMAILS: list[str] = [e.strip() for e in _notify_raw.split(",") if e.strip()]
+NOTIFY_EMAIL: str = NOTIFY_EMAILS[0] if NOTIFY_EMAILS else ""
 
 # ──────────────────────────────────────────────
 # GitHub Pages 設定

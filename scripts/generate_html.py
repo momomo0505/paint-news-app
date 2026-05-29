@@ -19,7 +19,7 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
 from scripts.collect_news import Article
-from scripts.config import DOCS_DIR, SEARCH_DAYS_BACK, TEMPLATES_DIR
+from scripts.config import DOCS_DIR, PAGES_BASE_URL, SEARCH_DAYS_BACK, TEMPLATES_DIR
 from scripts.translate_summarize import CATEGORIES
 
 logger = logging.getLogger(__name__)
@@ -123,6 +123,7 @@ def generate_weekly_report(
         "total_articles": len(articles),
         "total_domestic": len(domestic_articles or []),
         "total_competitor": len(competitor_items or []),
+        "pages_base_url": PAGES_BASE_URL.rstrip("/"),
     }
 
     html_content = template.render(**context)

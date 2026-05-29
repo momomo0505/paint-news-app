@@ -20,7 +20,7 @@ from scripts.collect_news import Article
 from scripts.config import (
     FROM_EMAIL,
     GMAIL_APP_PASSWORD,
-    NOTIFY_EMAIL,
+    NOTIFY_EMAILS,
     PAGES_BASE_URL,
 )
 from scripts.translate_summarize import CATEGORIES
@@ -230,7 +230,7 @@ def send_notification(
     """
     if not FROM_EMAIL:
         raise ValueError("環境変数 FROM_EMAIL を設定してください。")
-    if not NOTIFY_EMAIL:
+    if not NOTIFY_EMAILS:
         raise ValueError("環境変数 NOTIFY_EMAIL を設定してください。")
     if not GMAIL_APP_PASSWORD:
         raise ValueError("環境変数 GMAIL_APP_PASSWORD を設定してください。")
@@ -238,6 +238,7 @@ def send_notification(
     now_jst = datetime.now(JST)
     issue_date = now_jst.strftime("%Y年%m月%d日")
     report_url = f"{PAGES_BASE_URL.rstrip('/')}/{report_filename}"
+    recipients = NOTIFY_EMAILS
 
     total_count = len(articles) + len(domestic_articles or []) + len(competitor_items or [])
 
@@ -268,7 +269,7 @@ def send_notification(
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"塗装業界ニュース <{FROM_EMAIL}>"
-    msg["To"] = NOTIFY_EMAIL
+    msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     try:
@@ -277,9 +278,9 @@ def send_notification(
             smtp.starttls()
             smtp.ehlo()
             smtp.login(FROM_EMAIL, GMAIL_APP_PASSWORD)
-            smtp.sendmail(FROM_EMAIL, NOTIFY_EMAIL, msg.as_string())
+            smtp.sendmail(FROM_EMAIL, recipients, msg.as_string())
 
-        logger.info("メール送信成功: to=%s", NOTIFY_EMAIL)
+        logger.info("メール送信成功: to=%s", ", ".join(recipients))
         return True
 
     except smtplib.SMTPAuthenticationError as exc:
