@@ -6,11 +6,13 @@ HTML生成モジュール — 翻訳済み記事をHTMLファイルに出力す�
 - Jinja2テンプレートを使用したHTML生成
 - カテゴリ別の統計情報
 - 日付フォーマットの日本語変換
-- 過去のレポートへのインデックスページ生成
+- 過去のレポートへのインデックスページ生成（キーワード検索付き）
+- 1年以上経過したレポートの自動削除
 """
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -26,6 +28,12 @@ logger = logging.getLogger(__name__)
 
 # 日本時間 (JST = UTC+9)
 JST = timezone(timedelta(hours=9))
+
+# 検索インデックスファイルのパス
+SEARCH_INDEX_PATH = DOCS_DIR / "search-index.json"
+
+# レポート保持期間（日数）
+REPORT_RETENTION_DAYS = 365
 
 
 # ──────────────────────────────────────────────
@@ -137,9 +145,106 @@ def generate_weekly_report(
     output_path.write_text(html_content, encoding="utf-8")
     logger.info("HTMLレポート生成: %s", output_path)
 
+    _cleanup_old_reports()
+    _update_search_index(
+        now_jst,
+        output_filename,
+        competitor_items or [],
+        domestic_articles or [],
+        articles,
+        self_mention_articles or [],
+    )
     _update_index_page(now_jst)
 
     return output_path
+
+
+# ──────────────────────────────────────────────
+# 古いレポートの自動削除
+# ──────────────────────────────────────────────
+def _cleanup_old_reports(max_days: int = REPORT_RETENTION_DAYS) -> None:
+    """指定日数より古いレポートHTMLファイルを削除する（デフォルト1年）。"""
+    cutoff = datetime.now(JST) - timedelta(days=max_days)
+    deleted = 0
+    for f in list(DOCS_DIR.glob("weekly-news-*.html")):
+        date_str = f.stem.replace("weekly-news-", "")
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=JST)
+            if dt < cutoff:
+                f.unlink()
+                logger.info("古いレポートを削除: %s", f.name)
+                deleted += 1
+        except ValueError:
+            pass
+    if deleted:
+        logger.info("古いレポート %d 件を削除しました", deleted)
+
+
+# ──────────────────────────────────────────────
+# 検索インデックス更新
+# ──────────────────────────────────────────────
+def _update_search_index(
+    now: datetime,
+    filename: str,
+    competitor_items: list[dict],
+    domestic_articles: list[Article],
+    overseas_articles: list[Article],
+    self_mention_articles: list[Article],
+) -> None:
+    """docs/search-index.json に今週分のエントリを追加/更新する。"""
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # 既存インデックスを読み込む
+    if SEARCH_INDEX_PATH.exists():
+        try:
+            existing: list[dict] = json.loads(SEARCH_INDEX_PATH.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            existing = []
+    else:
+        existing = []
+
+    date_str = now.strftime("%Y-%m-%d")
+    label = now.strftime("%Y年%m月%d日号")
+
+    # 今週分の記事タイトルを収集
+    articles_list: list[dict] = []
+    for item in competitor_items:
+        title = item.get("title", "")
+        if title:
+            articles_list.append({"title": title, "section": "競合"})
+    for a in domestic_articles:
+        title = a.title_ja or a.title
+        if title:
+            articles_list.append({"title": title, "section": "国内"})
+    for a in overseas_articles:
+        title = a.title_ja or a.title
+        if title:
+            articles_list.append({"title": title, "section": "海外"})
+    for a in self_mention_articles:
+        title = a.title_ja or a.title
+        if title:
+            articles_list.append({"title": title, "section": "自社"})
+
+    new_entry = {
+        "date": date_str,
+        "label": label,
+        "filename": filename,
+        "articles": articles_list,
+    }
+
+    # 同一日付のエントリがあれば置換、なければ先頭に追加
+    updated = [e for e in existing if e.get("date") != date_str]
+    updated.insert(0, new_entry)
+
+    # 1年以上前のエントリを削除
+    cutoff_str = (datetime.now(JST) - timedelta(days=REPORT_RETENTION_DAYS)).strftime("%Y-%m-%d")
+    updated = [e for e in updated if e.get("date", "") >= cutoff_str]
+
+    SEARCH_INDEX_PATH.write_text(
+        json.dumps(updated, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    logger.info("検索インデックス更新: %d 件のレポート", len(updated))
 
 
 # ──────────────────────────────────────────────
@@ -162,7 +267,7 @@ INDEX_TEMPLATE = """\
             line-height: 1.7;
         }
         .container {
-            max-width: 600px;
+            max-width: 660px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -174,13 +279,51 @@ INDEX_TEMPLATE = """\
         .subtitle {
             color: #6b7280;
             font-size: 0.9rem;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
+        /* 検索エリア */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+        .search-wrap input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .search-wrap .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        #search-status {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+            min-height: 20px;
+        }
+        /* レポート一覧 */
         .issue-list {
             list-style: none;
         }
         .issue-list li {
             margin-bottom: 8px;
+        }
+        .issue-list li.hidden {
+            display: none;
         }
         .issue-list a {
             display: block;
@@ -202,6 +345,37 @@ INDEX_TEMPLATE = """\
             font-size: 0.85rem;
             font-weight: 400;
         }
+        .match-count {
+            display: inline-block;
+            margin-left: 8px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 12px;
+            padding: 1px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .match-titles {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .match-titles span {
+            display: inline-block;
+            margin-right: 4px;
+            margin-bottom: 2px;
+            padding: 1px 6px;
+            background: #f0f4ff;
+            border-radius: 4px;
+        }
+        .no-result {
+            text-align: center;
+            padding: 40px 0;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            display: none;
+        }
         footer {
             margin-top: 40px;
             text-align: center;
@@ -214,13 +388,126 @@ INDEX_TEMPLATE = """\
 <div class="container">
     <h1>🎨 塗装業界ウィークリーニュース</h1>
     <p class="subtitle">過去のレポート一覧</p>
-    <ul class="issue-list">
+
+    <div class="search-wrap">
+        <span class="icon">🔍</span>
+        <input type="text" id="search-input"
+               placeholder="キーワードで記事を検索（例：BASF、EV、脱炭素）"
+               autocomplete="off">
+    </div>
+    <p id="search-status"></p>
+
+    <ul class="issue-list" id="issue-list">
         {issue_items}
     </ul>
+    <p class="no-result" id="no-result">該当するレポートが見つかりませんでした。</p>
+
     <footer>
         <p>© {year} 塗装業界ニュース自動まとめツール</p>
     </footer>
 </div>
+
+<script>
+(function () {
+    var searchInput = document.getElementById('search-input');
+    var statusEl = document.getElementById('search-status');
+    var noResult = document.getElementById('no-result');
+    var items = document.querySelectorAll('#issue-list li');
+
+    // 検索インデックスを読み込む
+    var indexData = [];
+    fetch('search-index.json?t=' + Date.now())
+        .then(function (r) { return r.json(); })
+        .then(function (data) { indexData = data; })
+        .catch(function () { indexData = []; });
+
+    function normalize(s) {
+        return (s || '').toLowerCase();
+    }
+
+    function search(keyword) {
+        var kw = normalize(keyword.trim());
+
+        if (!kw) {
+            // キーワードなし → 全件表示・詳細非表示
+            items.forEach(function (li) {
+                li.classList.remove('hidden');
+                var detail = li.querySelector('.match-titles');
+                if (detail) detail.remove();
+                var badge = li.querySelector('.match-count');
+                if (badge) badge.remove();
+            });
+            statusEl.textContent = '';
+            noResult.style.display = 'none';
+            return;
+        }
+
+        var matched = 0;
+        items.forEach(function (li) {
+            var filename = li.dataset.filename || '';
+            var entry = indexData.find(function (e) { return e.filename === filename; });
+            var matchedTitles = [];
+
+            if (entry && entry.articles) {
+                matchedTitles = entry.articles.filter(function (a) {
+                    return normalize(a.title).indexOf(kw) !== -1;
+                });
+            }
+
+            // ファイル名(日付)でも検索
+            var dateMatch = normalize(li.dataset.date || '').indexOf(kw) !== -1
+                         || normalize(li.dataset.label || '').indexOf(kw) !== -1;
+
+            var hit = matchedTitles.length > 0 || dateMatch;
+
+            if (hit) {
+                li.classList.remove('hidden');
+                matched++;
+
+                // 既存バッジ・詳細を削除してから再描画
+                var oldBadge = li.querySelector('.match-count');
+                if (oldBadge) oldBadge.remove();
+                var oldDetail = li.querySelector('.match-titles');
+                if (oldDetail) oldDetail.remove();
+
+                if (matchedTitles.length > 0) {
+                    var link = li.querySelector('a');
+                    var badge = document.createElement('span');
+                    badge.className = 'match-count';
+                    badge.textContent = matchedTitles.length + '件';
+                    link.appendChild(badge);
+
+                    // 最大5件のタイトル表示
+                    var detail = document.createElement('div');
+                    detail.className = 'match-titles';
+                    matchedTitles.slice(0, 5).forEach(function (a) {
+                        var sp = document.createElement('span');
+                        sp.textContent = '[' + a.section + '] ' + a.title.slice(0, 40) + (a.title.length > 40 ? '…' : '');
+                        detail.appendChild(sp);
+                    });
+                    link.appendChild(detail);
+                }
+            } else {
+                li.classList.add('hidden');
+            }
+        });
+
+        if (matched === 0) {
+            noResult.style.display = 'block';
+            statusEl.textContent = '';
+        } else {
+            noResult.style.display = 'none';
+            statusEl.textContent = matched + ' 件のレポートがヒットしました';
+        }
+    }
+
+    var timer;
+    searchInput.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () { search(searchInput.value); }, 250);
+    });
+})();
+</script>
 </body>
 </html>
 """
@@ -230,7 +517,6 @@ def _update_index_page(now: datetime) -> None:
     """docs/ 内の全レポートをリストするインデックスページを生成する。"""
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 既存のHTMLファイルを取得（weekly-news-*.html）
     report_files = sorted(
         DOCS_DIR.glob("weekly-news-*.html"),
         reverse=True,
@@ -242,7 +528,6 @@ def _update_index_page(now: datetime) -> None:
 
     items_html_parts: list[str] = []
     for f in report_files:
-        # ファイル名から日付を抽出: weekly-news-YYYY-MM-DD.html
         date_str = f.stem.replace("weekly-news-", "")
         try:
             dt = datetime.strptime(date_str, "%Y-%m-%d")
@@ -251,7 +536,8 @@ def _update_index_page(now: datetime) -> None:
             display_date = date_str
 
         items_html_parts.append(
-            f'        <li><a href="{f.name}">'
+            f'        <li data-filename="{f.name}" data-date="{date_str}" data-label="{display_date}">'
+            f'<a href="{f.name}">'
             f'<span class="date">{display_date}</span> — '
             f"塗装業界ウィークリーニュース</a></li>"
         )
