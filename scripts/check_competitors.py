@@ -120,12 +120,13 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             continue
         a_tag = dd.find("a", href=True)
         if a_tag:
-                title = a_tag.get_text(strip=True)
-                link = urljoin(base_url, a_tag["href"])
-            else:
-                title = dd.get_text(strip=True)[:80]
-                link = base_url
-            items.append({"date": date, "title": title, "url": link, "raw_text": dt.get_text(strip=True) + " " + (dd.get_text(strip=True) if dd else "")})
+            title = a_tag.get_text(strip=True)
+            link = urljoin(base_url, a_tag["href"])
+        else:
+            title = dd.get_text(strip=True)[:80]
+            link = base_url
+        raw = dt.get_text(strip=True) + " " + dd.get_text(strip=True)
+        items.append({"date": date, "title": title, "url": link, "raw_text": raw})
 
     # ── 戦略3: class名に "news" を含む div / section 内のリンク ──
     for container in soup.find_all(
