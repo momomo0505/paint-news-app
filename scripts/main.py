@@ -56,8 +56,6 @@ def _save_self_mention_history(urls: set[str]) -> None:
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
 from scripts.translate_summarize import (
-    analyze_articles_impact,
-    analyze_competitor_impact,
     deduplicate_articles,
     filter_relevant_articles,
     generate_weekly_digest,
@@ -325,30 +323,20 @@ def run_pipeline(
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 
     # ────────────────────────────────────────
-    # Step 4.5: 事業影響分析 + 週次総括生成
+    # Step 4.5: 週次総括生成
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 4.5/6: 事業影響分析・週次総括 ━━━")
+    logger.info("━━━ Step 4.5/6: 週次総括コメント生成 ━━━")
 
     weekly_digest: str = ""
     if not dry_run:
         try:
-            if domestic_articles:
-                logger.info("国内記事の影響分析中（%d件）...", len(domestic_articles))
-                domestic_articles = analyze_articles_impact(domestic_articles)
-            if overseas_articles:
-                logger.info("海外記事の影響分析中（%d件）...", len(overseas_articles))
-                overseas_articles = analyze_articles_impact(overseas_articles)
-            if competitor_items:
-                logger.info("競合記事の影響分析中（%d件）...", len(competitor_items))
-                competitor_items = analyze_competitor_impact(competitor_items)
-
             logger.info("週次総括コメント生成中...")
             weekly_digest = generate_weekly_digest(
                 competitor_items, domestic_articles, overseas_articles
             )
         except Exception as exc:
-            logger.error("影響分析・週次総括エラー: %s", exc)
+            logger.error("週次総括エラー: %s", exc)
 
     # ────────────────────────────────────────
     # Step 5: HTML生成
