@@ -213,7 +213,7 @@ def _build_email_html(
             '<div style="margin-bottom:24px;background:#f0f9ff;border:1px solid #bae6fd;'
             'border-left:4px solid #0284c7;border-radius:8px;padding:16px 20px;">'
             '<h3 style="margin:0 0 10px;font-size:0.95rem;font-weight:700;color:#0c4a6e;">'
-            "🧠 今週のポイント — アンデックス㈱への示唆</h3>"
+            "🧠 今週のポイント</h3>"
             '<ul style="margin:0;padding:0;list-style:none;">' + rows + "</ul>"
             "</div>"
         )
@@ -244,7 +244,7 @@ def _build_email_html(
         '      <p style="margin:0 0 16px;font-size:0.85rem;color:#6b7280;">' + summary_text + "</p>\n"
         '      <div style="text-align:center;margin-bottom:28px;">'
         '<a href="' + report_url + '" '
-        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
+        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#ffffff !important;'
         'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
         "フルレポートを読む →</a></div>\n"
         + digest_html
@@ -252,9 +252,9 @@ def _build_email_html(
         + competitor_html
         + domestic_html
         + overseas_html
-        + '      <div style="text-align:center;margin-top:8px;">'
+        +         '      <div style="text-align:center;margin-top:8px;">'
         '<a href="' + report_url + '" '
-        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
+        'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#ffffff !important;'
         'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
         "フルレポートを読む →</a></div>\n"
         "    </div>\n"
