@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年05月30日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <div style="margin-bottom:10px;">
+            <a href="https://momomo0505.github.io/paint-news-app/"
+               style="font-size:0.8rem;color:#6b7280;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                ← 過去のレポート一覧
+            </a>
+        </div>
+        <h1>🎨 塗装業界ニュースレポート</h1>
+        <div class="header-meta">
+            <span>📅 2026年05月30日</span>
+            
+            <span>🏭 競合: 12件</span>
+            <span>🇯🇵 国内: 3件</span>
+            <span>🌍 海外: 4件</span>
+            <span>📆 対象: 2026/04/30 〜 2026/05/30</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════ -->
+<!-- 週次総括コメント                       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
+        <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
+            🧠 今週のポイント — アンデックス㈱への示唆
+        </h2>
+        <ul style="margin:0;padding:0;list-style:none;">
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **大気社の好業績と配当増額から見る業界動向**：大気社が2026年3月期決算で増配を発表し、業績連動型株式報酬制度も改定。塗装設備業界全体の需要回復を示唆している。アンデックスも自社の収益性向上と投資戦略の見直しを検討すべき時期。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ▶ **原材料不足による塗装工事停止リスクの拡大**：長崎県内でナフサ不足により塗料・資材が調達困難となり工事が停止。サプライチェーン混乱が塗装業界全体に波及する可能性が高く、アンデックスは顧客の設備稼働率低下に備えた営業戦略の調整が急務。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **海外大手塗料メーカーの大型M&amp;A動向**：アクゾノーベルが125億ユーロの買収提案を拒否するなど業界再編が加速。グローバル競争激化により国内市場でも価格圧力や技術革新要求が高まる中、アンデックスは差別化技術の開発に注力すべき。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ▶ **溶剤市場の成長とグリーンケミストリー革新**：2033年まで溶剤市場が581億ドルに成長予測され、環境配慮型技術が牽引要因。アンデックスは環境対応型塗装ブースの開発を急ぎ、顧客の環境規制対応ニーズを先取りした製品戦略を構築する必要がある。
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 0: 弊社関連記事（取材・掲載）  -->
+<!-- ══════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">イヤサカ</span>
+        <h2 class="article-title">2026.05.29イベント「ジャパン トラックショー 2026」ご来場のお礼</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 イヤサカのトラック業界展示会参加により、車両塗装市場での競合激化が予想。アンデックスも自動車関連塗装設備で対抗戦略が必要。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月29日</span>
+        <a href="https://www.iyasaka.co.jp/news/20260529/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.29IR2026年3月期決算説明会資料を掲載しました</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社の決算説明会資料から業績動向と投資戦略を分析し、塗装設備分野での競合動向を把握して自社の市場戦略を見直す機会。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月29日</span>
+        <a href="https://www.taikisha.co.jp/ir/library/presentation/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.29Newsletter大気社ニュースレター ISSUES #13「グローバルで活躍する力を計画的に育てる」を公開しました[1.8 MB]</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社のグローバル人材育成強化は海外展開加速を示唆。アンデックスも国際競争力向上のため人材戦略と海外市場開拓を急ぐ必要。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月29日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260529_01.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.05.22 【出展のお知らせ】2026年5月27日～29日　第4回九州農業WEEK　㏌グランメッセ熊本</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 明々工業の農業分野展開は新市場開拓の参考事例。アンデックスも農機具塗装など農業関連分野への塗装設備提案を検討する機会。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月22日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e3%80%90%e5%87%ba%e5%b1%95%e3%81%ae%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%80%912026%e5%b9%b45%e6%9c%8827%e6%97%a5%ef%bd%9e29%e6%97%a5%e3%80%80%e7%ac%ac4%e5%9b%9e%e4%b9%9d%e5%b7%9e%e8%be%b2%e6%a5%adw/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.05.22 ☆第1回猛暑テックー猛暑対策テクノロジー展－㏌インテックス大阪　2026年5月13日～15日</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 明々工業の猛暑対策技術展参加は環境対応製品への注力を示唆。塗装ブースの省エネ・暑熱対策技術で差別化提案が可能。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月22日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e2%98%86%e7%ac%ac1%e5%9b%9e%e7%8c%9b%e6%9a%91%e3%83%86%e3%83%83%e3%82%af%e3%83%bc%e7%8c%9b%e6%9a%91%e5%af%be%e7%ad%96%e3%83%86%e3%82%af%e3%83%8e%e3%83%ad%e3%82%b8%e3%83%bc%e5%b1%95%ef%bc%8d%e3%8f%8c/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.18IR2025年3月期 ファクトブックを掲載しました</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社のファクトブック公開により財務状況と事業戦略が明確化。競合分析を通じて自社の強み・弱みを再評価し戦略修正に活用。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月18日</span>
+        <a href="https://www.taikisha.co.jp/ir/library/factbook/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.15IR2026年３月期決算短信〔日本基準〕(連結)[714.4 KB]</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社の決算短信から業績好調が判明した場合、塗装設備市場での競争激化を想定し、価格競争力と技術優位性の確保が急務。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月15日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260515_03.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.15IR配当方針の変更及び剰余金の配当（増配）に関するお知らせ[328.6 KB]</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社の増配は業績好調と株主還元強化を示唆。アンデックスも収益性向上と財務体質強化で競争力維持が必要。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月15日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260515_02.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.05.15IR業績連動型株式報酬制度の改定に関するお知らせ[636.6 KB]</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大気社の業績連動型報酬制度改定は人材確保・定着強化策。アンデックスも優秀な技術者確保のため人事制度見直しを検討すべき。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月15日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260515_01.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">2026年5月13日お知らせ【メディア掲載】日刊工業新聞（5月13日掲載）に弊社代表 三好と日刊工業新聞社 神阪社長の対談記事が掲載</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 アネスト岩田代表のメディア露出は企業ブランド向上戦略。アンデックスも塗装設備専門メーカーとしての認知度向上施策が重要。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月13日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-05-13-0" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">2026年5月13日お知らせ創業100周年記念サイトを公開しました</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 アネスト岩田の100周年記念は企業ブランド力向上の脅威。当社は技術革新と顧客密着型サービスでの差別化を強化し、創業年数に依らない信頼性をアピールする営業戦略が必要。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月13日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-05-13" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.05.07 【出展のお知らせ】2026年5月13日～15日　第1回猛暑テック～猛暑対策テクノロジー展～　㏌インテックス大阪</h2>
+    </div>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 明々工業の猛暑対策展出展は塗装ブース内環境改善ニーズ拡大の機会。当社も空調・換気システム強化製品の開発を加速し、夏季作業環境改善を訴求した提案活動を展開すべき。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">2026年05月07日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e3%80%90%e5%87%ba%e5%b1%95%e3%81%ae%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%80%912026%e5%b9%b45%e6%9c%8813%e6%97%a5%ef%bd%9e15%e6%97%a5%e3%80%80%e7%ac%ac1%e5%9b%9e%e7%8c%9b%e6%9a%91%e3%83%86%e3%83%83/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">機能性水性コーティング剤の世界市場（2026年～2032年）、市場規模（防食コーティング、防曇コーティング、帯電防止コーティング、その他）・分析レポートを発表 - アットプレス</h2>
+    </div>
+    
+    <p class="article-summary">機能性水性コーティング剤の世界市場について、2026年から2032年までの市場規模分析レポートが発表された。防食コーティング、防曇コーティング、帯電防止コーティングなどの分野別市場動向が調査対象となっている。</p>
+    
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 水性塗料への転換加速により、VOC規制対応塗装ブースの需要増が見込める。機能性コーティング市場拡大により、精密塗装設備の新規開発機会と高付加価値製品への転換可能性。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">アットプレス — 2026年05月30日</span>
+        <a href="https://news.google.com/rss/articles/CBMiT0FVX3lxTE0zTDJkRmkzeVFOZ08tZlUzNktLZW1fS0pmZHZxUDRyZUw5VWppWE1iMk1JaFpJX1VsREJNZkJkQkROVFNyWnpoRXFWOUxScHM?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">塗料、資材なく工事止まる…メーカーから値上げ通知 ごみ袋は在庫十分 長崎県内のナフサ不足の影響 - 47NEWS</h2>
+    </div>
+    
+    <p class="article-summary">長崎県内でナフサ不足の影響により塗料や資材が調達できず、工事が停止する事態が発生している。塗料メーカーからは値上げ通知も出されており、業界への深刻な影響が広がっている。</p>
+    
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 塗料不足・価格高騰により顧客の設備投資延期リスク増大。一方で既存設備の稼働率向上・効率化ニーズ高まり、省塗料型ブースや自動化システムの提案機会拡大。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">47NEWS — 2026年05月30日</span>
+        <a href="https://news.google.com/rss/articles/CBMiS0FVX3lxTFA4RExURjdoU3NQcTBiaHNvZnFpb1ZWN0Viem54Zm42c3p5LTBIWVdTQ29YN0w4QnVTY0M2azQ3bkxPZVhZNWVCYzF3QQ?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイントHD株軟調 イラン衝突で需要･コスト懸念、塗り替えられず - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">イラン情勢の緊迫化を受けて日本ペイントホールディングスの株価が軟調に推移している。中東地域での需要減少とコスト上昇への懸念が材料視されている。</p>
+    
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 大手塗料メーカーの業績悪化により塗装業界全体の設備投資意欲減退懸念。中東向け輸出案件への影響と、原材料高騰による塗装ブース製造コスト上昇圧力。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年05月30日</span>
+        <a href="https://news.google.com/rss/articles/CBMifkFVX3lxTFBNZW9vaTdvM05KRHMwaVhZdHE2UWFITVVsdExXNlRHMHB0bW1vZkR2eWs5bFlMZGZtTzM4TFpUV09tQkowa2VBUWFTTjd1eUV2Snp4b2tNUWhVXzZFaHdEVkJLZmpINEk3ZkNNREpLYU9JZmlDM3VmZE0tUnREUQ?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #7c3aed;padding-left:12px;margin-bottom:16px;">
+        3. 海外塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">ダルックスが中間価格帯の塗料市場を狙う</h2>
+    </div>
+    <p class="article-summary">CAP Plcがナイジェリアで新しい中間価格帯塗料ブランド「Dulux Spruce」を発売しました。手頃な価格でありながら耐久性を備えた塗料ソリューションの需要増加に対応する戦略です。同ブランドはアフリカ市場における中間層消費者をターゲットとし、高品質と価格競争力を両立させた製品展開を目指しています。</p>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 アフリカ市場での中価格帯塗料需要拡大により、現地向け塗装ブースの輸出機会が増加。コストパフォーマンスを重視した設備仕様の開発が必要となる。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">The Punch — 2026年05月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://punchng.com/dulux-targets-mid-tier-paint-market/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">アクゾノーベル、日本ペイントとシャーウィン・ウィリアムズによる125億ユーロ買収提案を拒否</h2>
+    </div>
+    <p class="article-summary">塗料大手アクゾノーベル（オランダ）は、日本ペイントとシャーウィン・ウィリアムズ（米国）による125億ユーロ（約1兆9,000億円）の買収提案を拒否したと発表した。同社は提案価格が企業価値を過小評価しており、確実性に欠けると判断。アクゾノーベルの取締役会は現在の事業計画を継続する方針を支持している。この買収が成立すれば、世界の塗料業界における大型再編となる可能性があった。</p>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 塗料業界再編の見送りにより既存の競合関係が維持され、顧客との取引関係は安定。ただし将来的な大型統合リスクは継続している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">The Times of India — 2026年05月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://economictimes.indiatimes.com/news/international/business/akzonobel-rejects-12-5-billion-nippon-paint-sherwin-williams-takeover-offer/articleshow/131361152.cms"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">溶剤市場、2033年までに581億ドルに成長見込み - 産業需要とグリーンケミストリー革新が牽引</h2>
+    </div>
+    <p class="article-summary">世界の溶剤市場は着実な成長を続けており、2026年に397億ドル、2033年には581億ドルに達すると予測されている。年平均成長率（CAGR）は5.6%となる見込み。この拡大は産業需要の増加と環境に配慮したグリーンケミストリー技術の革新によって推進されている。溶剤は塗装・コーティング産業において重要な役割を担っており、今後も安定した需要が期待される。</p>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 溶剤市場の年率5.6%成長は塗装業界の拡大を示唆し、塗装設備需要の中長期的増加が期待。グリーン溶剤対応設備の開発が競争優位の鍵となる。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">PRNewswire — 2026年05月27日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.prnewswire.com/news-releases/solvents-market-to-reach-us-58-1-bn-by-2033-expands-amid-industrial-demand-and-green-chemistry-innovation---persistence-market-research-302782011.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">沈降シリカ世界市場予測2036：エボニック、ソルベイ、PPGが牽引するインド・中国・米国での業界成長</h2>
+    </div>
+    <p class="article-summary">Future Market Insightsの最新市場分析によると、世界の沈降シリカ市場が力強い成長を見せている。タイヤメーカー、接着剤メーカー、工業用配合業者の需要増加が成長を牽引しており、エボニック・インダストリーズ、ソルベイ、PPGインダストリーズなどの主要企業が、インド、中国、米国市場での業界拡大を推進している。2036年まで継続的な市場成長が予測されている。</p>
+    
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 沈降シリカ市場拡大は高機能塗料需要増を意味し、精密塗装設備の需要拡大が見込める。特に中国・インド市場への設備輸出機会が増加する。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">PRNewswire — 2026年05月26日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.prnewswire.com/news-releases/global-precipitated-silica-market-forecast-2036-how-evonik-industries-ag-solvay-sa--ppg-industries-inc-are-driving-industry-growth-across-india-china--usa-302781732.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+
+
+
+
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
