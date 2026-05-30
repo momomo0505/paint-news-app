@@ -297,6 +297,22 @@ COMPETITOR_SITES = [
         "url": "https://www.osame.co.jp/index.html",
         "language": "ja",
     },
+    {
+        "name": "サンワ・リノテック",
+        "url": "https://sanwa-renotech.com/",
+        "language": "ja",
+        "section_include": ["NEWS"],
+    },
+    {
+        "name": "大塚刷毛製造（マルテー）",
+        "url": "https://www.maru-t.co.jp/news/",
+        "language": "ja",
+    },
+    {
+        "name": "サンエス工業",
+        "url": "https://www.sanesu-ind.co.jp/news/",
+        "language": "ja",
+    },
     # ── 海外メーカー ──────────────────────────
     {
         "name": "WLD（広州ウェイロンダ）",
@@ -316,6 +332,51 @@ COMPETITOR_SITES = [
     {
         "name": "Saicozero",
         "url": "https://saicozero.com/blog/",
+        "language": "en",
+    },
+    {
+        "name": "RTT Finishing Solutions",
+        "url": "https://rttsolutions.com/blog/",
+        "language": "en",
+    },
+    {
+        "name": "Rohner Finishing Systems",
+        "url": "https://www.rohnerspraybooths.com/blog",
+        "language": "en",
+    },
+    {
+        "name": "Junair Spraybooths",
+        "url": "https://www.junair-spraybooths.co.uk/information/blog/",
+        "language": "en",
+    },
+    {
+        "name": "Termomeccanica GL",
+        "url": "https://termomeccanicagl.com/",
+        "language": "it",
+    },
+    {
+        "name": "Bostec",
+        "url": "https://www.bostec.co.uk/",
+        "language": "en",
+    },
+    {
+        "name": "Unitech Machinery",
+        "url": "https://unitechmachinery.co.uk/resources/news/",
+        "language": "en",
+    },
+    {
+        "name": "AFC Finishing Systems",
+        "url": "https://afc-ca.com/",
+        "language": "en",
+    },
+    {
+        "name": "Marathon Finishing Systems",
+        "url": "https://marathonspraybooths.com/",
+        "language": "en",
+    },
+    {
+        "name": "Autoke Machinery Equipment",
+        "url": "https://sprayboothmanufacturer.com/news/",
         "language": "en",
     },
 ]

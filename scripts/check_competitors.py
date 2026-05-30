@@ -65,9 +65,10 @@ def _parse_date(text: str) -> datetime | None:
 
 
 def _make_google_translate_url(url: str, lang: str) -> str:
-    """海外サイトのリンクを Google 翻訳経由に変換する。"""
-    if lang == "en":
-        return f"https://translate.google.com/translate?sl=en&tl=ja&u={url}"
+    """海外サイトのリンクを Google 翻訳経由に変換する（日本語以外は全言語対応）。"""
+    if lang != "ja":
+        sl = lang if lang else "auto"
+        return f"https://translate.google.com/translate?sl={sl}&tl=ja&u={url}"
     return url
 
 
@@ -107,7 +108,7 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             href = base_url
 
         link = urljoin(base_url, href)
-        items.append({"date": date, "title": title, "url": link})
+        items.append({"date": date, "title": title, "url": link, "raw_text": text})
 
     # ── 戦略2: <dl>/<dt>/<dd> パターン（日付がdtに入るサイト向け） ──
     for dt in soup.find_all("dt"):
@@ -119,12 +120,12 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             continue
         a_tag = dd.find("a", href=True)
         if a_tag:
-            title = a_tag.get_text(strip=True)
-            link = urljoin(base_url, a_tag["href"])
-        else:
-            title = dd.get_text(strip=True)[:80]
-            link = base_url
-        items.append({"date": date, "title": title, "url": link})
+                title = a_tag.get_text(strip=True)
+                link = urljoin(base_url, a_tag["href"])
+            else:
+                title = dd.get_text(strip=True)[:80]
+                link = base_url
+            items.append({"date": date, "title": title, "url": link, "raw_text": dt.get_text(strip=True) + " " + (dd.get_text(strip=True) if dd else "")})
 
     # ── 戦略3: class名に "news" を含む div / section 内のリンク ──
     for container in soup.find_all(
@@ -139,7 +140,7 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
                 continue
             title = text[:80] or parent_text[:80]
             link = urljoin(base_url, a_tag["href"])
-            items.append({"date": date, "title": title, "url": link})
+            items.append({"date": date, "title": title, "url": link, "raw_text": parent_text})
 
     # 重複除去（URL基準）
     seen = set()
@@ -173,6 +174,7 @@ def check_all_competitors() -> list[dict]:
         company = site["name"]
         url = site["url"]
         lang = site["language"]
+        section_include = site.get("section_include", [])
         logger.info("監視中: %s (%s)", company, url)
 
         soup = _fetch_page(url)
@@ -182,6 +184,13 @@ def check_all_competitors() -> list[dict]:
 
         items = _extract_news_items(soup, url)
         recent = [i for i in items if i["date"] >= cutoff]
+
+        # section_include が指定されている場合は raw_text でフィルター
+        if section_include:
+            recent = [
+                item for item in recent
+                if any(kw in item.get("raw_text", "") for kw in section_include)
+            ]
 
         if not recent:
             logger.info("%s: 過去%d日以内の更新なし", company, SEARCH_DAYS_BACK)
