@@ -38,6 +38,7 @@ from scripts.config import (
     MAX_DOMESTIC_ARTICLES,
     SEARCH_DAYS_BACK,
     EXCLUDED_DOMAINS,
+    SELF_MENTION_KEYWORDS,
 )
 
 logger = logging.getLogger(__name__)
@@ -561,6 +562,76 @@ def collect_industry_site_news() -> list[Article]:
 
     logger.info("業界専門サイト取得（重複排除前）: %d 件", len(all_articles))
     return all_articles
+
+
+def collect_self_mention_news() -> list[Article]:
+    """
+    アンデックス㈱が取材・掲載された記事を収集する。
+
+    Google News RSS（国内・英語両方）でキーワード検索し、
+    見つかった記事は skip_filter=True として必ずレポートに掲載する。
+
+    Returns:
+        list[Article]: 発見された自社関連記事リスト
+    """
+    JST = timezone(timedelta(hours=9))
+    cutoff = datetime.now(JST) - timedelta(days=SEARCH_DAYS_BACK)
+    base_url = "https://news.google.com/rss/search"
+    all_articles: list[Article] = []
+
+    for keyword in SELF_MENTION_KEYWORDS:
+        # 日本語キーワードは ja/JP、英語キーワードは en/US で検索
+        is_english = keyword.upper() == keyword or keyword.startswith("ANDEX")
+        params = {
+            "q": keyword,
+            "hl": "en" if is_english else "ja",
+            "gl": "US" if is_english else "JP",
+            "ceid": "US:en" if is_english else "JP:ja",
+        }
+        url = base_url + "?" + urllib.parse.urlencode(params)
+        logger.info("自社メンション検索: %s", keyword)
+
+        try:
+            feed = feedparser.parse(url)
+        except Exception as exc:
+            logger.warning("自社メンション RSS 取得エラー (%s): %s", keyword, exc)
+            continue
+
+        entries = getattr(feed, "entries", [])
+        logger.info("  取得: %d 件", len(entries))
+
+        for entry in entries:
+            pub_dt = _parse_rss_date(entry)
+            if pub_dt < cutoff:
+                continue
+
+            title = getattr(entry, "title", "").strip()
+            if not title:
+                continue
+
+            summary_html = getattr(entry, "summary", "") or ""
+            description = _clean_rss_summary(summary_html)
+            link = getattr(entry, "link", "") or ""
+
+            source_info = getattr(entry, "source", None)
+            source = source_info.title if (source_info and hasattr(source_info, "title")) else "Google News"
+
+            all_articles.append(
+                Article(
+                    title=title,
+                    description=description,
+                    url=link,
+                    source=source,
+                    published_at=pub_dt.isoformat(),
+                    skip_filter=True,  # 自社記事は必ず掲載
+                )
+            )
+
+        time.sleep(0.5)
+
+    unique = _deduplicate_articles(all_articles)
+    logger.info("自社メンション記事: %d 件", len(unique))
+    return unique
 
 
 if __name__ == "__main__":

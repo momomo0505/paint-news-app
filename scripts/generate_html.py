@@ -69,6 +69,7 @@ def generate_weekly_report(
     *,
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
+    self_mention_articles: list[Article] | None = None,
 ) -> Path:
     """
     週間レポートのHTMLファイルを生成する。
@@ -106,6 +107,9 @@ def generate_weekly_report(
         competitor_by_company.setdefault(company, []).append(item)
 
     context = {
+        # 自社メンション記事
+        "self_mention_articles": _prepare_article_data(self_mention_articles or []),
+        "total_self_mention": len(self_mention_articles or []),
         # 海外ニュース
         "articles": _prepare_article_data(articles),
         # 国内ニュース

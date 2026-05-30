@@ -41,6 +41,38 @@ def _google_translate_url(url: str) -> str:
 # ──────────────────────────────────────────────
 # セクション別HTML生成ヘルパー
 # ──────────────────────────────────────────────
+def _build_self_mention_section(self_mention_articles: list[Article]) -> str:
+    if not self_mention_articles:
+        return ""
+
+    rows = ""
+    for article in self_mention_articles:
+        url = article.url
+        title = article.title_ja or article.title
+        summary = article.summary_ja or article.description[:100] or ""
+        rows += (
+            '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #fde68a;">'
+            '<p style="margin:0 0 4px;font-size:0.9rem;color:#1a1a2e;font-weight:600;">' + title[:100] + "</p>"
+            + (
+                '<p style="margin:0 0 6px;font-size:0.85rem;color:#4b5563;line-height:1.5;">' + summary[:200] + "</p>"
+                if summary else ""
+            )
+            + '<a href="' + url + '" style="font-size:0.8rem;color:#d97706;text-decoration:none;font-weight:600;">記事を読む →</a>'
+            "</li>\n"
+        )
+
+    return (
+        '<div style="margin-bottom:28px;background:#fffbeb;border:1px solid #fde68a;'
+        'border-left:4px solid #f59e0b;border-radius:8px;padding:16px 20px;">'
+        '<h2 style="margin:0 0 6px;font-size:1rem;font-weight:700;color:#92400e;">'
+        "★ 弊社（アンデックス㈱）関連記事</h2>"
+        '<p style="margin:0 0 12px;font-size:0.8rem;color:#b45309;">'
+        "弊社が取材・掲載された記事が見つかりました。社内への共有をご検討ください。</p>"
+        '<ul style="margin:0;padding:0;list-style:none;">' + rows + "</ul>"
+        "</div>"
+    )
+
+
 def _build_competitor_section(competitor_items: list[dict]) -> str:
     if not competitor_items:
         return ""
@@ -157,8 +189,9 @@ def _build_email_html(
     issue_date: str,
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
+    self_mention_articles: list[Article] | None = None,
 ) -> str:
-    """通知メールのHTML本文を構築する（3セクション構成）。"""
+    """通知メールのHTML本文を構築する（自社記事 + 3セクション構成）。"""
 
     total = len(articles) + len(domestic_articles or []) + len(competitor_items or [])
     summary_text = (
@@ -167,9 +200,18 @@ def _build_email_html(
         "海外: " + str(len(articles)) + "件"
     )
 
+    self_mention_html = _build_self_mention_section(self_mention_articles or [])
     competitor_html = _build_competitor_section(competitor_items or [])
     domestic_html = _build_domestic_section(domestic_articles or [])
     overseas_html = _build_overseas_section(articles)
+
+    self_mention_badge = ""
+    if self_mention_articles:
+        self_mention_badge = (
+            '<span style="display:inline-block;margin-left:8px;padding:2px 8px;'
+            'background:#f59e0b;color:#fff;border-radius:12px;font-size:0.75rem;font-weight:700;">'
+            "★ 弊社掲載あり</span>"
+        )
 
     return (
         "<!DOCTYPE html>\n"
@@ -180,13 +222,14 @@ def _build_email_html(
         '    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:32px;">\n'
         '      <p style="margin:0 0 4px;font-size:0.85rem;color:#6b7280;">塗装業界ニュースレポート</p>\n'
         '      <h1 style="margin:0 0 6px;font-size:1.4rem;font-weight:700;color:#1a1a2e;">'
-        "🎨 " + issue_date + "号</h1>\n"
+        "🎨 " + issue_date + "号" + self_mention_badge + "</h1>\n"
         '      <p style="margin:0 0 16px;font-size:0.85rem;color:#6b7280;">' + summary_text + "</p>\n"
         '      <div style="text-align:center;margin-bottom:28px;">'
         '<a href="' + report_url + '" '
         'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
         'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
         "フルレポートを読む →</a></div>\n"
+        + self_mention_html
         + competitor_html
         + domestic_html
         + overseas_html
@@ -214,6 +257,7 @@ def send_notification(
     *,
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
+    self_mention_articles: list[Article] | None = None,
     no_articles: bool = False,
 ) -> bool:
     """
@@ -264,6 +308,7 @@ def send_notification(
             issue_date,
             competitor_items=competitor_items,
             domestic_articles=domestic_articles,
+            self_mention_articles=self_mention_articles,
         )
 
     msg = MIMEMultipart("alternative")

@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from scripts.check_competitors import check_all_competitors
-from scripts.collect_news import Article, collect_domestic_news, collect_news
+from scripts.collect_news import Article, collect_domestic_news, collect_news, collect_self_mention_news
 from scripts.config import DOCS_DIR, LOG_LEVEL
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
@@ -156,7 +156,7 @@ def run_pipeline(
     # Step 1: 競合他社ニュース監視
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 1/5: 競合他社ニュース監視 ━━━")
+    logger.info("━━━ Step 1/6: 競合他社ニュース監視 ━━━")
 
     if dry_run:
         competitor_items = []
@@ -170,10 +170,30 @@ def run_pipeline(
             competitor_items = []
 
     # ────────────────────────────────────────
+    # Step 1.5: 自社メンション検知
+    # ────────────────────────────────────────
+    logger.info("")
+    logger.info("━━━ Step 1.5/6: 自社メンション検知（アンデックス㈱）━━━")
+
+    if dry_run:
+        self_mention_articles: list[Article] = []
+        logger.info("ドライラン: 自社メンション検知スキップ")
+    else:
+        try:
+            self_mention_articles = collect_self_mention_news()
+            if self_mention_articles:
+                logger.info("自社関連記事 発見: %d 件 ★", len(self_mention_articles))
+            else:
+                logger.info("自社関連記事: 今週は掲載なし")
+        except Exception as exc:
+            logger.error("自社メンション検知エラー: %s", exc)
+            self_mention_articles = []
+
+    # ────────────────────────────────────────
     # Step 2: 国内ニュース収集 → フィルタ → 要約
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 2/5: 国内ニュース収集 ━━━")
+    logger.info("━━━ Step 2/6: 国内ニュース収集 ━━━")
 
     if dry_run:
         domestic_articles: list[Article] = []
@@ -218,7 +238,7 @@ def run_pipeline(
     # Step 3: 海外ニュース収集
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 3/5: 海外ニュース収集 ━━━")
+    logger.info("━━━ Step 3/6: 海外ニュース収集 ━━━")
 
     if dry_run:
         logger.info("ドライラン: ダミーデータを使用します")
@@ -249,7 +269,7 @@ def run_pipeline(
     # Step 4: 関連性フィルタ → 翻訳・要約（海外ニュースのみ）
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 4/5: 関連性フィルタ → 翻訳・要約 ━━━")
+    logger.info("━━━ Step 4/6: 関連性フィルタ → 翻訳・要約 ━━━")
 
     if dry_run:
         logger.info("ドライラン: 翻訳済みダミーデータを使用します")
@@ -270,12 +290,13 @@ def run_pipeline(
     # Step 5: HTML生成
     # ────────────────────────────────────────
     logger.info("")
-    logger.info("━━━ Step 5/5: HTML生成・メール送信 ━━━")
+    logger.info("━━━ Step 5/6: HTML生成・メール送信 ━━━")
 
     report_path = generate_weekly_report(
         overseas_articles,
         competitor_items=competitor_items,
         domestic_articles=domestic_articles,
+        self_mention_articles=self_mention_articles,
     )
     report_filename = report_path.name
     logger.info("HTML生成完了: %s", report_path)
@@ -297,6 +318,7 @@ def run_pipeline(
                 report_filename,
                 competitor_items=competitor_items,
                 domestic_articles=domestic_articles,
+                self_mention_articles=self_mention_articles,
             )
             if success:
                 logger.info("メール送信完了")
