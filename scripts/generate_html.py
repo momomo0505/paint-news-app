@@ -70,6 +70,7 @@ def generate_weekly_report(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    weekly_digest: str = "",
 ) -> Path:
     """
     週間レポートのHTMLファイルを生成する。
@@ -128,6 +129,8 @@ def generate_weekly_report(
         "total_domestic": len(domestic_articles or []),
         "total_competitor": len(competitor_items or []),
         "pages_base_url": PAGES_BASE_URL.rstrip("/"),
+        "weekly_digest": weekly_digest,
+        "weekly_digest_lines": [line for line in weekly_digest.splitlines() if line.strip()],
     }
 
     html_content = template.render(**context)

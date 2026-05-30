@@ -264,6 +264,26 @@
 </header>
 
 <!-- ══════════════════════════════════════ -->
+<!-- 週次総括コメント                       -->
+<!-- ══════════════════════════════════════ -->
+{% if weekly_digest_lines %}
+<div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
+        <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
+            🧠 今週のポイント — アンデックス㈱への示唆
+        </h2>
+        <ul style="margin:0;padding:0;list-style:none;">
+            {% for line in weekly_digest_lines %}
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                {{ line }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════ -->
 <!-- Section 0: 弊社関連記事（取材・掲載）  -->
 <!-- ══════════════════════════════════════ -->
 {% if self_mention_articles %}
@@ -311,6 +331,9 @@
         <span class="category-tag" style="background:#fee2e2;color:#991b1b;">{{ item.company }}</span>
         <h2 class="article-title">{{ item.title }}</h2>
     </div>
+    {% if item.impact_ja %}
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 {{ item.impact_ja }}</p>
+    {% endif %}
     <div class="article-footer">
         <span class="article-source">{{ item.date.strftime('%Y年%m月%d日') }}</span>
         <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
@@ -338,6 +361,9 @@
     </div>
     {% if article.summary_ja %}
     <p class="article-summary">{{ article.summary_ja }}</p>
+    {% endif %}
+    {% if article.impact_ja %}
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 {{ article.impact_ja }}</p>
     {% endif %}
     <div class="article-footer">
         <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
@@ -367,6 +393,9 @@
         <h2 class="article-title">{{ article.title_ja }}</h2>
     </div>
     <p class="article-summary">{{ article.summary_ja }}</p>
+    {% if article.impact_ja %}
+    <p style="font-size:0.82rem;color:#0c4a6e;background:#f0f9ff;border-left:3px solid #0284c7;padding:6px 10px;margin-bottom:10px;border-radius:0 4px 4px 0;">💡 {{ article.impact_ja }}</p>
+    {% endif %}
     <div class="article-footer">
         <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
         <a href="https://translate.google.com/translate?sl=en&tl=ja&u={{ article.url }}"

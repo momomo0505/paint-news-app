@@ -28,11 +28,39 @@ from pathlib import Path
 from scripts.check_competitors import check_all_competitors
 from scripts.collect_news import Article, collect_domestic_news, collect_news, collect_self_mention_news
 from scripts.config import DOCS_DIR, LOG_LEVEL
+
+# 自社メンション履歴ファイルパス
+SELF_MENTION_HISTORY_PATH = DOCS_DIR / "self_mention_history.json"
+
+
+def _load_self_mention_history() -> set[str]:
+    """過去に報告済みの自社記事URLを読み込む。"""
+    if SELF_MENTION_HISTORY_PATH.exists():
+        try:
+            import json as _json
+            data = _json.loads(SELF_MENTION_HISTORY_PATH.read_text(encoding="utf-8"))
+            return set(data.get("reported_urls", []))
+        except Exception:
+            pass
+    return set()
+
+
+def _save_self_mention_history(urls: set[str]) -> None:
+    """報告済みURLをファイルに保存する。"""
+    import json as _json
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    SELF_MENTION_HISTORY_PATH.write_text(
+        _json.dumps({"reported_urls": sorted(urls)}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 from scripts.generate_html import generate_weekly_report
 from scripts.send_email import send_notification
 from scripts.translate_summarize import (
+    analyze_articles_impact,
+    analyze_competitor_impact,
     deduplicate_articles,
     filter_relevant_articles,
+    generate_weekly_digest,
     summarize_domestic_articles,
     translate_and_summarize,
 )
@@ -180,11 +208,21 @@ def run_pipeline(
         logger.info("ドライラン: 自社メンション検知スキップ")
     else:
         try:
-            self_mention_articles = collect_self_mention_news()
+            raw_mentions = collect_self_mention_news()
+
+            # 過去に報告済みの記事をスキップ（初回のみ掲載）
+            history_urls = _load_self_mention_history()
+            self_mention_articles = [a for a in raw_mentions if a.url not in history_urls]
+
             if self_mention_articles:
-                logger.info("自社関連記事 発見: %d 件 ★", len(self_mention_articles))
+                logger.info("自社関連記事 新着: %d 件 ★（既掲載 %d 件をスキップ）",
+                            len(self_mention_articles), len(raw_mentions) - len(self_mention_articles))
+                # 履歴を更新して保存
+                history_urls.update(a.url for a in self_mention_articles)
+                _save_self_mention_history(history_urls)
             else:
-                logger.info("自社関連記事: 今週は掲載なし")
+                logger.info("自社関連記事: 新着なし（既掲載 %d 件）", len(raw_mentions))
+
         except Exception as exc:
             logger.error("自社メンション検知エラー: %s", exc)
             self_mention_articles = []
@@ -287,6 +325,32 @@ def run_pipeline(
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 
     # ────────────────────────────────────────
+    # Step 4.5: 事業影響分析 + 週次総括生成
+    # ────────────────────────────────────────
+    logger.info("")
+    logger.info("━━━ Step 4.5/6: 事業影響分析・週次総括 ━━━")
+
+    weekly_digest: str = ""
+    if not dry_run:
+        try:
+            if domestic_articles:
+                logger.info("国内記事の影響分析中（%d件）...", len(domestic_articles))
+                domestic_articles = analyze_articles_impact(domestic_articles)
+            if overseas_articles:
+                logger.info("海外記事の影響分析中（%d件）...", len(overseas_articles))
+                overseas_articles = analyze_articles_impact(overseas_articles)
+            if competitor_items:
+                logger.info("競合記事の影響分析中（%d件）...", len(competitor_items))
+                competitor_items = analyze_competitor_impact(competitor_items)
+
+            logger.info("週次総括コメント生成中...")
+            weekly_digest = generate_weekly_digest(
+                competitor_items, domestic_articles, overseas_articles
+            )
+        except Exception as exc:
+            logger.error("影響分析・週次総括エラー: %s", exc)
+
+    # ────────────────────────────────────────
     # Step 5: HTML生成
     # ────────────────────────────────────────
     logger.info("")
@@ -297,6 +361,7 @@ def run_pipeline(
         competitor_items=competitor_items,
         domestic_articles=domestic_articles,
         self_mention_articles=self_mention_articles,
+        weekly_digest=weekly_digest,
     )
     report_filename = report_path.name
     logger.info("HTML生成完了: %s", report_path)
@@ -319,6 +384,7 @@ def run_pipeline(
                 competitor_items=competitor_items,
                 domestic_articles=domestic_articles,
                 self_mention_articles=self_mention_articles,
+                weekly_digest=weekly_digest,
             )
             if success:
                 logger.info("メール送信完了")

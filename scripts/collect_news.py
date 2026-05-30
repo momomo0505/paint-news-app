@@ -74,6 +74,7 @@ class Article:
         self.title_ja: str = ""
         self.summary_ja: str = ""
         self.category: str = ""
+        self.impact_ja: str = ""  # アンデックス㈱への事業影響分析
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -87,6 +88,7 @@ class Article:
             "title_ja": self.title_ja,
             "summary_ja": self.summary_ja,
             "category": self.category,
+            "impact_ja": self.impact_ja,
         }
 
     def __repr__(self) -> str:

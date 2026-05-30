@@ -190,15 +190,33 @@ def _build_email_html(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    weekly_digest: str = "",
 ) -> str:
     """通知メールのHTML本文を構築する（自社記事 + 3セクション構成）。"""
 
-    total = len(articles) + len(domestic_articles or []) + len(competitor_items or [])
     summary_text = (
         "競合: " + str(len(competitor_items or [])) + "件 ｜ "
         "国内: " + str(len(domestic_articles or [])) + "件 ｜ "
         "海外: " + str(len(articles)) + "件"
     )
+
+    # 週次総括ブロック
+    digest_html = ""
+    if weekly_digest:
+        lines = [l for l in weekly_digest.splitlines() if l.strip()]
+        rows = "".join(
+            '<li style="font-size:0.875rem;color:#1e3a5f;line-height:1.7;padding:4px 0;'
+            'border-bottom:1px solid #e0f2fe;">' + line + "</li>\n"
+            for line in lines
+        )
+        digest_html = (
+            '<div style="margin-bottom:24px;background:#f0f9ff;border:1px solid #bae6fd;'
+            'border-left:4px solid #0284c7;border-radius:8px;padding:16px 20px;">'
+            '<h3 style="margin:0 0 10px;font-size:0.95rem;font-weight:700;color:#0c4a6e;">'
+            "🧠 今週のポイント — アンデックス㈱への示唆</h3>"
+            '<ul style="margin:0;padding:0;list-style:none;">' + rows + "</ul>"
+            "</div>"
+        )
 
     self_mention_html = _build_self_mention_section(self_mention_articles or [])
     competitor_html = _build_competitor_section(competitor_items or [])
@@ -229,6 +247,7 @@ def _build_email_html(
         'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#fff;'
         'border-radius:6px;text-decoration:none;font-weight:600;font-size:0.95rem;">'
         "フルレポートを読む →</a></div>\n"
+        + digest_html
         + self_mention_html
         + competitor_html
         + domestic_html
@@ -258,6 +277,7 @@ def send_notification(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    weekly_digest: str = "",
     no_articles: bool = False,
 ) -> bool:
     """
@@ -309,6 +329,7 @@ def send_notification(
             competitor_items=competitor_items,
             domestic_articles=domestic_articles,
             self_mention_articles=self_mention_articles,
+            weekly_digest=weekly_digest,
         )
 
     msg = MIMEMultipart("alternative")

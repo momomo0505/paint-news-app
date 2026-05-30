@@ -541,6 +541,242 @@ def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
 
 
 # ──────────────────────────────────────────────
+# 事業影響分析
+# ──────────────────────────────────────────────
+def analyze_articles_impact(
+    articles: list[Article],
+    batch_size: int = 12,
+) -> list[Article]:
+    """
+    各記事についてアンデックス㈱への事業影響を Claude で分析する。
+
+    塗装業界・競合・市場・規制・原材料・顧客産業など多角的視点から
+    各記事の影響を 50〜80 字で生成し、article.impact_ja に格納する。
+
+    Args:
+        articles: 分析対象記事リスト（title_ja / summary_ja 設定済み推奨）
+        batch_size: 1回の Claude 呼び出しに含める最大記事数
+
+    Returns:
+        list[Article]: impact_ja が設定された記事リスト
+    """
+    if not ANTHROPIC_API_KEY or not articles:
+        return articles
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    for batch_start in range(0, len(articles), batch_size):
+        batch = articles[batch_start: batch_start + batch_size]
+
+        items_text = "\n".join(
+            f"{i + 1}. 【{a.title_ja or a.title}】\n   {(a.summary_ja or a.description)[:200]}"
+            for i, a in enumerate(batch)
+        )
+
+        prompt = f"""あなたはアンデックス㈱（塗装ブース・塗装設備メーカー、主要顧客：自動車補修・工業塗装分野）の経営・営業戦略コンサルタントです。
+
+以下のニュース記事それぞれについて、アンデックス㈱への事業影響を分析してください。
+
+【分析の視点（複数の角度から考察すること）】
+- 塗装設備の需要増減・販売機会への影響
+- 競合メーカーや業界勢力図の変化
+- 技術革新・規制変化による製品戦略への示唆
+- 原材料・部品調達コストへの影響
+- 顧客産業（自動車・航空・建機・造船・鉄道・風力等）の景気動向の影響
+- 新市場・新規顧客開拓の機会またはリスク
+- 経営・人材・DX面での示唆
+
+【注意】
+- 塗装業界に限らず、マクロ経済・産業政策・エネルギー・物流など幅広い視点を取り入れること
+- 直接関係がない記事でも、間接的な波及効果を考察すること
+- 各分析は 50〜80 字の日本語で、簡潔かつ実務的に記述すること
+
+記事リスト:
+{items_text}
+
+以下のJSON形式のみで返してください（説明文・マークダウン不要）:
+[{{"id": 1, "impact": "50〜80字の影響分析"}}, {{"id": 2, "impact": "影響分析"}}, ...]"""
+
+        try:
+            response = client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=3000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = response.content[0].text.strip()
+
+            # コードブロック除去
+            if "```" in text:
+                lines = text.split("\n")
+                json_lines, in_block = [], False
+                for line in lines:
+                    if line.startswith("```"):
+                        in_block = not in_block
+                        continue
+                    if in_block:
+                        json_lines.append(line)
+                text = "\n".join(json_lines)
+
+            impact_list = json.loads(text)
+            impact_map = {int(item["id"]): item["impact"] for item in impact_list}
+
+            for i, article in enumerate(batch):
+                article.impact_ja = impact_map.get(i + 1, "")
+
+            logger.info(
+                "影響分析完了: batch %d〜%d (%d件)",
+                batch_start + 1,
+                batch_start + len(batch),
+                len(batch),
+            )
+
+        except Exception as exc:
+            logger.warning("影響分析エラー（バッチ %d〜）: %s", batch_start + 1, exc)
+            # フォールバック: impact_ja を空のままにする
+
+        if batch_start + batch_size < len(articles):
+            time.sleep(1.5)
+
+    return articles
+
+
+def analyze_competitor_impact(competitor_items: list[dict]) -> list[dict]:
+    """
+    競合他社ニュースについてアンデックス㈱への事業影響を分析する。
+
+    Args:
+        competitor_items: 競合ニュースの dict リスト
+
+    Returns:
+        list[dict]: impact_ja キーが追加された dict リスト
+    """
+    if not ANTHROPIC_API_KEY or not competitor_items:
+        return competitor_items
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    batch_size = 10
+    for batch_start in range(0, len(competitor_items), batch_size):
+        batch = competitor_items[batch_start: batch_start + batch_size]
+
+        items_text = "\n".join(
+            f"{i + 1}. 【{item.get('company', '')}】{item.get('title', '')}"
+            for i, item in enumerate(batch)
+        )
+
+        prompt = f"""アンデックス㈱（塗装ブース・塗装設備メーカー）の立場から、以下の競合・関連メーカーのニュースそれぞれについて事業影響を分析してください。
+
+【分析の視点】
+- 競合との差別化・脅威・機会
+- 市場シェア・顧客への影響
+- 技術・製品戦略への示唆
+- 営業活動・提案活動への活かし方
+
+各分析は 40〜70 字の日本語で、簡潔かつ実務的に記述してください。
+
+競合ニュースリスト:
+{items_text}
+
+以下のJSON形式のみで返してください:
+[{{"id": 1, "impact": "影響分析"}}, {{"id": 2, "impact": "影響分析"}}, ...]"""
+
+        try:
+            response = client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=2000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = response.content[0].text.strip()
+
+            if "```" in text:
+                lines = text.split("\n")
+                json_lines, in_block = [], False
+                for line in lines:
+                    if line.startswith("```"):
+                        in_block = not in_block
+                        continue
+                    if in_block:
+                        json_lines.append(line)
+                text = "\n".join(json_lines)
+
+            impact_list = json.loads(text)
+            impact_map = {int(item["id"]): item["impact"] for item in impact_list}
+
+            for i, item in enumerate(batch):
+                item["impact_ja"] = impact_map.get(i + 1, "")
+
+        except Exception as exc:
+            logger.warning("競合影響分析エラー: %s", exc)
+            for item in batch:
+                item.setdefault("impact_ja", "")
+
+        if batch_start + batch_size < len(competitor_items):
+            time.sleep(1.5)
+
+    return competitor_items
+
+
+def generate_weekly_digest(
+    competitor_items: list[dict],
+    domestic_articles: list[Article],
+    overseas_articles: list[Article],
+) -> str:
+    """
+    収集した全ニュースをもとにアンデックス㈱向け週次総括コメントを生成する。
+
+    重要トレンド 3〜5 点を箇条書きで返す。HTML 表示用に改行コードを含む文字列。
+
+    Returns:
+        str: 週次総括テキスト（空の場合は ""）
+    """
+    if not ANTHROPIC_API_KEY:
+        return ""
+
+    all_titles = []
+    for item in competitor_items[:10]:
+        all_titles.append(f"[競合] {item.get('company', '')}：{item.get('title', '')[:60]}")
+    for a in domestic_articles[:10]:
+        all_titles.append(f"[国内] {a.title_ja or a.title[:60]}")
+    for a in overseas_articles[:10]:
+        all_titles.append(f"[海外] {a.title_ja or a.title[:60]}")
+
+    if not all_titles:
+        return ""
+
+    titles_text = "\n".join(all_titles)
+
+    prompt = f"""あなたはアンデックス㈱（塗装ブース・塗装設備メーカー、主要顧客：自動車補修・工業塗装分野）の経営会議向けに週次ニュースブリーフィングを作成する専門アナリストです。
+
+今週収集されたニュースの見出し一覧を以下に示します。
+
+{titles_text}
+
+これらを踏まえ、アンデックス㈱が今週特に注目すべきビジネストレンド・リスク・機会を 3〜5 点にまとめてください。
+
+【要件】
+- 各ポイントは 60〜120 字で具体的に記述すること
+- 塗装業界に限らず、マクロ経済・エネルギー・規制・顧客産業の動向も視野に入れること
+- 「何が起きているか」だけでなく「アンデックス㈱として何を考え・どう動くべきか」まで踏み込むこと
+- 箇条書き形式で、各項目の冒頭にアイコン（●や▶など）を付けること
+
+回答は日本語の箇条書きのみ（JSON不要）で返してください。"""
+
+    try:
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        digest = response.content[0].text.strip()
+        logger.info("週次総括生成完了: %d 文字", len(digest))
+        return digest
+    except Exception as exc:
+        logger.warning("週次総括生成エラー: %s", exc)
+        return ""
+
+
+# ──────────────────────────────────────────────
 # メイン関数
 # ──────────────────────────────────────────────
 def translate_and_summarize(
