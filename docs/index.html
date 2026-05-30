@@ -9,21 +9,251 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
                          "Noto Sans JP", sans-serif;
-            background: #f8f9fa; color: #1a1a2e; line-height: 1.7;
+            background: #f8f9fa;
+            color: #1a1a2e;
+            line-height: 1.7;
         }
-        .container { max-width: 660px; margin: 0 auto; padding: 40px 20px; }
-        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-        .subtitle { color: #6b7280; font-size: 0.9rem; margin-bottom: 28px; }
-        .empty { text-align: center; padding: 60px 0; color: #9ca3af; font-size: 0.95rem; }
-        footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #6b7280; }
+        .container {
+            max-width: 660px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+        /* 検索エリア */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+        .search-wrap input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .search-wrap .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        #search-status {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+            min-height: 20px;
+        }
+        /* レポート一覧 */
+        .issue-list {
+            list-style: none;
+        }
+        .issue-list li {
+            margin-bottom: 8px;
+        }
+        .issue-list li.hidden {
+            display: none;
+        }
+        .issue-list a {
+            display: block;
+            padding: 14px 20px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #1a1a2e;
+            font-weight: 500;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .issue-list a:hover {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07);
+            border-color: #d1d5db;
+        }
+        .issue-list .date {
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-weight: 400;
+        }
+        .match-count {
+            display: inline-block;
+            margin-left: 8px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 12px;
+            padding: 1px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .match-titles {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .match-titles span {
+            display: inline-block;
+            margin-right: 4px;
+            margin-bottom: 2px;
+            padding: 1px 6px;
+            background: #f0f4ff;
+            border-radius: 4px;
+        }
+        .no-result {
+            text-align: center;
+            padding: 40px 0;
+            color: #9ca3af;
+            font-size: 0.95rem;
+            display: none;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>🎨 塗装業界ウィークリーニュース</h1>
     <p class="subtitle">過去のレポート一覧</p>
-    <p class="empty">まだレポートがありません。次回の自動配信をお待ちください。</p>
-    <footer><p>© 2026 塗装業界ニュース自動まとめツール</p></footer>
+
+    <div class="search-wrap">
+        <span class="icon">🔍</span>
+        <input type="text" id="search-input"
+               placeholder="キーワードで記事を検索（例：BASF、EV、脱炭素）"
+               autocomplete="off">
+    </div>
+    <p id="search-status"></p>
+
+    <ul class="issue-list" id="issue-list">
+                <li data-filename="weekly-news-2026-05-30.html" data-date="2026-05-30" data-label="2026年05月30日号"><a href="weekly-news-2026-05-30.html"><span class="date">2026年05月30日号</span> — 塗装業界ウィークリーニュース</a></li>
+    </ul>
+    <p class="no-result" id="no-result">該当するレポートが見つかりませんでした。</p>
+
+    <footer>
+        <p>© 2026 塗装業界ニュース自動まとめツール</p>
+    </footer>
 </div>
+
+<script>
+(function () {
+    var searchInput = document.getElementById('search-input');
+    var statusEl = document.getElementById('search-status');
+    var noResult = document.getElementById('no-result');
+    var items = document.querySelectorAll('#issue-list li');
+
+    // 検索インデックスを読み込む
+    var indexData = [];
+    fetch('search-index.json?t=' + Date.now())
+        .then(function (r) { return r.json(); })
+        .then(function (data) { indexData = data; })
+        .catch(function () { indexData = []; });
+
+    function normalize(s) {
+        return (s || '').toLowerCase();
+    }
+
+    function search(keyword) {
+        var kw = normalize(keyword.trim());
+
+        if (!kw) {
+            // キーワードなし → 全件表示・詳細非表示
+            items.forEach(function (li) {
+                li.classList.remove('hidden');
+                var detail = li.querySelector('.match-titles');
+                if (detail) detail.remove();
+                var badge = li.querySelector('.match-count');
+                if (badge) badge.remove();
+            });
+            statusEl.textContent = '';
+            noResult.style.display = 'none';
+            return;
+        }
+
+        var matched = 0;
+        items.forEach(function (li) {
+            var filename = li.dataset.filename || '';
+            var entry = indexData.find(function (e) { return e.filename === filename; });
+            var matchedTitles = [];
+
+            if (entry && entry.articles) {
+                matchedTitles = entry.articles.filter(function (a) {
+                    return normalize(a.title).indexOf(kw) !== -1;
+                });
+            }
+
+            // ファイル名(日付)でも検索
+            var dateMatch = normalize(li.dataset.date || '').indexOf(kw) !== -1
+                         || normalize(li.dataset.label || '').indexOf(kw) !== -1;
+
+            var hit = matchedTitles.length > 0 || dateMatch;
+
+            if (hit) {
+                li.classList.remove('hidden');
+                matched++;
+
+                // 既存バッジ・詳細を削除してから再描画
+                var oldBadge = li.querySelector('.match-count');
+                if (oldBadge) oldBadge.remove();
+                var oldDetail = li.querySelector('.match-titles');
+                if (oldDetail) oldDetail.remove();
+
+                if (matchedTitles.length > 0) {
+                    var link = li.querySelector('a');
+                    var badge = document.createElement('span');
+                    badge.className = 'match-count';
+                    badge.textContent = matchedTitles.length + '件';
+                    link.appendChild(badge);
+
+                    // 最大5件のタイトル表示
+                    var detail = document.createElement('div');
+                    detail.className = 'match-titles';
+                    matchedTitles.slice(0, 5).forEach(function (a) {
+                        var sp = document.createElement('span');
+                        sp.textContent = '[' + a.section + '] ' + a.title.slice(0, 40) + (a.title.length > 40 ? '…' : '');
+                        detail.appendChild(sp);
+                    });
+                    link.appendChild(detail);
+                }
+            } else {
+                li.classList.add('hidden');
+            }
+        });
+
+        if (matched === 0) {
+            noResult.style.display = 'block';
+            statusEl.textContent = '';
+        } else {
+            noResult.style.display = 'none';
+            statusEl.textContent = matched + ' 件のレポートがヒットしました';
+        }
+    }
+
+    var timer;
+    searchInput.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () { search(searchInput.value); }, 250);
+    });
+})();
+</script>
 </body>
 </html>
