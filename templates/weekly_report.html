@@ -245,9 +245,15 @@
 <!-- ヘッダー -->
 <header class="header">
     <div class="header-inner">
-        <div style="margin-bottom:10px;">
+        <div style="margin-bottom:12px;">
             <a href="{{ pages_base_url }}/"
-               style="font-size:0.8rem;color:#6b7280;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+               style="display:inline-flex;align-items:center;gap:6px;
+                      font-size:0.85rem;font-weight:600;color:#2563eb;
+                      background:#eff6ff;border:1px solid #bfdbfe;
+                      border-radius:6px;padding:6px 14px;
+                      text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='#dbeafe'"
+               onmouseout="this.style.background='#eff6ff'">
                 ← 過去のレポート一覧
             </a>
         </div>
@@ -270,7 +276,7 @@
 <div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
     <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
         <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
-            🧠 今週のポイント — アンデックス㈱への示唆
+            🧠 今週のポイント
         </h2>
         <ul style="margin:0;padding:0;list-style:none;">
             {% for line in weekly_digest_lines %}
