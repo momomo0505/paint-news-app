@@ -1,0 +1,67 @@
+[
+  {
+    "title": "Testing Various Ways to Waterproof FDM Printed Parts",
+    "description": "Along with layer lines, FDM printers are notorious for being neither air- nor water-tight due to the countless very small gaps between the layers. This is very unfortunate if you are trying to FDM …",
+    "url": "https://hackaday.com/2026/05/30/testing-various-ways-to-waterproof-fdm-printed-parts/",
+    "source": "Hackaday",
+    "published_at": "2026-05-30T14:00:59Z",
+    "image_url": "https://hackaday.com/wp-content/uploads/2026/05/fdm_print_waterproofing_half-baked-research_youtube.jpg",
+    "skip_filter": false,
+    "title_ja": "FDM 3Dプリント部品の防水処理方法の検証",
+    "summary_ja": "FDM（熱溶解積層）3Dプリンターで製造された部品は、積層間の微細な隙間により気密性・水密性に課題がある。この問題を解決するため、様々な防水処理方法が検証されている。積層痕と共に、FDMプリント部品特有の弱点である浸水問題に対する実用的な解決策の研究が進められている。",
+    "category": "technology",
+    "impact_ja": ""
+  },
+  {
+    "title": "BMW’s New Dual-Finish Paint Costs 14,000 Euros. Here’s Why",
+    "description": "For €14,000, you could buy a perfectly sensible Dacia Sandero in Germany. The supermini consistently tops Europe’s sales charts by providing affordable transportation for the masses. When you’re shopping in the full-size luxury sedan segment,...\nFirst publish…",
+    "url": "https://www.bmwblog.com/2026/05/30/bmw-dual-finish-paint-costs-14000-euros/",
+    "source": "BMWBLOG",
+    "published_at": "2026-05-30T07:49:40Z",
+    "image_url": "https://cdn.bmwblog.com/wp-content/uploads/2026/05/2027-BMW-7-Series-Dual-Finish-Tanzanite-Blue-7.jpg",
+    "skip_filter": false,
+    "title_ja": "BMWの新デュアルフィニッシュペイントが1万4千ユーロ、その理由とは",
+    "summary_ja": "BMWが新開発したデュアルフィニッシュペイントオプションの価格が1万4千ユーロ（約230万円）に設定されている。この価格は欧州で人気の小型車ダチア・サンデロ1台分に相当する金額で、高級セダンセグメントでの差別化を図る特殊塗装技術として注目されている。同社は塗装技術の革新により、プレミアムブランドとしての地位をさらに強化する戦略を取っている。",
+    "category": "automotive",
+    "impact_ja": ""
+  },
+  {
+    "title": "Windsor, Ont., manufacturer pivots to 'huge' market in India as Canada tries to strike trade deal",
+    "description": "As India and Canada work toward a free trade deal, a Windsor, Ont., business that manufactures coatings for the automotive rubber industry is also eyeing the Indian market amid uncertainty linked to U.S. tariffs. “We need to be there,\" says the president of G…",
+    "url": "https://www.cbc.ca/news/canada/windsor/india-canada-trade-talks-amid-us-tariff-uncertainty-9.7215412",
+    "source": "CBC News",
+    "published_at": "2026-05-29T10:00:00Z",
+    "image_url": "https://i.cbc.ca/ais/e3e649eb-2789-41c4-8ac8-2c910b6d97b3,1779990272352/full/max/0/default.jpg?im=Crop%2Crect%3D%280%2C378%2C4032%2C2268%29%3BResize%3D620",
+    "skip_filter": false,
+    "title_ja": "カナダ・ウィンザーのコーティングメーカー、米国関税の不確実性でインド市場に進出",
+    "summary_ja": "自動車用ゴム業界向けコーティングを製造するカナダ・ウィンザーの企業が、米国関税の不確実性を背景にインド市場への進出を検討している。インドとカナダの自由貿易協定交渉が進む中、同社社長は「インド市場は巨大で、我々はそこにいる必要がある」と述べている。米国の通商政策変更リスクを受け、カナダ企業が新たな輸出市場を模索する動きが活発化している。",
+    "category": "company",
+    "impact_ja": ""
+  },
+  {
+    "title": "Dulux targets mid-tier paint market",
+    "description": "CAP Plc launches Dulux Spruce, a new mid-tier paint brand, to meet the growing demand for affordable and durable paint solutions in Nigeria. Discover Spruc\n\nRead More: https://punchng.com/dulux-targets-mid-tier-paint-market/",
+    "url": "https://punchng.com/dulux-targets-mid-tier-paint-market/",
+    "source": "The Punch",
+    "published_at": "2026-05-29T01:09:03Z",
+    "image_url": "https://cdn.punchng.com/wp-content/uploads/2026/05/29015721/Dulux.webp",
+    "skip_filter": false,
+    "title_ja": "ダルックス、中級塗料市場をターゲットに",
+    "summary_ja": "CAP Plcがナイジェリアで新しい中級塗料ブランド「Dulux Spruce」を発売。手頃な価格でありながら耐久性のある塗料ソリューションへの需要増加に応えることを目的としている。中間価格帯の塗料市場への参入により、より幅広い顧客層へのアプローチを図る戦略的な動きとなっている。",
+    "category": "company",
+    "impact_ja": ""
+  },
+  {
+    "title": "AkzoNobel rejects €12.5 billion Nippon Paint, Sherwin-Williams takeover offer",
+    "description": "Dulux paint maker AkzoNobel has rejected a massive takeover offer. Rivals Nippon Paint and Sherwin-Williams proposed a €12.5 billion deal. AkzoNobel stated the offer undervalued its business and lacked certainty. The company board continues to back its planne…",
+    "url": "https://economictimes.indiatimes.com/news/international/business/akzonobel-rejects-12-5-billion-nippon-paint-sherwin-williams-takeover-offer/articleshow/131361152.cms",
+    "source": "The Times of India",
+    "published_at": "2026-05-27T18:24:37Z",
+    "image_url": "https://img.etimg.com/thumb/msid-131357687,width-1200,height-630,imgsize-67024,overlay-etmarkets/articleshow.jpg",
+    "skip_filter": false,
+    "title_ja": "アクゾノーベル、日本ペイント・シャーウィン・ウィリアムズによる125億ユーロの買収提案を拒否",
+    "summary_ja": "塗料メーカーのアクゾノーベル（Duluxブランド）は、競合他社である日本ペイントとシャーウィン・ウィリアムズからの125億ユーロ（約2兆円）規模の大型買収提案を拒否した。同社は提案価格が企業価値を過小評価しており、確実性に欠けると判断。取締役会は引き続き独自の事業計画を支持する方針を示している。",
+    "category": "company",
+    "impact_ja": ""
+  }
+]
