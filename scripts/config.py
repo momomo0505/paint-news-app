@@ -389,10 +389,26 @@ CLAUDE_MODEL = "claude-sonnet-4-20250514"
 CLAUDE_MAX_TOKENS = 1024
 
 # ──────────────────────────────────────────────
-# メール送信設定 (Gmail SMTP)
+# メール送信設定 (SMTP 汎用)
 # ──────────────────────────────────────────────
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "")
-GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
+
+# SMTP サーバー設定
+# SMTP_HOST を指定しない場合は Gmail SMTP にフォールバック（後方互換）
+SMTP_HOST: str = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT: int = int(os.environ.get("SMTP_PORT", "587"))
+
+# SMTP 認証ユーザー名（省略時は FROM_EMAIL を使用）
+SMTP_USER: str = os.environ.get("SMTP_USER", "") or FROM_EMAIL
+
+# SMTP パスワード（SMTP_PASSWORD を優先、未設定時は GMAIL_APP_PASSWORD にフォールバック）
+SMTP_PASSWORD: str = (
+    os.environ.get("SMTP_PASSWORD", "")
+    or os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "")
+)
+
+# 後方互換用エイリアス（既存コードが参照している場合のため残す）
+GMAIL_APP_PASSWORD: str = SMTP_PASSWORD
 
 # 送信先メールアドレス（カンマ区切りで複数指定可）
 # 例: "a@example.com,b@example.com,c@example.com"

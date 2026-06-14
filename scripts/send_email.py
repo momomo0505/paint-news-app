@@ -1,11 +1,13 @@
 """
-メール送信モジュール — Gmail SMTP で週間レポートのリンクを通知する
+メール送信モジュール — SMTP で週間レポートのリンクを通知する
 ================================================================
 
 機能:
 - 3セクション構成（競合ニュース / 国内ニュース / 海外ニュース）
 - 海外リンクは Google 翻訳経由に自動変換
-- Gmail SMTP (smtplib) を使用（外部サービス不要）
+- 任意の SMTP サーバーに対応（社内メールサーバー・Gmail 等）
+  - ポート 465: SSL 接続
+  - ポート 587 / その他: STARTTLS 接続
 """
 
 from __future__ import annotations
@@ -19,7 +21,10 @@ from email.mime.text import MIMEText
 from scripts.collect_news import Article
 from scripts.config import (
     FROM_EMAIL,
-    GMAIL_APP_PASSWORD,
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USER,
+    SMTP_PASSWORD,
     NOTIFY_EMAILS,
     PAGES_BASE_URL,
 )
@@ -28,9 +33,6 @@ from scripts.translate_summarize import CATEGORIES
 logger = logging.getLogger(__name__)
 
 JST = timezone(timedelta(hours=9))
-
-GMAIL_SMTP_HOST = "smtp.gmail.com"
-GMAIL_SMTP_PORT = 587
 
 
 def _google_translate_url(url: str) -> str:
@@ -296,8 +298,8 @@ def send_notification(
         raise ValueError("環境変数 FROM_EMAIL を設定してください。")
     if not NOTIFY_EMAILS:
         raise ValueError("環境変数 NOTIFY_EMAIL を設定してください。")
-    if not GMAIL_APP_PASSWORD:
-        raise ValueError("環境変数 GMAIL_APP_PASSWORD を設定してください。")
+    if not SMTP_PASSWORD:
+        raise ValueError("環境変数 SMTP_PASSWORD（または GMAIL_APP_PASSWORD）を設定してください。")
 
     now_jst = datetime.now(JST)
     issue_date = now_jst.strftime("%Y年%m月%d日")
@@ -339,14 +341,20 @@ def send_notification(
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     try:
-        with smtplib.SMTP(GMAIL_SMTP_HOST, GMAIL_SMTP_PORT) as smtp:
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.ehlo()
-            smtp.login(FROM_EMAIL, GMAIL_APP_PASSWORD)
-            smtp.sendmail(FROM_EMAIL, recipients, msg.as_string())
+        # ポート 465 は SSL、それ以外は STARTTLS で接続
+        if SMTP_PORT == 465:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
+                smtp.login(SMTP_USER, SMTP_PASSWORD)
+                smtp.sendmail(FROM_EMAIL, recipients, msg.as_string())
+        else:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
+                smtp.ehlo()
+                smtp.starttls()
+                smtp.ehlo()
+                smtp.login(SMTP_USER, SMTP_PASSWORD)
+                smtp.sendmail(FROM_EMAIL, recipients, msg.as_string())
 
-        logger.info("メール送信成功: to=%s", ", ".join(recipients))
+        logger.info("メール送信成功: host=%s, to=%s", SMTP_HOST, ", ".join(recipients))
         return True
 
     except smtplib.SMTPAuthenticationError as exc:
