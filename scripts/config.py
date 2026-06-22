@@ -385,7 +385,7 @@ COMPETITOR_SITES = [
 # Claude API 設定
 # ──────────────────────────────────────────────
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+CLAUDE_MODEL = "claude-sonnet-4-6"
 CLAUDE_MAX_TOKENS = 1024
 
 # ──────────────────────────────────────────────
