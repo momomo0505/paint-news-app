@@ -79,6 +79,29 @@ SEARCH_KEYWORD_GROUPS = [
     '"wind power" OR "wind energy" installation OR "offshore wind" capacity 2026',
     # 造船・船舶業界の景気動向（船体塗装需要）
     'shipbuilding orders OR "ship construction" market OR "dry dock" 2026',
+    # ── 新規追加：顧客業界の幅広い動向把握 ──────────────
+    # 鉄鋼業界（板・形鋼の生産・価格動向）
+    '"steel industry" OR "steelmaker" OR "steel production" OR "steel market" OR "steel demand" 2026',
+    # 制御盤・分電盤・スイッチギア業界
+    '"control panel" manufacturer OR "switchgear" industry OR "distribution board" market OR "electrical enclosure" manufacturer 2026',
+    # 半導体製造装置（TEL・ASML・Applied Materials等。半導体メーカー自体は除外）
+    '"semiconductor equipment" OR "wafer fabrication equipment" OR "Tokyo Electron" OR "Applied Materials" OR ASML OR "Lam Research" market 2026',
+    # 造船業界・より幅広い動向
+    'shipbuilding industry OR "ship order" OR "vessel construction" OR shipyard market 2026',
+    # 航空機業界・機体製造（川重・新明和・三菱など）
+    '"aircraft manufacturing" OR "aerospace manufacturing" OR "Kawasaki" aircraft OR "Mitsubishi Aircraft" OR "Shin Meiwa" 2026',
+    # 航空機内装・整備（JAMCO・JAL・ANA・Airbus MRO）
+    'JAMCO OR "aircraft interior" OR "aircraft MRO" OR "aviation maintenance" OR "aircraft overhaul" 2026',
+    # 鉄道業界（国内外・車両更新・インフラ投資）
+    '"railway industry" OR "rail market" OR "rolling stock" OR "train manufacturer" OR "metro" procurement 2026',
+    # 防衛・防衛産業（武器輸出・防衛装備品）
+    '"defense industry" OR "defence industry" OR "military equipment" OR "weapons export" OR "defense budget" OR "defense spending" 2026',
+    # 架装業界（特装車・上物製造）
+    '"truck body" manufacturer OR "special vehicle" OR "vehicle upfitter" OR "special purpose vehicle" OR "vehicle superstructure" 2026',
+    # 建設機械業界（より幅広い市場動向）
+    '"construction machinery" industry OR "construction equipment" market OR "heavy machinery" demand OR Komatsu OR Caterpillar 2026',
+    # バッテリー・全固体電池業界
+    '"solid-state battery" OR "all-solid-state battery" OR "battery industry" OR "EV battery" OR "battery market" OR "energy storage" 2026',
 ]
 
 # 特定ニュースサイトを対象にした Google News RSS 検索（国内一般メディア）
@@ -97,15 +120,12 @@ DOMESTIC_SITE_SPECIFIC_KEYWORDS = [
 ]
 
 # 塗装業界専門サイト（直接スクレイピングで全記事を収集）
+# COATAZ はクライアントサイドレンダリング（HTMLにリンクが含まれない）ため
+# requests + BeautifulSoup では収集できず、対象から除外している。
 INDUSTRY_NEWS_SITES = [
     {
         "name": "WEB塗料報知",
         "url": "https://www.e-toryo.co.jp/info/",
-        "language": "ja",
-    },
-    {
-        "name": "COATAZ",
-        "url": "https://coataz.com/",
         "language": "ja",
     },
 ]
@@ -187,14 +207,70 @@ DOMESTIC_RSS_KEYWORDS = [
     # 造船・船舶業界（船体塗装需要）
     "造船 受注 市場 動向",
     "船舶 建造 国内 景気",
+    # ── 新規追加：顧客業界の幅広い動向把握 ──────────────
+    # 鉄鋼業界
+    "鉄鋼業界 動向 市場",
+    "鉄鋼メーカー 受注 生産 業績",
+    "日本製鉄 JFEスチール 神戸製鋼 動向",
+    # 制御盤・分電盤業界
+    "制御盤業界 市場 動向",
+    "分電盤 配電盤 市場 メーカー",
+    "制御盤メーカー 受注 設備投資",
+    # 半導体製造装置業界（半導体メーカーではなく装置メーカー）
+    "半導体製造装置 市場 動向",
+    "東京エレクトロン 業績 受注",
+    "半導体装置 国内メーカー 受注 設備",
+    # 造船業界（幅広い動向）
+    "造船業界 受注 景気 市場",
+    "国内造船 新造船 建造量",
+    # 航空機業界・機体製造
+    "川崎重工 新明和工業 三菱 航空機 受注",
+    "航空機製造 機体 国内 動向",
+    "航空宇宙 製造 設備投資 市場",
+    # 航空機内装・MRO（整備・修理・オーバーホール）
+    "JAMCO 航空機 内装 動向",
+    "JAL ANA 航空機整備 MRO 投資",
+    "航空機 MRO 整備 市場 動向",
+    # 鉄道業界（国内外）
+    "鉄道業界 動向 市場 受注",
+    "鉄道車両メーカー 受注 製造 動向",
+    "海外鉄道 インフラ 受注 日本",
+    # 防衛関連業界
+    "防衛産業 動向 受注 市場",
+    "武器輸出 防衛装備品 解禁",
+    "防衛関連 設備投資 受注 景気",
+    "防衛省 装備品 調達 動向",
+    # 架装業界（特装車・上物）
+    "架装業界 特装車 動向 市場",
+    "架装メーカー 受注 特装",
+    "特装車 消防車 高所作業車 架装",
+    # 建設機械業界（幅広い動向）
+    "建設機械業界 市場 景気 動向",
+    "コマツ 日立建機 住友建機 業績",
+    "建機 需要 受注 国内外",
+    # バッテリー・全固体電池業界
+    "全固体電池 市場 開発 量産",
+    "バッテリー業界 電池 市場 動向",
+    "EV電池 全固体 トヨタ パナソニック 開発",
+    "蓄電池 市場 設備投資 動向",
 ]
 
-# 1キーワードグループあたりの最大取得件数
+# NewsAPI の1キーワードグループあたりの取得件数
 ARTICLES_PER_QUERY = 10
 
-# 最終的にまとめに含める記事数の上限（各カテゴリ）
-MAX_ARTICLES = 25           # 海外ニュース上限
-MAX_DOMESTIC_ARTICLES = 35  # 国内ニュース上限（新規ソース追加に伴い拡大）
+# Google News RSS は検索語の一致度に関わらず最大100件を返し、後半は
+# 「そのサイトの新着記事」で埋まる。上位のみ採用して無関係記事の流入を防ぐ。
+RSS_ITEMS_PER_KEYWORD = 12
+SITE_SPECIFIC_ITEMS_PER_KEYWORD = 15
+
+# 関連性フィルタにかける記事プールの上限。
+# フィルタ通過率は1割前後のため、最終掲載数より十分多く確保する。
+DOMESTIC_POOL_SIZE = 240
+OVERSEAS_POOL_SIZE = 150
+
+# 最終的にまとめに含める記事数の上限（関連性フィルタ通過後に適用）
+MAX_ARTICLES = 25
+MAX_DOMESTIC_ARTICLES = 25
 MAX_COMPETITOR_ITEMS = 30
 
 # 検索対象期間（日数 ─ 過去30日間）

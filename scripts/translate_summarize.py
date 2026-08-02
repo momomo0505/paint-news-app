@@ -187,14 +187,18 @@ def _call_claude_with_retry(
 def filter_relevant_articles(
     articles: list[Article],
     language: str = "en",
+    batch_size: int = 50,
 ) -> list[Article]:
     """
-    Claude API を使って塗装業界に無関係な記事を一括除外する。
-    全記事をまとめて1回のAPIコールで判定するため低コスト。
+    Claude API を使って塗装業界に無関係な記事を除外する。
+
+    収集した記事プールは数百件になるため、一定件数ごとに分割して判定する。
+    1回のプロンプトに詰め込みすぎると判定精度と応答の安定性が落ちる。
 
     Args:
         articles: フィルタ対象の記事リスト
         language: "en"（海外）または "ja"（国内）
+        batch_size: 1回の判定に含める記事数
 
     Returns:
         list[Article]: 業界関連記事のみ
@@ -208,6 +212,29 @@ def filter_relevant_articles(
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+    kept: list[Article] = []
+    for start in range(0, len(articles), batch_size):
+        batch = articles[start: start + batch_size]
+        kept.extend(_filter_relevant_batch(client, batch, language))
+        if start + batch_size < len(articles):
+            time.sleep(1.0)
+
+    logger.info(
+        "関連性フィルタ（%s）合計: %d件 → %d件（除外: %d件）",
+        language,
+        len(articles),
+        len(kept),
+        len(articles) - len(kept),
+    )
+    return kept
+
+
+def _filter_relevant_batch(
+    client: anthropic.Anthropic,
+    articles: list[Article],
+    language: str,
+) -> list[Article]:
+    """関連性フィルタの1バッチ分を判定する。"""
     items_text = "\n".join(
         f"{i + 1}. {a.title} | {a.description[:120]}"
         for i, a in enumerate(articles)
@@ -254,18 +281,25 @@ def filter_relevant_articles(
 - 労働力不足・人材採用・賃金動向（製造・工業塗装業界の経営課題）
 - 中国・インド・EU・米国の塗装・製造業動向
 
-需要先メーカーの景気動向（塗装需要に直結するため含める）:
+需要先メーカー・顧客業界の景気動向（塗装需要に直結するため含める）:
 - 自動車メーカー（トヨタ・ホンダ・日産・VW・GM等）の生産台数・販売動向・設備投資
-- 航空機メーカー（ボーイング・エアバス・三菱・川崎重工等）の受注・製造動向・MRO市場
+- 航空機メーカー（ボーイング・エアバス・三菱・川崎重工・新明和工業等）の受注・製造動向
+- 航空機内装（JAMCO等）・MRO（JAL・ANAの整備・修理・オーバーホール）市場
 - 建設機械メーカー（コマツ・キャタピラー・日立建機等）の出荷・受注・市場動向
-- 鉄道車両メーカー（日本車輌・川崎車両・アルストム・シーメンス等）の受注・車両更新動向
+- 鉄道車両メーカー（日本車輌・川崎車両・アルストム・シーメンス・CRRC等）の受注・車両更新
 - 風力発電・洋上風力の設備投資・新設・導入動向（国内外問わず）
 - 造船・船舶業界の受注・建造動向（国内外問わず）
+- 鉄鋼業界（日本製鉄・JFEスチール・神戸製鋼等）の生産・受注・市場動向（鉄鋼製品は塗装対象）
+- 制御盤・分電盤・配電盤メーカーの市場動向（電気機器は塗装・防錆対象）
+- 半導体製造装置メーカー（東京エレクトロン・ASML等）の受注・設備投資（装置製造に塗装工程あり）
+- 防衛産業・防衛装備品（武器輸出・防衛予算・航空機・艦艇・装甲車等）の受注・市場動向
+- 架装業界（特装車・消防車・高所作業車・タンクローリー等の上物製造）の動向
+- バッテリー・全固体電池業界（トヨタ・パナソニック・CATL等）の開発・量産動向
 
 【判断が難しい場合の基準】
 「外壁塗装」「屋根塗装」「住宅塗装」「塗り替え」が主テーマ → 除外
 「板金塗装」「工業塗装」「防食塗装」「塗装設備」が主テーマ → 含める
-「自動車メーカー・航空・建機・鉄道・風力の生産/受注/景気」が主テーマ → 含める
+「自動車・航空・建機・鉄道・風力・造船・鉄鋼・防衛・架装・バッテリーの生産/受注/景気」が主テーマ → 含める
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
@@ -320,12 +354,25 @@ Market & business:
 Customer industry trends (INCLUDE — directly affects coating demand):
 - Automotive manufacturer production volumes, sales trends, capital investment
   (Toyota, Honda, Nissan, Volkswagen, GM, Stellantis, Ford, Hyundai, etc.)
-- Aircraft manufacturer orders and production trends (Boeing, Airbus, Mitsubishi, Kawasaki)
-- MRO / aircraft maintenance, repair, overhaul market
+- Aircraft manufacturer orders and production trends (Boeing, Airbus, Mitsubishi, Kawasaki, Shin Meiwa)
+- Aircraft interior manufacturers (JAMCO, etc.)
+- MRO / aircraft maintenance, repair, overhaul market (JAL, ANA, Airbus MRO, etc.)
 - Construction equipment manufacturer orders/shipments (Komatsu, Caterpillar, Hitachi Construction, CNH)
 - Railway vehicle manufacturer orders and fleet renewal (Alstom, Siemens, Bombardier, CRRC, Kawasaki, Nippon Sharyo)
 - Wind power / offshore wind installation and capacity investment trends (global)
 - Shipbuilding industry orders and vessel construction trends (global)
+- Steel industry production, market trends, major steelmakers (Nippon Steel, JFE, Kobe Steel, POSCO, ArcelorMittal)
+  (Steel products are direct coating targets — INCLUDE)
+- Control panel / switchgear / distribution board manufacturers and market trends
+  (Electrical enclosures are coated for corrosion protection — INCLUDE)
+- Semiconductor manufacturing equipment makers (Tokyo Electron, ASML, Applied Materials, Lam Research)
+  (Equipment manufacturing involves coating processes — INCLUDE)
+- Defense industry: weapons exports, defense budgets, military aircraft, naval vessels, armored vehicles
+  (Defense equipment requires specialized coatings — INCLUDE)
+- Vehicle body builder / truck body / special vehicle industry (fire trucks, aerial work platforms, tank trucks)
+  (Special vehicles require industrial painting — INCLUDE)
+- Battery / solid-state battery industry (Toyota, Panasonic, CATL, Samsung SDI)
+  (Battery manufacturing equipment and casings require coatings — INCLUDE)
 
 記事リスト（番号|タイトル|説明）:
 {items_text}
@@ -337,29 +384,25 @@ Return numbers only, no other text."""
     try:
         response = client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=200,
+            max_tokens=800,
             messages=[{"role": "user", "content": prompt}],
         )
         numbers_text = response.content[0].text.strip()
-        logger.info("関連性フィルタ（%s）結果: %s", language, numbers_text)
+        logger.info("関連性フィルタ（%s）バッチ結果: %s", language, numbers_text[:200])
 
         indices = [
             int(n.strip()) - 1
-            for n in numbers_text.split(",")
+            for n in numbers_text.replace("，", ",").split(",")
             if n.strip().isdigit()
         ]
         filtered = [articles[i] for i in indices if 0 <= i < len(articles)]
         logger.info(
-            "関連性フィルタ（%s）: %d件 → %d件（除外: %d件）",
-            language,
-            len(articles),
-            len(filtered),
-            len(articles) - len(filtered),
+            "  バッチ（%s）: %d件 → %d件", language, len(articles), len(filtered)
         )
         return filtered
 
     except Exception as exc:
-        logger.error("関連性フィルタエラー（フォールバック: 全件返却）: %s", exc)
+        logger.error("関連性フィルタエラー（このバッチは全件通過）: %s", exc)
         return articles
 
 
@@ -436,11 +479,11 @@ Return numbers only, no other text."""
     try:
         response = client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=300,
+            max_tokens=800,
             messages=[{"role": "user", "content": prompt}],
         )
         numbers_text = response.content[0].text.strip()
-        logger.info("重複除去（%s）結果: %s", language, numbers_text)
+        logger.info("重複除去（%s）結果: %s", language, numbers_text[:200])
 
         indices = [
             int(n.strip()) - 1
@@ -463,13 +506,20 @@ Return numbers only, no other text."""
         return url_unique
 
 
-def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
+def summarize_domestic_articles(
+    articles: list[Article],
+    batch_size: int = 10,
+) -> list[Article]:
     """
-    国内ニュース記事を Claude API で一括要約する（1〜2文）。
+    国内ニュース記事を Claude API で要約する（1〜2文）。
     title_ja と summary_ja を設定して返す。
+
+    一度に多数の記事を要約させると応答が max_tokens に達して JSON が途中で
+    途切れるため、一定件数ごとに分割して要約する。
 
     Args:
         articles: 国内ニュース記事リスト（日本語）
+        batch_size: 1回の要約に含める記事数
 
     Returns:
         list[Article]: summary_ja が設定された記事リスト
@@ -486,6 +536,21 @@ def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+    for start in range(0, len(articles), batch_size):
+        batch = articles[start: start + batch_size]
+        _summarize_domestic_batch(client, batch)
+        if start + batch_size < len(articles):
+            time.sleep(1.0)
+
+    logger.info("国内記事要約完了: %d件", len(articles))
+    return articles
+
+
+def _summarize_domestic_batch(
+    client: anthropic.Anthropic,
+    articles: list[Article],
+) -> None:
+    """国内記事1バッチ分を要約し、各記事に summary_ja を設定する。"""
     items_text = "\n".join(
         f"{i + 1}. タイトル: {a.title}\n   詳細: {a.description[:200]}"
         for i, a in enumerate(articles)
@@ -504,7 +569,7 @@ def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
     try:
         response = client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=2000,
+            max_tokens=4000,
             messages=[{"role": "user", "content": prompt}],
         )
         text = response.content[0].text.strip()
@@ -529,15 +594,11 @@ def summarize_domestic_articles(articles: list[Article]) -> list[Article]:
             article.title_ja = article.title
             article.summary_ja = summary_map.get(i + 1, article.description[:120] or "")
 
-        logger.info("国内記事要約完了: %d件", len(articles))
-
     except Exception as exc:
-        logger.error("国内記事要約エラー（フォールバック使用）: %s", exc)
+        logger.error("国内記事要約エラー（このバッチはフォールバック）: %s", exc)
         for article in articles:
             article.title_ja = article.title
             article.summary_ja = article.description[:150] if article.description else ""
-
-    return articles
 
 
 # ──────────────────────────────────────────────

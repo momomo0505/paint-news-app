@@ -27,7 +27,7 @@ from pathlib import Path
 
 from scripts.check_competitors import check_all_competitors
 from scripts.collect_news import Article, collect_domestic_news, collect_news, collect_self_mention_news
-from scripts.config import DOCS_DIR, LOG_LEVEL
+from scripts.config import DOCS_DIR, LOG_LEVEL, MAX_ARTICLES, MAX_DOMESTIC_ARTICLES
 
 # 自社メンション履歴ファイルパス
 SELF_MENTION_HISTORY_PATH = DOCS_DIR / "self_mention_history.json"
@@ -261,6 +261,12 @@ def run_pipeline(
                 domestic_articles = deduplicate_articles(domestic_articles, language="ja")
                 logger.info("重複除去後: %d件", len(domestic_articles))
 
+            # 掲載件数の上限はフィルタ通過後に適用する
+            # （先に切ると無関係な新着記事で枠が埋まり、関連記事が押し出される）
+            if len(domestic_articles) > MAX_DOMESTIC_ARTICLES:
+                domestic_articles = domestic_articles[:MAX_DOMESTIC_ARTICLES]
+                logger.info("国内ニュース上限適用: %d件", len(domestic_articles))
+
             if domestic_articles:
                 logger.info("国内ニュース一括要約中...")
                 domestic_articles = summarize_domestic_articles(domestic_articles)
@@ -318,7 +324,13 @@ def run_pipeline(
         if overseas_articles:
             logger.info("海外ニュース重複除去中（%d件）...", len(overseas_articles))
             overseas_articles = deduplicate_articles(overseas_articles, language="en")
-            logger.info("重複除去後: %d件 → 翻訳・要約開始", len(overseas_articles))
+            logger.info("重複除去後: %d件", len(overseas_articles))
+
+            if len(overseas_articles) > MAX_ARTICLES:
+                overseas_articles = overseas_articles[:MAX_ARTICLES]
+                logger.info("海外ニュース上限適用: %d件", len(overseas_articles))
+
+            logger.info("翻訳・要約開始: %d件", len(overseas_articles))
             overseas_articles = translate_and_summarize(overseas_articles)
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 

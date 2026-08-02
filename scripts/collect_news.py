@@ -34,8 +34,10 @@ from scripts.config import (
     DOMESTIC_SITE_SPECIFIC_KEYWORDS,
     INDUSTRY_NEWS_SITES,
     ARTICLES_PER_QUERY,
-    MAX_ARTICLES,
-    MAX_DOMESTIC_ARTICLES,
+    RSS_ITEMS_PER_KEYWORD,
+    SITE_SPECIFIC_ITEMS_PER_KEYWORD,
+    DOMESTIC_POOL_SIZE,
+    OVERSEAS_POOL_SIZE,
     SEARCH_DAYS_BACK,
     EXCLUDED_DOMAINS,
     SELF_MENTION_KEYWORDS,
@@ -233,8 +235,11 @@ def collect_news() -> list[Article]:
     全キーワードグループからニュースを収集し、
     重複排除・ソート済みの記事リストを返す。
 
+    ここでは関連性フィルタ前の「プール」を返す。最終的な掲載件数の絞り込みは
+    フィルタ通過後に呼び出し側（main）で行う。
+
     Returns:
-        list[Article]: 最大 MAX_ARTICLES 件の記事リスト（新しい順）
+        list[Article]: 最大 OVERSEAS_POOL_SIZE 件の記事リスト（新しい順）
     """
     if not NEWSAPI_KEY:
         logger.error("NEWSAPI_KEY が設定されていません。")
@@ -273,9 +278,8 @@ def collect_news() -> list[Article]:
 
     unique_articles.sort(key=_parse_date, reverse=True)
 
-    # 上限数に制限
-    result = unique_articles[:MAX_ARTICLES]
-    logger.info("最終記事数: %d 件", len(result))
+    result = unique_articles[:OVERSEAS_POOL_SIZE]
+    logger.info("海外プール件数（フィルタ前）: %d 件", len(result))
 
     return result
 
@@ -307,10 +311,13 @@ def collect_domestic_news() -> list[Article]:
     収集元:
     - Google News RSS（汎用キーワード検索）
     - Google News RSS（日経・47ニュース・CBC・TBS・FNN サイト特化検索）
-    - WEB塗料報知・COATAZ 直接スクレイピング
+    - 業界専門サイトの直接スクレイピング
+
+    ここでは関連性フィルタ前の「プール」を返す。最終的な掲載件数の絞り込みは
+    フィルタ通過後に呼び出し側（main）で行う。
 
     Returns:
-        list[Article]: 最大 MAX_DOMESTIC_ARTICLES 件の記事リスト（新しい順）
+        list[Article]: 最大 DOMESTIC_POOL_SIZE 件の記事リスト（新しい順）
     """
     JST = timezone(timedelta(hours=9))
     cutoff = datetime.now(JST) - timedelta(days=SEARCH_DAYS_BACK)
@@ -335,8 +342,9 @@ def collect_domestic_news() -> list[Article]:
             logger.warning("RSS 取得エラー (%s): %s", keyword, exc)
             continue
 
-        entries = getattr(feed, "entries", [])
-        logger.info("  取得: %d 件", len(entries))
+        all_entries = getattr(feed, "entries", [])
+        entries = all_entries[:RSS_ITEMS_PER_KEYWORD]
+        logger.info("  取得: %d 件（応答 %d 件）", len(entries), len(all_entries))
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
@@ -393,8 +401,8 @@ def collect_domestic_news() -> list[Article]:
             return datetime.min.replace(tzinfo=timezone.utc)
 
     unique_articles.sort(key=_sort_key, reverse=True)
-    result = unique_articles[:MAX_DOMESTIC_ARTICLES]
-    logger.info("国内最終記事数: %d 件", len(result))
+    result = unique_articles[:DOMESTIC_POOL_SIZE]
+    logger.info("国内プール件数（フィルタ前）: %d 件", len(result))
     return result
 
 
@@ -457,8 +465,9 @@ def collect_site_specific_domestic_news() -> list[Article]:
             logger.warning("RSS 取得エラー (%s): %s", keyword[:40], exc)
             continue
 
-        entries = getattr(feed, "entries", [])
-        logger.info("  取得: %d 件", len(entries))
+        all_entries = getattr(feed, "entries", [])
+        entries = all_entries[:SITE_SPECIFIC_ITEMS_PER_KEYWORD]
+        logger.info("  取得: %d 件（応答 %d 件）", len(entries), len(all_entries))
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
@@ -500,8 +509,11 @@ def collect_site_specific_domestic_news() -> list[Article]:
 
 def collect_industry_site_news() -> list[Article]:
     """
-    塗装業界専門サイト（WEB塗料報知・COATAZ）を直接スクレイピングして
-    最新記事を収集する。
+    塗装業界専門サイトを直接スクレイピングして最新記事を収集する。
+
+    記事一覧は「1記事＝1ブロック（li / article）」で構成され、そのブロック内に
+    日付・カテゴリリンク・記事リンクが同居している。記事リンク単体の親要素には
+    日付が含まれないため、ブロック単位で日付とタイトルを取り出す。
 
     Returns:
         list[Article]: 取得した記事リスト（重複排除前）
@@ -524,29 +536,36 @@ def collect_industry_site_news() -> list[Article]:
             logger.warning("%s: ページ取得失敗: %s", name, exc)
             continue
 
-        # リンクと日付を含むアイテムを抽出（check_competitors.py と同様のアプローチ）
         found = 0
+        skipped_old = 0
         seen_urls: set[str] = set()
 
-        for a_tag in soup.find_all("a", href=True):
-            href = a_tag["href"]
-            link = urljoin(url, href)
+        for block in soup.find_all(["li", "article"]):
+            block_text = block.get_text(separator=" ", strip=True)
+            date = _scrape_parse_date(block_text)
+            if date is None:
+                continue
+
+            links = block.find_all("a", href=True)
+            if not links:
+                continue
+
+            # カテゴリリンク（「企業」「建築・土木」等）と記事リンクが混在するため、
+            # ブロック内で最も長いリンクテキストを記事タイトルとみなす。
+            title_tag = max(links, key=lambda a: len(a.get_text(strip=True)))
+            title = title_tag.get_text(strip=True)
+            if len(title) < 8:
+                continue
+
+            link = urljoin(url, title_tag["href"])
             if link in seen_urls:
                 continue
-
-            title = a_tag.get_text(strip=True)
-            if len(title) < 5:
-                continue
-
-            # 周辺テキストから日付を探す
-            parent = a_tag.parent
-            parent_text = parent.get_text(separator=" ", strip=True) if parent else ""
-            date = _scrape_parse_date(parent_text) or _scrape_parse_date(title)
-
-            if date is None or date < cutoff:
-                continue
-
             seen_urls.add(link)
+
+            if date < cutoff:
+                skipped_old += 1
+                continue
+
             all_articles.append(
                 Article(
                     title=title[:200],
@@ -559,7 +578,7 @@ def collect_industry_site_news() -> list[Article]:
             )
             found += 1
 
-        logger.info("  %s: %d 件取得", name, found)
+        logger.info("  %s: %d 件取得（期間外で除外 %d 件）", name, found, skipped_old)
         time.sleep(1.0)
 
     logger.info("業界専門サイト取得（重複排除前）: %d 件", len(all_articles))
