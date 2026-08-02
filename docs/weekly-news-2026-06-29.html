@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年06月29日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <div style="margin-bottom:12px;">
+            <a href="https://momomo0505.github.io/paint-news-app/"
+               style="display:inline-flex;align-items:center;gap:6px;
+                      font-size:0.85rem;font-weight:600;color:#2563eb;
+                      background:#eff6ff;border:1px solid #bfdbfe;
+                      border-radius:6px;padding:6px 14px;
+                      text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='#dbeafe'"
+               onmouseout="this.style.background='#eff6ff'">
+                ← 過去のレポート一覧
+            </a>
+        </div>
+        <h1>🎨 塗装業界ニュースレポート</h1>
+        <div class="header-meta">
+            <span>📅 2026年06月29日</span>
+            
+            <span>🏭 競合: 24件</span>
+            <span>🇯🇵 国内: 6件</span>
+            <span>🌍 海外: 0件</span>
+            <span>📆 対象: 2026/05/30 〜 2026/06/29</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════ -->
+<!-- 週次総括コメント                       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
+        <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
+            🧠 今週のポイント
+        </h2>
+        <ul style="margin:0;padding:0;list-style:none;">
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● 船舶・インフラ向け防食塗料の海外展開が加速：日本ペイントマリンが船底防汚で海外深耕を推進、中国塗料はタイ合弁でインフラ向け重防食市場を開拓と、国内大手が海外需要の取り込みを本格化している。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● 資材高騰・供給不足が塗装現場を直撃：ナフサ不足を背景に農業・塗装用資材の価格高騰と品薄が深刻化しており、現場事業者がコスト削減と代替対応に迫られる厳しい経営環境が浮き彫りになっている。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● 自動車補修塗装の自動化・デジタル化が加速：BASFがロボット塗装とデジタル技術を融合させたボディショップ自動化ソリューションを推進しており、補修塗装領域でも省人化・品質均一化の潮流が鮮明になっている。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● 耐UV・耐腐食コーティング市場の中長期成長が鮮明：耐紫外線コーティングおよび周期腐食試験機の世界市場が2032年に向けて拡大予測が示され、性能・耐久性重視の高機能塗料需要が構造的に高まっている。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● 競合各社がガバナンス・IR情報を集中開示：大気社・トリニティ工業が株主総会結果や有価証券報告書を相次いで公開しており、業界大手が投資家への透明性強化と中期戦略の対外発信を強める局面に入っている。
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 0: 弊社関連記事（取材・掲載）  -->
+<!-- ══════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">バンザイ</span>
+        <h2 class="article-title">会社案内</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月26日</span>
+        <a href="https://www.banzai.co.jp/company.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">バンザイ</span>
+        <h2 class="article-title">お知らせサービス関連帳票電子化のご案内</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月26日</span>
+        <a href="https://www.banzai.co.jp//news/news_detail211" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.25IR臨時報告書（第81回定時株主総会　議決権行使結果）を掲載しました</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月25日</span>
+        <a href="https://www.taikisha.co.jp/ir/stock/meeting/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.25お知らせコーポレート・ガバナンス報告書を更新しました</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月25日</span>
+        <a href="https://www.taikisha.co.jp/corporate/governance/#anc-02" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.24IR第81期 株主通信を掲載しました[4.4 MB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月24日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260624.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">第92期定時株主総会決議ご通知</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月23日</span>
+        <a href="https://www.trinityind.co.jp/wp/wp-content/uploads/2026/06/92_resolution.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">企業情報 ご挨拶 経営理念・行動指針 TRINITY VISION 2030・中期経営計画 会社概要・役員一覧 会社の沿革 事業所 関係会社 会社紹介動画 事業</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月23日</span>
+        <a href="https://www.trinityind.co.jp/news/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">マルテーデコペンツールシリーズ　エイジングローラー・エイジングブロックのご紹介！ 2026.06.23 #新製品情報</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月23日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=320" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">2026年3月期有価証券報告書</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月18日</span>
+        <a href="https://www.trinityind.co.jp/wp/wp-content/uploads/2026/06/sec202603.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.17IR第81期 有価証券報告書および内部統制報告書（2025年4月1日 ‐ 2026年3月31日）を掲載しました</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月17日</span>
+        <a href="https://www.taikisha.co.jp/ir/library/edinet/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.17IR「SOMPOサステナビリティ・インデックス」の構成銘柄に9年連続選定</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月17日</span>
+        <a href="https://www.taikisha.co.jp/news/20260617_931.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.06.17 【出展のお知らせ】2026年6月24日、25日　第7回九州猛暑対策展　㏌マリンメッセ福岡　A館</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月17日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e3%80%90%e5%87%ba%e5%b1%95%e3%81%ae%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%80%912026%e5%b9%b46%e6%9c%8824%e6%97%a5%e3%80%8125%e6%97%a5%e3%80%80%e7%ac%ac7%e5%9b%9e%e4%b9%9d%e5%b7%9e%e7%8c%9b%e6%9a%91/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">NEWマルテー水性ペイントキャッチャーのご紹介！ 2026.06.17 #新製品情報</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月17日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=319" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">イヤサカ</span>
+        <h2 class="article-title">2026.06.11イベント「ジャパン トラックショー 2026」ブース実績動画</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月11日</span>
+        <a href="https://www.iyasaka.co.jp/news/20260611/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.06.11 ☆第4回九州 農業WEEK(通称：J-AGRI KYUSHU) inグランメッセ熊本　2026年5月27日～29日</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月11日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e2%98%86%e7%ac%ac4%e5%9b%9e%e4%b9%9d%e5%b7%9e-%e8%be%b2%e6%a5%adweek%e9%80%9a%e7%a7%b0%ef%bc%9aj-agri-kyushu-in%e3%82%b0%e3%83%a9%e3%83%b3%e3%83%a1%e3%83%83%e3%82%bb%e7%86%8a%e6%9c%ac%e3%80%802026/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.10お知らせインドネシアグループ会社におけるメールアカウントへの不正アクセス等について[112.8 KB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月10日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260610.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">クイックデッキ・クイックラップ実演研修会開催のご案内 2026.06.08 #お知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月08日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=318" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">Paint on ICE に参加しました！ 2026.06.08 #お知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月08日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=316" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">サンエス工業</span>
+        <h2 class="article-title">2026.06.08お知らせ2027年卒業予定の学生向け会社説明・工場見学会を開催します。</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月08日</span>
+        <a href="https://www.sanesu-ind.co.jp/news/2598/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.04IR定時株主総会決議ご通知の郵送廃止のお知らせ[420.7 KB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月04日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260604.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">イヤサカ</span>
+        <h2 class="article-title">2026.06.02その他SHOP REPORT Vol.13 発刊のお知らせ【株式会社三野ボデー 観音寺坂本店 様】</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月02日</span>
+        <a href="https://www.iyasaka.co.jp/news/20260602/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.06.02リリース大気社グループ、理念体系を刷新</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月02日</span>
+        <a href="https://www.taikisha.co.jp/news/20260602_924.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">ERATEC ZEROのご紹介！ 2026.06.02 #新製品情報</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月02日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=317" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">第92期定時株主総会招集ご通知</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年06月01日</span>
+        <a href="https://www.trinityind.co.jp/wp/wp-content/uploads/2026/05/92_convened.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">中国塗料・タイ合弁、重防食 インフラ関連に的 - 化学工業日報 電子版</h2>
+    </div>
+    
+    <p class="article-summary">中国塗料はタイの合弁会社を通じて、重防食塗料分野でインフラ関連市場への展開を強化している。東南アジアにおける防食塗料需要の取り込みを狙った戦略的な動きとして注目される。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">化学工業日報 電子版 — 2026年06月29日</span>
+        <a href="https://news.google.com/rss/articles/CBMiU0FVX3lxTFBjRDVyamtudlhZLVJfSFVPdndNVXVYM1dvSGhqNFcwQWt4VHhYRklnS1BYTjNYUmxSTk9DaWgzNkZVcU1taWNTMUljWG9WVmJfUjdz?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">インタビュー／日本ペイントマリン執行役員・松嶋貴明氏 船底防汚塗料で海外深耕 - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントマリンの松嶋貴明執行役員が、船底防汚塗料の海外市場深耕戦略について語った。国際競争が激化する船舶塗料市場において、海外展開の加速が重要課題となっている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年06月29日</span>
+        <a href="https://news.google.com/rss/articles/CBMiW0FVX3lxTE9UVzhRb2xEa1Z2ZHRKSEFIM2NkUDBHcnVXcGNPMVpaZTRCSjlsdHdER1BUSzdYN3lUZ05saENrLUZWM3dfQ1hBQUkwcmdhVEFuUWRreW01UlM3R28?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">ナフサ不足が深刻化「ビニールハウスは汚れを落として光の透過量を維持」宮崎の農家や塗装店が資材高騰と品薄に苦慮し経営努力で対応 - FNNプライムオンライン</h2>
+    </div>
+    
+    <p class="article-summary">ナフサ不足による原材料高騰と品薄が深刻化し、宮崎県の塗装店では経営への影響が拡大している。各事業者はコスト上昇に対応するため、独自の経営努力で乗り切ろうとしている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">FNNプライムオンライン — 2026年06月28日</span>
+        <a href="https://news.google.com/rss/articles/CBMiTkFVX3lxTE1TZlU4MWthZXR4VFlvc2hKVTlKaHZTd2l6YVZxamhCU080Zk9ndVJORWNkWjd4dklub1AtMW1qbHgzd085NFBVY3A5Ry1LQQ?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">周期腐食試験機の世界市場（2026年～2032年）、市場規模（縦型サイクル腐食試験機、横型サイクル腐食試験機）・分析レポートを発表 - アットプレス</h2>
+    </div>
+    
+    <p class="article-summary">2026年から2032年を対象とした周期腐食試験機の世界市場分析レポートが発表され、縦型・横型の各タイプ別に市場規模が調査されている。防食・耐久性評価ニーズの高まりを背景に、試験機市場の動向把握が重要となっている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">アットプレス — 2026年06月27日</span>
+        <a href="https://news.google.com/rss/articles/CBMiT0FVX3lxTE9lcXZQTWdncG0tcGlhOFFneEExQnE4QWs5Wi1GdnBXWjFJZkpDdDk1Tm9xZDVjNTFUTEM5U1FvX0pVeUFWLXQ3aHBDYjNMVlU?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">耐紫外線コーティングの世界市場（2026年～2032年）、市場規模（水性塗料、溶剤系塗料、粉体塗料）・分析レポートを発表 - アットプレス</h2>
+    </div>
+    
+    <p class="article-summary">2026年から2032年を対象とした耐紫外線コーティングの世界市場分析レポートが発表され、水性・溶剤系・粉体塗料の各カテゴリ別に市場規模が示されている。UV対策需要の拡大を受けた塗料市場の成長トレンドが注目される。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">アットプレス — 2026年06月27日</span>
+        <a href="https://news.google.com/rss/articles/CBMiT0FVX3lxTE5TZWJMOEJUU3FublpTa2NpRnF3Q3ROUGdpNkdmcnpQV3dpcVJMcUdDUVZZb1dnRE9HdHQ5SlcyLWxCOHoxX05OalU1QXFYb0U?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">BASF、ロボット塗装で自動車補修の未来へ デジタル技術と融合しボディショップの自動化を加速 - carview!</h2>
+    </div>
+    
+    <p class="article-summary">BASFはロボット塗装技術とデジタル技術を融合させ、自動車補修（ボディショップ）の自動化を加速させる取り組みを進めている。補修塗装工程の効率化・省人化に向けた技術革新として、業界への影響が期待される。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">carview! — 2026年06月27日</span>
+        <a href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxPT2FwVU5fQXlhNk5ScEpBZ3pWRGhBRi12NnN6UERpSGd6V0pmSlZwdlo3OERQbVhiSjhReElCaVZDVjFUZkdkMTNCd1R1VXJPWTRwdGJwcVZwVkMyM3Rmd3NfNHBEcDgwOXJZR0k1Y3pwYldBeUNjblZwV2pBS19KdkNuT3M4SlI1?oc=5" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+
+
+
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
