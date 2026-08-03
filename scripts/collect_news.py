@@ -30,6 +30,7 @@ from scripts.config import (
     NEWSAPI_KEY,
     NEWSAPI_BASE_URL,
     SEARCH_KEYWORD_GROUPS,
+    OVERSEAS_RSS_KEYWORDS,
     DOMESTIC_RSS_KEYWORDS,
     DOMESTIC_SITE_SPECIFIC_KEYWORDS,
     INDUSTRY_NEWS_SITES,
@@ -228,12 +229,93 @@ def _fetch_articles_for_query(
 
 
 # ──────────────────────────────────────────────
+# 海外ニュース — Google News RSS（英語）
+# ──────────────────────────────────────────────
+def collect_overseas_rss_news() -> list[Article]:
+    """
+    Google News RSS（英語）で海外塗装業界ニュースを収集する。
+
+    NewsAPI はフリープランで 100リクエスト/日の制限があり、
+    デバッグ実行が重なるとクォータを枯渇させる。
+    本関数はクォータ制限なしの Google News RSS を主力ソースとして使用する。
+
+    Returns:
+        list[Article]: 取得した記事リスト（重複排除前）
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=SEARCH_DAYS_BACK)
+    base_url = "https://news.google.com/rss/search"
+    all_articles: list[Article] = []
+
+    for keyword in OVERSEAS_RSS_KEYWORDS:
+        params = {
+            "q": keyword,
+            "hl": "en",
+            "gl": "US",
+            "ceid": "US:en",
+        }
+        url = base_url + "?" + urllib.parse.urlencode(params)
+        logger.info("海外 RSS 検索: %s", keyword[:60])
+
+        try:
+            feed = feedparser.parse(url)
+        except Exception as exc:
+            logger.warning("海外 RSS 取得エラー (%s): %s", keyword[:40], exc)
+            continue
+
+        all_entries = getattr(feed, "entries", [])
+        entries = all_entries[:RSS_ITEMS_PER_KEYWORD]
+        logger.info("  取得: %d 件（応答 %d 件）", len(entries), len(all_entries))
+
+        for entry in entries:
+            pub_dt = _parse_rss_date(entry)
+            # UTC に統一して比較
+            if pub_dt.utcoffset() is None:
+                pub_dt = pub_dt.replace(tzinfo=timezone.utc)
+            if pub_dt.astimezone(timezone.utc) < cutoff:
+                continue
+
+            title = getattr(entry, "title", "").strip()
+            if not title:
+                continue
+
+            summary_html = getattr(entry, "summary", "") or ""
+            description = _clean_rss_summary(summary_html)
+            link = getattr(entry, "link", "") or ""
+
+            source_info = getattr(entry, "source", None)
+            source = (
+                source_info.title
+                if (source_info and hasattr(source_info, "title"))
+                else "Google News"
+            )
+
+            all_articles.append(
+                Article(
+                    title=title,
+                    description=description,
+                    url=link,
+                    source=source,
+                    published_at=pub_dt.isoformat(),
+                )
+            )
+
+        time.sleep(0.5)
+
+    logger.info("海外 RSS 合計（重複排除前）: %d 件", len(all_articles))
+    return all_articles
+
+
+# ──────────────────────────────────────────────
 # メイン関数
 # ──────────────────────────────────────────────
 def collect_news() -> list[Article]:
     """
-    全キーワードグループからニュースを収集し、
-    重複排除・ソート済みの記事リストを返す。
+    海外ニュースを収集し、重複排除・ソート済みの記事リストを返す。
+
+    収集源:
+    1. Google News RSS（英語） — 主力。クォータ制限なし。
+    2. NewsAPI — フォールバック。フリープランは 100リクエスト/日の制限あり。
+       クォータ枯渇（429）を検出した場合は即時スキップ。
 
     ここでは関連性フィルタ前の「プール」を返す。最終的な掲載件数の絞り込みは
     フィルタ通過後に呼び出し側（main）で行う。
@@ -241,38 +323,53 @@ def collect_news() -> list[Article]:
     Returns:
         list[Article]: 最大 OVERSEAS_POOL_SIZE 件の記事リスト（新しい順）
     """
-    if not NEWSAPI_KEY:
-        logger.error("NEWSAPI_KEY が設定されていません。")
-        raise ValueError("環境変数 NEWSAPI_KEY を設定してください。")
-
-    now = datetime.now(timezone.utc)
-    from_date = (now - timedelta(days=SEARCH_DAYS_BACK)).strftime("%Y-%m-%d")
-    to_date = now.strftime("%Y-%m-%d")
-
     all_articles: list[Article] = []
 
-    for i, query in enumerate(SEARCH_KEYWORD_GROUPS):
-        if i > 0:
-            time.sleep(1.0)
-        result = _fetch_articles_for_query(query, from_date, to_date)
-        if result is None:
-            # 429（日次クオータ枯渇）— 残りは全部スキップ
-            logger.warning("NewsAPI クオータ枯渇を検出。残りキーワードグループをスキップします。")
-            break
-        all_articles.extend(result)
+    # ── 1. Google News RSS（主力） ──────────────────────
+    logger.info("--- 海外 RSS 収集開始 ---")
+    rss_articles = collect_overseas_rss_news()
+    all_articles.extend(rss_articles)
 
-    logger.info("全キーワードグループ合計: %d 件", len(all_articles))
+    # ── 2. NewsAPI（補助 / フォールバック） ────────────────
+    if NEWSAPI_KEY:
+        logger.info("--- NewsAPI 補助収集開始 ---")
+        now = datetime.now(timezone.utc)
+        from_date = (now - timedelta(days=SEARCH_DAYS_BACK)).strftime("%Y-%m-%d")
+        to_date = now.strftime("%Y-%m-%d")
+        quota_exhausted = False
+
+        for i, query in enumerate(SEARCH_KEYWORD_GROUPS):
+            if quota_exhausted:
+                break
+            if i > 0:
+                time.sleep(0.5)
+            result = _fetch_articles_for_query(query, from_date, to_date)
+            if result is None:
+                logger.warning("NewsAPI クォータ枯渇 — 残りキーワードをスキップします。")
+                quota_exhausted = True
+                break
+            all_articles.extend(result)
+
+        if quota_exhausted:
+            logger.info("NewsAPI: クォータ枯渇のため Google News RSS のみ使用")
+        else:
+            logger.info("NewsAPI: 補助収集完了")
+    else:
+        logger.info("NewsAPI キー未設定 — Google News RSS のみ使用")
+
+    logger.info("海外合計（重複排除前）: %d 件", len(all_articles))
 
     # 重複排除
     unique_articles = _deduplicate_articles(all_articles)
-    logger.info("重複排除後: %d 件", len(unique_articles))
+    logger.info("海外重複排除後: %d 件", len(unique_articles))
 
     # 公開日の新しい順でソート
     def _parse_date(article: Article) -> datetime:
         try:
-            return datetime.fromisoformat(
-                article.published_at.replace("Z", "+00:00")
-            )
+            dt = datetime.fromisoformat(article.published_at.replace("Z", "+00:00"))
+            if dt.utcoffset() is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
         except (ValueError, AttributeError):
             return datetime.min.replace(tzinfo=timezone.utc)
 

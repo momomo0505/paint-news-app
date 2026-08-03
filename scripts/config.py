@@ -104,6 +104,56 @@ SEARCH_KEYWORD_GROUPS = [
     '"solid-state battery" OR "all-solid-state battery" OR "battery industry" OR "EV battery" OR "battery market" OR "energy storage" 2026',
 ]
 
+# 海外ニュース収集用 Google News RSS キーワード（英語）
+# ※NewsAPI はフリープランで 100リクエスト/日の制限があるため、
+#   Google News RSS を主力とし NewsAPI はフォールバック用途に限定する。
+OVERSEAS_RSS_KEYWORDS = [
+    # 塗装ブース・設備（最も業界固有）
+    '"spray booth" OR "paint booth" OR "coating booth" finishing',
+    # 自動車補修塗装
+    '"automotive refinish" OR "collision repair" coating',
+    # ボディショップ経営
+    '"body shop" business OR "auto body" industry OR "collision center"',
+    # 工業塗装全般
+    '"industrial coatings" OR "industrial painting" OR "powder coating" industry',
+    # 主要塗料ブランド動向
+    'Axalta OR PPG OR "BASF Coatings" OR Sikkens OR "Kansai Paint" OR "Nippon Paint" coatings',
+    # 塗料市場分析
+    '"coatings market" OR "paint market" analysis OR forecast OR trend 2026',
+    # EV・次世代車両
+    '"electric vehicle" coating OR EV "body shop" OR "autonomous vehicle" repair',
+    # 環境規制・技術革新
+    '"coatings industry" VOC OR regulation OR sustainability OR waterborne',
+    # 航空機塗装
+    '"aerospace coating" OR "aircraft coating" OR "aviation finish"',
+    # 鉄鋼・重防食・船舶
+    '"anti-corrosion coating" OR "marine coating" OR "steel coating" OR "bridge painting"',
+    # 風力発電向けコーティング
+    '"wind turbine coating" OR "wind blade coating" OR "offshore coating"',
+    # 建設機械・重機向け塗装
+    '"construction equipment" coating OR "heavy equipment" painting',
+    # 塗装ロボット・自動化
+    '"painting robot" OR "automated painting" OR "robotic coating" OR "Industry 4.0" coating',
+    # 鉄道・バス車両
+    '"rail coating" OR "railway painting" OR "train coating"',
+    # 塗料原材料
+    '"titanium dioxide" OR "resin coating" OR naphtha "paint industry"',
+    # 自動車メーカー生産動向（塗装需要の最大顧客）
+    'Toyota OR Honda OR Volkswagen OR "General Motors" "vehicle production" 2026',
+    # 航空機メーカー動向
+    'Boeing OR Airbus aircraft orders OR production 2026',
+    # 建設機械メーカー
+    'Komatsu OR Caterpillar OR "construction equipment" market 2026',
+    # 造船・船舶
+    'shipbuilding orders OR "ship construction" market 2026',
+    # 鉄鋼業界
+    '"steel industry" OR "steel production" OR "steel market" 2026',
+    # 防衛産業
+    '"defense industry" OR "military equipment" OR "defense budget" 2026',
+    # バッテリー・全固体電池
+    '"solid-state battery" OR "EV battery" OR "battery market" 2026',
+]
+
 # 特定ニュースサイトを対象にした Google News RSS 検索（国内一般メディア）
 # 各サイトの塗装・塗料業界関連記事を対象に絞り込む
 DOMESTIC_SITE_SPECIFIC_KEYWORDS = [
