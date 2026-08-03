@@ -13,10 +13,12 @@
 from __future__ import annotations
 
 import calendar
+import json
 import logging
 import re
 import time
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 from typing import Any
@@ -280,10 +282,7 @@ def collect_overseas_rss_news() -> list[Article]:
 
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
-
-            # Google News のリダイレクト URL ではなく実際の記事 URL を使う
-            rss_link = getattr(entry, "link", "") or ""
-            link = _extract_real_url(summary_html, rss_link)
+            link = getattr(entry, "link", "") or ""
 
             source_info = getattr(entry, "source", None)
             source = (
@@ -404,38 +403,106 @@ def _clean_rss_summary(html: str) -> str:
     return text[:300]
 
 
-def _extract_real_url(summary_html: str, fallback_url: str) -> str:
+# ──────────────────────────────────────────────
+# Google News リダイレクト URL の解決
+# ──────────────────────────────────────────────
+_GN_BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+
+
+def _extract_gn_article_id(url: str) -> str | None:
+    """Google News リダイレクト URL から記事 ID を取り出す。"""
+    match = re.search(r"news\.google\.com/rss/articles/([^?/&#]+)", url)
+    return match.group(1) if match else None
+
+
+def _resolve_gn_url(article_id: str, session: requests.Session, timeout: int = 20) -> str | None:
     """
-    Google News RSS のサマリー HTML から実際の記事 URL を抽出する。
+    Google News の記事 ID から実際の記事 URL を取得する。
 
-    Google News RSS の entry.link は `news.google.com/rss/articles/...` という
-    内部リダイレクト URL を返す。Chrome の翻訳機能が有効なページでこの URL を
-    クリックすると translate.goog 経由になり記事に辿り着けない。
-    summary の <a href="..."> には実際の記事 URL が埋め込まれているため、
-    そこから取得する。
-
-    Args:
-        summary_html: RSS entry.summary の HTML 文字列
-        fallback_url: 実際の URL が取得できない場合の代替 URL
+    /rss/articles/... は HTTP リダイレクトではなく JavaScript で遷移するため、
+    requests の allow_redirects では解決できない（200 のまま Google News に留まる）。
+    また URL 末尾の base64 は暗号化されておりオフラインでは復号できない。
+    そのため Google News 内部の batchexecute API (Fbv4je) に、記事ページから
+    取得した署名 (data-n-a-sg) とタイムスタンプ (data-n-a-ts) を添えて問い合わせる。
 
     Returns:
-        str: 実際の記事 URL（取得できなければ fallback_url）
+        str | None: 実際の記事 URL。取得できなければ None
     """
-    if not summary_html:
-        return fallback_url
-    try:
-        soup = BeautifulSoup(summary_html, "lxml")
-        for a in soup.find_all("a", href=True):
-            href = a["href"]
-            if (
-                href.startswith("http")
-                and "google.com" not in href
-                and "google.co" not in href
-            ):
-                return href
-    except Exception:
-        pass
-    return fallback_url
+    page = session.get(f"https://news.google.com/rss/articles/{article_id}", timeout=timeout)
+    signature = re.search(r'data-n-a-sg="([^"]+)"', page.text)
+    timestamp = re.search(r'data-n-a-ts="([^"]+)"', page.text)
+    if not (signature and timestamp):
+        return None
+
+    request_payload = json.dumps(
+        [
+            "garturlreq",
+            [
+                ["X", "X", ["X", "X"], None, None, 1, 1, "US:en", None, 1,
+                 None, None, None, None, None, 0, 1],
+                "X", "X", 1, [1, 1, 1], 1, 1, None, 0, 0, None, 0,
+            ],
+            article_id,
+            int(timestamp.group(1)),
+            signature.group(1),
+        ]
+    )
+    response = session.post(
+        _GN_BATCH_URL,
+        headers={"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        data={"f.req": json.dumps([[["Fbv4je", request_payload, None, "generic"]]])},
+        timeout=timeout,
+    )
+    response.raise_for_status()
+
+    match = re.search(r'\\"garturlres\\",\\"(https?://.*?)\\"', response.text)
+    return match.group(1) if match else None
+
+
+def resolve_google_news_urls(articles: list[Article], max_workers: int = 8) -> list[Article]:
+    """
+    記事リスト中の Google News リダイレクト URL を実際の記事 URL に置き換える。
+
+    1記事あたり 2 リクエスト必要なため、掲載件数を絞り込んだ後に呼び出すこと。
+    解決に失敗した記事は元の URL のまま残す（リンク切れを避けるため）。
+
+    Args:
+        articles: 対象の記事リスト（URL は破壊的に更新される）
+        max_workers: 並列実行数
+
+    Returns:
+        list[Article]: 引数と同じリスト
+    """
+    targets = [a for a in articles if _extract_gn_article_id(a.url)]
+    if not targets:
+        return articles
+
+    logger.info("Google News URL 解決中: %d 件", len(targets))
+
+    session = requests.Session()
+    session.headers.update(_SCRAPE_HEADERS)
+
+    resolved = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(_resolve_gn_url, _extract_gn_article_id(a.url), session): a
+            for a in targets
+        }
+        for future in as_completed(futures):
+            article = futures[future]
+            try:
+                real_url = future.result()
+            except Exception as exc:
+                logger.warning("URL 解決エラー (%s): %s", article.title[:40], exc)
+                continue
+            if real_url:
+                article.url = real_url
+                resolved += 1
+            else:
+                logger.warning("URL 解決失敗（元 URL を維持）: %s", article.title[:40])
+
+    logger.info("Google News URL 解決完了: %d / %d 件", resolved, len(targets))
+    return articles
 
 
 def collect_domestic_news() -> list[Article]:
@@ -492,9 +559,7 @@ def collect_domestic_news() -> list[Article]:
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
 
-            # Google News リダイレクト URL ではなく実際の記事 URL を使う
-            rss_link = getattr(entry, "link", "") or ""
-            link = _extract_real_url(summary_html, rss_link)
+            link = getattr(entry, "link", "") or ""
 
             source_info = getattr(entry, "source", None)
             if source_info and hasattr(source_info, "title"):
@@ -616,10 +681,7 @@ def collect_site_specific_domestic_news() -> list[Article]:
 
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
-
-            # Google News リダイレクト URL ではなく実際の記事 URL を使う
-            rss_link = getattr(entry, "link", "") or ""
-            link = _extract_real_url(summary_html, rss_link)
+            link = getattr(entry, "link", "") or ""
 
             source_info = getattr(entry, "source", None)
             if source_info and hasattr(source_info, "title"):

@@ -26,7 +26,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from scripts.check_competitors import check_all_competitors
-from scripts.collect_news import Article, collect_domestic_news, collect_news, collect_self_mention_news
+from scripts.collect_news import (
+    Article,
+    collect_domestic_news,
+    collect_news,
+    collect_self_mention_news,
+    resolve_google_news_urls,
+)
 from scripts.config import DOCS_DIR, LOG_LEVEL, MAX_ARTICLES, MAX_DOMESTIC_ARTICLES
 
 # 自社メンション履歴ファイルパス
@@ -267,6 +273,10 @@ def run_pipeline(
                 domestic_articles = domestic_articles[:MAX_DOMESTIC_ARTICLES]
                 logger.info("国内ニュース上限適用: %d件", len(domestic_articles))
 
+            # 1記事あたり2リクエスト必要なため、件数を絞り込んだ後に解決する
+            if domestic_articles:
+                domestic_articles = resolve_google_news_urls(domestic_articles)
+
             if domestic_articles:
                 logger.info("国内ニュース一括要約中...")
                 domestic_articles = summarize_domestic_articles(domestic_articles)
@@ -329,6 +339,9 @@ def run_pipeline(
             if len(overseas_articles) > MAX_ARTICLES:
                 overseas_articles = overseas_articles[:MAX_ARTICLES]
                 logger.info("海外ニュース上限適用: %d件", len(overseas_articles))
+
+            # 1記事あたり2リクエスト必要なため、件数を絞り込んだ後に解決する
+            overseas_articles = resolve_google_news_urls(overseas_articles)
 
             logger.info("翻訳・要約開始: %d件", len(overseas_articles))
             overseas_articles = translate_and_summarize(overseas_articles)
