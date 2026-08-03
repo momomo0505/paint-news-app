@@ -416,6 +416,9 @@ def deduplicate_articles(
     同じ決算発表・新製品・規制改正などを複数メディアが報道している場合、
     最も情報量の多い1件のみ残してその他を除外する。
 
+    タイトルだけでなく説明文の冒頭も Claude に渡すことで、
+    異なるタイトルでも同じ出来事を報じている記事を検出できる。
+
     Args:
         articles: 重複チェック対象の記事リスト
         language: "ja"（国内）または "en"（海外）
@@ -443,13 +446,25 @@ def deduplicate_articles(
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    items_text = "\n".join(
-        f"{i + 1}. {a.title}"
-        for i, a in enumerate(url_unique)
-    )
+    # タイトル＋説明文の冒頭を渡してセマンティック重複も検出できるようにする
+    def _item_line(i: int, a: Article) -> str:
+        desc = (a.description or "").strip()
+        # 説明文が長すぎると合計トークンが増えるため 100 文字で切る
+        desc_short = desc[:100] + ("…" if len(desc) > 100 else "")
+        if desc_short:
+            return f"{i + 1}. 【タイトル】{a.title}\n   【概要】{desc_short}"
+        return f"{i + 1}. 【タイトル】{a.title}"
+
+    def _item_line_en(i: int, a: Article) -> str:
+        desc = (a.description or "").strip()
+        desc_short = desc[:100] + ("..." if len(desc) > 100 else "")
+        if desc_short:
+            return f"{i + 1}. [Title] {a.title}\n   [Summary] {desc_short}"
+        return f"{i + 1}. [Title] {a.title}"
 
     if language == "ja":
-        prompt = f"""以下のニュース記事タイトルリストを確認し、同じ出来事・イベント・トピックを複数メディアが重複して報道しているグループを特定してください。
+        items_text = "\n".join(_item_line(i, a) for i, a in enumerate(url_unique))
+        prompt = f"""以下のニュース記事リストを確認し、同じ出来事・イベント・トピックを複数メディアが重複して報道しているグループを特定してください。
 各グループから最も情報量が多いと思われる記事を1件だけ残し、残りは除外します。
 
 【重複とみなす典型例】
@@ -457,6 +472,7 @@ def deduplicate_articles(
 - 同一製品・サービスの発表（複数媒体が同じニュースを転載）
 - 同一の法改正・規制変更
 - 同じ展示会・イベントの告知
+※タイトルが異なっていても同じ出来事・発表内容であれば重複とみなしてください。
 
 記事リスト:
 {items_text}
@@ -465,9 +481,12 @@ def deduplicate_articles(
 例: 1,3,5,7,9
 番号のみ返してください。他の文言は不要です。"""
     else:
-        prompt = f"""Review the following news article titles and identify groups of articles covering the exact same event, announcement, or topic (e.g., the same earnings report, product launch, or regulation covered by multiple outlets).
+        items_text = "\n".join(_item_line_en(i, a) for i, a in enumerate(url_unique))
+        prompt = f"""Review the following news articles and identify groups covering the EXACT SAME event, announcement, or topic (e.g., the same earnings report, product launch, or regulation reported by multiple outlets).
 
-For each duplicate group, keep only the most informative article (usually the one with the most specific or detailed title).
+Note: Articles may have different titles but still report the same news — use the summary to detect such cases.
+
+For each duplicate group, keep only the most informative article (usually the one with the most specific title or the most detailed summary).
 
 Article list:
 {items_text}

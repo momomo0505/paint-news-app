@@ -34,6 +34,7 @@ from scripts.collect_news import (
     resolve_google_news_urls,
 )
 from scripts.config import DOCS_DIR, LOG_LEVEL, MAX_ARTICLES, MAX_DOMESTIC_ARTICLES
+from scripts.dedup_history import filter_already_published, load_published_history
 
 # 自社メンション履歴ファイルパス
 SELF_MENTION_HISTORY_PATH = DOCS_DIR / "self_mention_history.json"
@@ -178,11 +179,24 @@ def run_pipeline(
         save_json: 記事データをJSONに保存するか
     """
     now_jst = datetime.now(JST)
+    today_str = now_jst.strftime("%Y-%m-%d")
+
     logger.info("=" * 60)
     logger.info("塗装業界ニュース自動まとめツール 実行開始")
     logger.info("実行日時: %s (JST)", now_jst.strftime("%Y-%m-%d %H:%M:%S"))
     logger.info("モード: %s", "ドライラン" if dry_run else "本番")
     logger.info("=" * 60)
+
+    # ────────────────────────────────────────
+    # 過去掲載済み記事の履歴を先読み（過去4週分）
+    # ────────────────────────────────────────
+    # Claude API 呼び出しの前段で除外するため、パイプライン冒頭で一度だけ読み込む。
+    # dry_run でも履歴読み込みは行う（デバッグのため）。
+    past_articles = load_published_history(
+        DOCS_DIR,
+        exclude_date=today_str,
+        n_weeks=4,
+    )
 
     # ────────────────────────────────────────
     # Step 1: 競合他社ニュース監視
@@ -245,6 +259,13 @@ def run_pipeline(
             domestic_articles = collect_domestic_news()
             logger.info("国内ニュース収集完了: %d 件", len(domestic_articles))
 
+            # ── 過去週掲載済みを除外（Claude API 呼び出し前に実施してコスト削減）──
+            if domestic_articles and past_articles:
+                logger.info("━━ 過去週重複除外（国内）━━")
+                domestic_articles, _ = filter_already_published(
+                    domestic_articles, past_articles, language="ja"
+                )
+
             if domestic_articles:
                 # skip_filter=True の記事（指定メディア・業界専門サイト）はフィルタをバイパス
                 trusted = [a for a in domestic_articles if a.skip_filter]
@@ -299,6 +320,13 @@ def run_pipeline(
         try:
             overseas_articles = collect_news()
             logger.info("海外ニュース収集完了: %d 件", len(overseas_articles))
+
+            # ── 過去週掲載済みを除外（Claude API 呼び出し前に実施してコスト削減）──
+            if overseas_articles and past_articles:
+                logger.info("━━ 過去週重複除外（海外）━━")
+                overseas_articles, _ = filter_already_published(
+                    overseas_articles, past_articles, language="en"
+                )
         except Exception as exc:
             logger.error("海外ニュース収集エラー: %s", exc)
             overseas_articles = []
