@@ -280,7 +280,10 @@ def collect_overseas_rss_news() -> list[Article]:
 
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
-            link = getattr(entry, "link", "") or ""
+
+            # Google News のリダイレクト URL ではなく実際の記事 URL を使う
+            rss_link = getattr(entry, "link", "") or ""
+            link = _extract_real_url(summary_html, rss_link)
 
             source_info = getattr(entry, "source", None)
             source = (
@@ -401,6 +404,40 @@ def _clean_rss_summary(html: str) -> str:
     return text[:300]
 
 
+def _extract_real_url(summary_html: str, fallback_url: str) -> str:
+    """
+    Google News RSS のサマリー HTML から実際の記事 URL を抽出する。
+
+    Google News RSS の entry.link は `news.google.com/rss/articles/...` という
+    内部リダイレクト URL を返す。Chrome の翻訳機能が有効なページでこの URL を
+    クリックすると translate.goog 経由になり記事に辿り着けない。
+    summary の <a href="..."> には実際の記事 URL が埋め込まれているため、
+    そこから取得する。
+
+    Args:
+        summary_html: RSS entry.summary の HTML 文字列
+        fallback_url: 実際の URL が取得できない場合の代替 URL
+
+    Returns:
+        str: 実際の記事 URL（取得できなければ fallback_url）
+    """
+    if not summary_html:
+        return fallback_url
+    try:
+        soup = BeautifulSoup(summary_html, "lxml")
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if (
+                href.startswith("http")
+                and "google.com" not in href
+                and "google.co" not in href
+            ):
+                return href
+    except Exception:
+        pass
+    return fallback_url
+
+
 def collect_domestic_news() -> list[Article]:
     """
     国内塗装業界ニュースを複数のソースから収集する。
@@ -455,7 +492,9 @@ def collect_domestic_news() -> list[Article]:
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
 
-            link = getattr(entry, "link", "") or ""
+            # Google News リダイレクト URL ではなく実際の記事 URL を使う
+            rss_link = getattr(entry, "link", "") or ""
+            link = _extract_real_url(summary_html, rss_link)
 
             source_info = getattr(entry, "source", None)
             if source_info and hasattr(source_info, "title"):
@@ -577,7 +616,10 @@ def collect_site_specific_domestic_news() -> list[Article]:
 
             summary_html = getattr(entry, "summary", "") or ""
             description = _clean_rss_summary(summary_html)
-            link = getattr(entry, "link", "") or ""
+
+            # Google News リダイレクト URL ではなく実際の記事 URL を使う
+            rss_link = getattr(entry, "link", "") or ""
+            link = _extract_real_url(summary_html, rss_link)
 
             source_info = getattr(entry, "source", None)
             if source_info and hasattr(source_info, "title"):
