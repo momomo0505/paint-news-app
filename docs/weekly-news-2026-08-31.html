@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年08月31日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <div style="margin-bottom:12px;">
+            <a href="https://momomo0505.github.io/paint-news-app/"
+               style="display:inline-flex;align-items:center;gap:6px;
+                      font-size:0.85rem;font-weight:600;color:#2563eb;
+                      background:#eff6ff;border:1px solid #bfdbfe;
+                      border-radius:6px;padding:6px 14px;
+                      text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='#dbeafe'"
+               onmouseout="this.style.background='#eff6ff'">
+                ← 過去のレポート一覧
+            </a>
+        </div>
+        <h1>🎨 塗装業界ニュースレポート</h1>
+        <div class="header-meta">
+            <span>📅 2026年08月31日</span>
+            
+            <span>🏭 競合: 17件</span>
+            <span>🇯🇵 国内: 25件</span>
+            <span>🌍 海外: 25件</span>
+            <span>📆 対象: 2026/08/01 〜 2026/08/31</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════ -->
+<!-- 週次総括コメント                       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
+        <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
+            🧠 今週のポイント
+        </h2>
+        <ul style="margin:0;padding:0;list-style:none;">
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **水性塗料・グリーンコーティングの需要加速**：日本ペイントで水性塗料の新規顧客向け販売比率が初めて半数を超え、国内グリーンコーティング市場も2034年に78億ドル規模へ拡大予測。環境規制強化を背景に業界の脱溶剤化が本格的な転換点を迎えつつある。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **PPGの経営刷新と海外大手の構造変革**：PPGインダストリーズが経営陣を刷新し、「割安株」評価の真価が問われる局面に。グローバル塗料大手が収益性改善と投資家の信頼回復を同時に迫られており、業界再編の呼び水となる可能性がある。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **自動車・航空MRO向け補修塗料市場の中長期成長**：自動車補修塗料の2035年市場予測レポートが相次いで公表され、商用航空MROも2035年に1,083億ドル規模へ拡大見込み。エアバスのボーイング逆転も加わり、航空機塗装需要の底上げが期待される。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **塗装ロボット・自動化技術への注目度上昇**：アネスト岩田がCOATING JAPAN展示会に塗装ロボット・設備を出展。現代自EV工場でのロボット比率2対1の報道も重なり、製造現場における塗装工程の自動化・省人化投資が加速する潮流が鮮明になっている。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **大気社のDX認定取得と業界デジタル化の進展**：大気社が経産省のDX認定を取得し、自己株取得や事業部門移転も重なる構造改革フェーズへ。塗装・設備エンジニアリング企業においてもデジタル変革への対応が競争力の分岐点として浮上している。
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 0: 弊社関連記事（取材・掲載）  -->
+<!-- ══════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">イヤサカ</span>
+        <h2 class="article-title">2026.08.27企業情報i-bouテーマソング「ぼく、i-bou!」ミュージックビデオリリースのご案内</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月27日</span>
+        <a href="https://www.iyasaka.co.jp/news/20260827/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.27リリース経済産業省が定める「DX認定」を取得</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月27日</span>
+        <a href="https://www.taikisha.co.jp/news/20260827_955.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">2026年8月25日塗装ロボット・塗装設備【展示会出展】「第9回 塗料・塗装設備展-COATING JAPAN-」出展のお知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月25日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-08-25" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.21お知らせ事業開発本部移転のお知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月21日</span>
+        <a href="https://www.taikisha.co.jp/news/20260821_953.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">イヤサカ</span>
+        <h2 class="article-title">2026.08.17その他令和8年8月千葉豪雨で被災された方々にお見舞い申し上げます</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月17日</span>
+        <a href="https://www.iyasaka.co.jp/news/20260817/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">バンザイ</span>
+        <h2 class="article-title">会社案内</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月16日</span>
+        <a href="https://www.banzai.co.jp/company.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">バンザイ</span>
+        <h2 class="article-title">お知らせ令和8年8月千葉豪雨に伴う連絡窓口のご案内</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月16日</span>
+        <a href="https://www.banzai.co.jp//news/news_detail214" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.07IR2027年３月期第１四半期決算説明資料を掲載しました</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.taikisha.co.jp/ir/library/presentation/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.07IR2027年３月期第１四半期決算短信〔日本基準〕(連結)[433.4 KB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260807_02.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.07IR自己株式の取得に係る事項の決定に関するお知らせ[107.4 KB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20260807_01.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">『⽇経・東証IRフェア2026』への出展のお知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.trinityind.co.jp/news/3275.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">トリニティ工業</span>
+        <h2 class="article-title">企業情報 ご挨拶 経営理念・行動指針 TRINITY VISION 2030・中期経営計画 会社概要・役員一覧 会社の沿革 事業所 関係会社 会社紹介動画 事業</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.trinityind.co.jp/news/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">2026.08.07 ☆夏季休業のお知らせ☆</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e2%98%86%e5%a4%8f%e5%ad%a3%e4%bc%91%e6%a5%ad%e3%81%ae%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e2%98%86/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">サンワ・リノテック</span>
+        <h2 class="article-title">2026.08.07NEWS【SDGsの取り組み】「タンザニア小規模農家支援事業」への支援</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://sanwa-renotech.com/information/4544/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">X（旧Twitter）公式アカウント開設のお知らせ 2026.08.07 #お知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月07日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=326" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">2026.08.06IR日経・東証IRフェア2026出展のお知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月06日</span>
+        <a href="https://www.taikisha.co.jp/news/20260806_946.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">ソーラーパネル 純水洗浄システムのご紹介 2026.08.05 #新製品情報</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年08月05日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=325" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">商用航空機MRO市場、2035年に1,083億1,000万米ドルへ拡大、航空機の長期運航と整備需要を背景にCAGR 4.29％で成長 - Newscast.jp</h2>
+    </div>
+    
+    <p class="article-summary">商用航空機のMRO（整備・修理・オーバーホール）市場は、航空機の長期運航と整備需要の高まりを背景に、2035年までに1,083億1,000万米ドル規模へと拡大する見込みです。年平均成長率（CAGR）4.29％での成長が予測されており、航空機向け塗装・コーティング需要の拡大も期待されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Newscast.jp — 2026年08月20日</span>
+        <a href="https://newscast.jp/news/7279637" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">塗料報知新聞社、夏季休業のお知らせ</h2>
+    </div>
+    
+    <p class="article-summary">塗料報知新聞社が夏季休業を実施するとのお知らせです。休業期間中は業務対応が停止されますので、関係者は事前に確認が必要です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">WEB塗料報知 — 2026年08月06日</span>
+        <a href="https://www.e-toryo.co.jp/info/e-toryo-57-2-3-2/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">財務・経営戦略を聞く／JFEHD副社長 田中利弘氏／製品価格上げ収益改善へ／インド事業、需要捉え成長期待 - japanmetal.com</h2>
+    </div>
+    
+    <p class="article-summary">JFEホールディングスの副社長・田中利弘氏が、製品価格の引き上げによる収益改善とインド事業での成長を軸とした財務・経営戦略を語りました。鉄鋼製品の価格動向は塗料・防錆材料のコストにも影響するため、塗装業界にとっても注目の内容です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">japanmetal.com — 2026年08月31日</span>
+        <a href="https://www.japanmetal.com/news-to20260831150541.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">池田工業＝北斗市 素地調整 多彩な工法開発＜道南イチオシ企業＞ - 47NEWS</h2>
+    </div>
+    
+    <p class="article-summary">北斗市の池田工業が、塗装の前工程となる素地調整において多彩な工法を独自に開発し、道南地域の注目企業として取り上げられました。素地調整技術の高度化は塗装品質の向上に直結するため、業界内での参考事例として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">47NEWS — 2026年08月30日</span>
+        <a href="https://www.47news.jp/14868669.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">ちょっと訪問／関西ペイントブラーノ 色やアート、人をつなぐ - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">関西ペイントのブランド「ブラーノ」が、色やアートを通じて人々をつなぐ取り組みを展開していることが紹介されました。塗料メーカーが色彩文化の発信拠点としての役割を担う新たな事例として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月30日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/779398" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">米の現代自EV工場で見たロボ1400体 対ヒト比率は2:1、平均の3倍超 - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">米国の現代自動車EV工場では、約1,400体のロボットが稼働しており、ロボット対人間の比率が2対1と業界平均の3倍超に達しています。自動車製造における自動化の急速な進展は、車体塗装工程にも大きく影響する動向として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年08月30日</span>
+        <a href="https://www.nikkei.com/article/DGXZQOGN19BGL0Z10C26A8000000/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、2026年1～6月で新規客への水性塗料販売が初の半数超え 中東情勢影響か - netdenjd.com</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントは2026年1～6月において、新規顧客向けの水性塗料販売が初めて半数を超え、中東情勢による溶剤調達への影響が一因と見られています。水性塗料へのシフトが加速している現状は、塗装業界全体の材料選定に影響を与える可能性があります。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">netdenjd.com — 2026年08月29日</span>
+        <a href="https://www.netdenjd.com/archives/680029" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">DIC株が高値圏、半導体向け樹脂けん引 値上げ浸透で最高益 - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">DICは半導体向け樹脂が好調をけん引し、値上げの浸透により最高益を達成、株価が高値圏で推移しています。化学素材の値上げ浸透は塗料・インク関連材料のコストにも波及する可能性があり、業界の動向として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年08月29日</span>
+        <a href="https://www.nikkei.com/article/DGXZQOUB286NO0Y6A820C2000000/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本のグリーンコーティング市場規模は2034年までに78億米ドルに達し、2026年から2034年にかけて年平均成長率（CAGR）3.87％を記録する見込み - ドリームニュース</h2>
+    </div>
+    
+    <p class="article-summary">日本のグリーンコーティング市場は2034年までに78億米ドル規模に達し、2026年から2034年にかけて年平均成長率3.87％で成長する見込みです。環境規制の強化や持続可能性への需要拡大を背景に、塗装業界でも環境対応型製品の重要性が一層高まっています。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">ドリームニュース — 2026年08月28日</span>
+        <a href="https://www.dreamnews.jp/press/0000360755" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">関西ペイント、「日経・東証IRフェア2026」に出展…成長戦略や技術力を紹介へ 1枚目の写真・画像 - CAR CARE PLUS</h2>
+    </div>
+    
+    <p class="article-summary">関西ペイントは「日経・東証IRフェア2026」に出展し、同社の成長戦略や技術力を投資家・関係者に向けて紹介する予定です。大手塗料メーカーの経営方針や技術開発の方向性を把握する機会として、業界関係者にとっても参考となる情報です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">CAR CARE PLUS — 2026年08月28日</span>
+        <a href="https://carcareplus.jp/article/img/2026/08/28/15437/158388.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">「モノパイル」国内ではじめて製造 洋上風力発電の風車を支える基礎部分 安定供給に期待 広島・福山市 - FNNプライムオンライン</h2>
+    </div>
+    
+    <p class="article-summary">広島・福山市で洋上風力発電の基礎構造物「モノパイル」が国内で初めて製造され、安定供給への期待が高まっています。洋上風力発電の拡大に伴い、大型鋼管構造物の塗装・防食ニーズの増加が見込まれます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">FNNプライムオンライン — 2026年08月28日</span>
+        <a href="https://www.fnn.jp/articles/-/1103097" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、新ブランド「カラモニー」立ち上げ - 化学工業日報 電子版</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントが新ブランド「カラモニー」を立ち上げ、塗料市場における新たな展開を図っています。塗装業界にとって、製品ラインナップの変化や新ブランドの動向として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">化学工業日報 電子版 — 2026年08月28日</span>
+        <a href="https://chemicaldaily.com/archives/845885" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">関西ペイント、日経・東証IRフェア2026に出展…成長戦略や技術力を紹介へ - レスポンス（Response.jp）</h2>
+    </div>
+    
+    <p class="article-summary">関西ペイントが日経・東証IRフェア2026に出展し、成長戦略や技術力をアピールする予定です。業界大手の今後の方向性や技術動向を把握する機会として注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">レスポンス（Response.jp） — 2026年08月27日</span>
+        <a href="https://response.jp/article/2026/08/27/415808.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">キッチンカーも手掛ける鈑金塗装工場 「有限会社バラーズファクトリー」 - things-niigata.jp</h2>
+    </div>
+    
+    <p class="article-summary">新潟の鈑金塗装工場「有限会社バラーズファクトリー」がキッチンカーの製造・塗装も手掛け、事業領域を拡大しています。自動車鈑金塗装の技術を活かした多角的な経営モデルとして参考になります。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">things-niigata.jp — 2026年08月27日</span>
+        <a href="https://things-niigata.jp/other/baraers-factory/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">アンデックス、塗装実演ブース増設 建機・航空機向け顧客招き、販売拡大 - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">アンデックスが建設機械・航空機向けに塗装実演ブースを増設し、顧客を招いて販売拡大を図っています。実演を通じた技術提案型営業が、塗装機器・材料の販売促進に効果的であることを示す事例です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月26日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/454469?gnr_footer\\u003d10939" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">ジャムコ、航空機内装品の新工場−エアバス向け量産体制 - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">ジャムコがエアバス向け航空機内装品の量産に対応する新工場を設立し、生産体制を強化しています。航空機内装分野での需要拡大により、高品質な塗装・表面処理ニーズの増加が期待されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月26日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/347474?gnr_footer\\u003d26239" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">鈑金塗装 一発合格90％ ナサ工業・製造部マネージャーの今泉龍也氏に聞く - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">ナサ工業の製造部マネージャー今泉龍也氏が、鈑金塗装の技能検定で一発合格率90％を達成した取り組みについて語っています。人材育成と技術品質の向上に向けた具体的なノウハウとして、塗装業界の関係者に参考になる内容です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月26日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/788569" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">発電機制御盤の世界市場（2026年～2032年）、市場規模（手動制御盤、自動制御盤）・分析レポートを発表 - Newscast.jp</h2>
+    </div>
+    
+    <p class="article-summary">発電機制御盤の世界市場が2026年から2032年にかけて拡大するとの市場分析レポートが発表されました。発電設備の増加に伴い、制御盤や関連機器への防食・塗装需要も高まる可能性があります。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Newscast.jp — 2026年08月25日</span>
+        <a href="https://newscast.jp/news/6812311" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">研究開発＜塗料・表面処理剤＞ - 日経転職版</h2>
+    </div>
+    
+    <p class="article-summary">日経転職版に塗料・表面処理剤分野の研究開発職の求人情報が掲載されています。塗料業界における研究開発人材の需要が継続していることが伺えます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日経転職版 — 2026年08月25日</span>
+        <a href="https://career.nikkei.com/agent/125/jobdetail5339587/?t_sid\\u003d1" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">フィジカルAIが現場育てる 愛知の自動車部品、作業者が4分の1に - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">愛知県の自動車部品工場でフィジカルAIを活用した自動化が進み、作業者数が4分の1に削減されています。塗装工程を含む製造現場でもAI・自動化技術の導入が加速しており、業界全体への影響が注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年08月25日</span>
+        <a href="https://www.nikkei.com/article/DGXZQOFD234210T20C26A7000000/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">水性塗料市場の規模、シェア、成長率、分析（2034年まで） - Straits Research</h2>
+    </div>
+    
+    <p class="article-summary">水性塗料市場は2034年に向けて規模・シェア・成長率ともに拡大傾向にあることがStraits Researchの分析で示されています。塗装業界にとって、環境対応型の水性塗料への需要増加という市場トレンドを把握する上で重要な指標となります。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Straits Research — 2026年08月24日</span>
+        <a href="https://straitsresearch.com/jp/report/water-borne-coatings-market" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日産、栃木でスポーツ車・EV生産…〝工場内キャラバン〟とは？ - ニュースイッチ by 日刊工業新聞社</h2>
+    </div>
+    
+    <p class="article-summary">日産自動車は栃木工場でスポーツ車およびEVの生産を展開しており、工場内で部品や車両を効率的に運搬する〝工場内キャラバン〟と呼ばれる独自の物流システムを導入しています。製造現場における塗装工程の効率化にも関連する生産体制の取り組みとして注目されます。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">ニュースイッチ by 日刊工業新聞社 — 2026年08月24日</span>
+        <a href="https://newswitch.jp/p/50073" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">全固体電池はゲームチェンジャーか？ 日刊自動車新聞記者に聞くトヨタの開発とEV電池の行方 - JBpress</h2>
+    </div>
+    
+    <p class="article-summary">トヨタが開発を進める全固体電池がEV市場におけるゲームチェンジャーとなり得るか、その技術動向と今後の電池開発の行方が注目されています。EV普及に伴う車体塗装や防錆対策など、塗装業界への波及効果を見据えた情報として重要です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">JBpress — 2026年08月24日</span>
+        <a href="https://jbpress.ismedia.jp/articles/-/96518" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">九大、自動建機をスケッチで指示 システム開発、AIが行動ツリー作成 - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">九州大学は、手書きスケッチによる指示をAIが解析して自動建機の行動ツリーを生成するシステムを開発しました。建設現場における自動化・無人化の進展は、塗装・防錆施工の自動化技術にも将来的な影響を与える可能性があります。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月24日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/790024" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">昨年度の建機出荷額、４．５％増の２兆４３９６億円−外需がけん引 - 日刊工業新聞</h2>
+    </div>
+    
+    <p class="article-summary">昨年度の建設機械出荷額は前年度比4.5％増の2兆4396億円となり、外需がけん引する形で市場が拡大しました。建機需要の増加は、車体や構造物向けの防錆・塗装需要の拡大にも直結するため、塗装業界にとって追い風となる動向です。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日刊工業新聞 — 2026年08月22日</span>
+        <a href="https://www.nikkan.co.jp/articles/view/341569?gnr_footer\\u003d25528" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #7c3aed;padding-left:12px;margin-bottom:16px;">
+        3. 海外塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">自動車補修塗料市場の規模・シェア・成長予測レポート（2035年）</h2>
+    </div>
+    <p class="article-summary">SNS Insiderが自動車補修塗料市場に関する調査レポートを発表した。同レポートは2035年を見据えた市場規模、シェア、成長動向を網羅的に分析している。自動車保有台数の増加や修理需要の拡大、環境規制への対応を背景に、水性塗料やUV硬化型塗料など次世代補修塗料の採用が市場成長を牽引すると予測される。地域別・製品別の詳細な市場動向や競合分析も含まれており、業界関係者にとって重要な戦略立案ツールとなる内容となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">SNS Insider — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.snsinsider.com/reports/automotive-refinish-coatings-market-10884"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">モロッコの自動車補修塗料市場規模・シェア・トレンド・成長分析レポート（2030年）</h2>
+    </div>
+    <p class="article-summary">MarketsandMarketsが、モロッコの自動車補修塗料市場に関する調査レポートを公開した。同レポートでは、市場規模・シェア・成長トレンドの分析とともに、2030年を見据えた将来予測を提供している。モロッコは北アフリカにおける自動車産業の成長拠点として注目されており、補修塗料市場の拡大が期待されている。自動車保有台数の増加や補修需要の高まりが市場成長の主要ドライバーと考えられる。</p>
+    <div class="article-footer">
+        <span class="article-source">MarketsandMarkets — 2026年08月19日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.marketsandmarkets.com/Market-Reports/geography/refinish-paint-market/morocco"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">2026年7月の粗鋼生産量レポート — 世界鉄鋼協会</h2>
+    </div>
+    <p class="article-summary">世界鉄鋼協会（worldsteel）が2026年7月の世界粗鋼生産量に関するデータを公表した。粗鋼は防食塗装・重防食コーティングが適用される橋梁・船舶・建機・風力鉄塔など多くの工業分野の基幹素材であり、その生産動向は塗料・コーティング市場の需要予測に直結する。詳細な国別・地域別生産統計は、鉄鋼向け塗料メーカーや防食コーティングサプライヤーの市場戦略立案に活用される。生産量の増減トレンドは、工業用塗料の需要変動を読み解く重要な先行指標となる。</p>
+    <div class="article-footer">
+        <span class="article-source">worldsteel.org — 2026年08月24日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://worldsteel.org/media/press-releases/2026/july-2026-crude-steel-production/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPGインダストリーズの経営陣刷新、「割安株」としての真価が問われる</h2>
+    </div>
+    <p class="article-summary">PPGインダストリーズが経営陣の大幅な刷新を実施し、同社の株式評価に注目が集まっている。市場では同社株が割安と見られてきたが、今回のリーダーシップ交代がその評価を裏付けるかどうかが試される局面となっている。新体制のもとで業績改善と企業価値向上が実現できるか、投資家からの関心が高まっている。塗料・コーティング業界大手としてのPPGの今後の戦略的方向性が注目される。</p>
+    <div class="article-footer">
+        <span class="article-source">simplywall.st — 2026年08月27日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simplywall.st/stocks/us/materials/nyse-ppg/ppg-industries/news/ppg-industries-ppg-leadership-reshuffle-puts-its-undervalued"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-other">
+            その他
+        </span>
+        <h2 class="article-title">エアバス、キャセイパシフィックおよびエア・バルティックとの大型契約で8月の受注を強化、安定した引き渡しも継続</h2>
+    </div>
+    <p class="article-summary">エアバスは8月にキャセイパシフィック航空およびエア・バルティックとの大型発注契約を締結し、堅調な受注実績を記録した。安定した航空機引き渡しも継続しており、同社の製造・納入体制が順調に推移していることを示している。航空機需要の回復を背景に、エアバスは受注残の積み上げを続けている。</p>
+    <div class="article-footer">
+        <span class="article-source">Aviation News.eu — 2026年08月25日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://aviationnews.eu/news/2026/08/airbus-secures-strong-august-orders-with-major-cathay-pacific-and-airbaltic-deals-amid-steady-deliveries/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPG、スロベニアの特別支援学校で「カラフル・コミュニティ」プロジェクトを完了</h2>
+    </div>
+    <p class="article-summary">PPGは、スロベニアの特別な教育的ニーズを持つ子どもたちのための学校において、社会貢献活動「COLORFUL COMMUNITIES（カラフル・コミュニティ）」プロジェクトを完了した。同プロジェクトはPPGが世界各地で展開するCSR活動の一環であり、地域社会の施設に塗装を施すことで環境改善を支援するものである。PPGの塗料・塗装の専門知識を活かし、学習環境の美化と機能向上に貢献した。</p>
+    <div class="article-footer">
+        <span class="article-source">PPG Industries — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://investor.ppg.com/news/news-details/2026/PPG-completes-COLORFUL-COMMUNITIES-project-at-school-for-children-with-special-educational-needs-in-Slovenia/default.aspx"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPGインダストリーズの経営陣刷新、「割安株」としての真価が問われる</h2>
+    </div>
+    <p class="article-summary">PPGインダストリーズが経営陣の大幅な刷新を実施し、同社の株式評価に注目が集まっている。市場では同社株が割安と見られてきたが、今回のリーダーシップ交代がその評価を裏付けるかどうかが試される局面となっている。新体制のもとで業績改善と企業価値向上が実現できるか、投資家からの関心が高まっている。塗料・コーティング業界大手としてのPPGの今後の戦略的方向性が注目される。</p>
+    <div class="article-footer">
+        <span class="article-source">simplywall.st — 2026年08月27日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simplywall.st/stocks/us/materials/nyse-ppg/ppg-industries/news/ppg-industries-ppg-leadership-reshuffle-puts-its-undervalued"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPGインダストリーズの経営陣刷新、「割安株」としての真価が問われる</h2>
+    </div>
+    <p class="article-summary">PPGインダストリーズが経営陣の大幅な刷新を実施し、同社の株式評価に注目が集まっている。市場では同社株が割安と見られてきたが、今回のリーダーシップ交代がその評価を裏付けるかどうかが試される局面となっている。新体制のもとで業績改善と企業価値向上が実現できるか、投資家からの関心が高まっている。塗料・コーティング業界大手としてのPPGの今後の戦略的方向性が注目される。</p>
+    <div class="article-footer">
+        <span class="article-source">simplywall.st — 2026年08月27日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simplywall.st/stocks/us/materials/nyse-ppg/ppg-industries/news/ppg-industries-ppg-leadership-reshuffle-puts-its-undervalued"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">エアバス、2026年ジェット機市場競争でボーイングを逆転</h2>
+    </div>
+    <p class="article-summary">エアバスが2026年の受注・納入実績においてボーイングを上回り、民間ジェット機市場のシェア争いで優位に立った。ボーイングは品質問題や生産遅延の影響が続く中、エアバスは着実に納入数を伸ばしている。この逆転は、航空機製造業界における両社の競争構図に大きな変化をもたらすものとして注目されている。</p>
+    <div class="article-footer">
+        <span class="article-source">MiGFlug — 2026年08月31日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://migflug.com/afterburner/es/airbus-overtakes-boeing-2026-orders-deliveries/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">溶射アルミニウムブロンズコーティングパウダー市場、航空宇宙・石油ガス需要を背景に2035年までCAGR 4.5〜6%成長へ</h2>
+    </div>
+    <p class="article-summary">溶射用アルミニウムブロンズコーティングパウダー市場は、航空宇宙および石油・ガスインフラ向け需要の拡大を主な成長ドライバーとして、2035年までに年平均成長率4.5〜6%での市場拡大が見込まれている。航空機部品の耐摩耗・防食コーティング需要と、老朽化する石油・ガスインフラの保護コーティング更新需要が市場を牽引する見通し。溶射技術はその高い密着性と耐久性から、過酷な環境下での長期防食を求める産業用途での採用が加速している。</p>
+    <div class="article-footer">
+        <span class="article-source">IndexBox — 2026年08月31日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.indexbox.io/blog/thermal-spray-aluminum-bronze-coating-powders-market-aerospace-coating-cycles-and-oil-gas-infrastructure-demand-drive-4-5-6-cagr-through-2035/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">UV吸収型船舶用トップコート塗料市場の2035年までの見通し</h2>
+    </div>
+    <p class="article-summary">IndexBoxは、UV吸収型船舶用トップコート塗料市場に関する2035年までの市場展望レポートを公開した。船舶塗料市場において、紫外線吸収機能を持つトップコートへの需要が高まっており、長期的な市場成長が見込まれている。海洋環境における塗膜保護性能への要求水準の上昇や、船舶の長寿命化ニーズが市場拡大を後押ししている。環境規制の強化や新素材・新技術の導入も市場動向に影響を与える重要な要因として挙げられている。</p>
+    <div class="article-footer">
+        <span class="article-source">IndexBox — 2026年08月31日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.indexbox.io/blog/uv-absorbing-marine-topcoat-paint-market-outlook-to-2035/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">非イオン系湿潤剤液体コーティング市場の2035年展望</h2>
+    </div>
+    <p class="article-summary">IndexBoxは、非イオン系湿潤剤を用いた液体コーティング市場の2035年までの展望レポートを発表した。非イオン系湿潤剤は塗料・コーティングの塗布性や基材への密着性を向上させる重要な添加剤として広く使用されている。市場は環境規制の強化や水性塗料へのシフトを背景に需要拡大が見込まれており、メーカー各社の製品開発動向や地域別需要予測が分析されている。</p>
+    <div class="article-footer">
+        <span class="article-source">IndexBox — 2026年08月30日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.indexbox.io/blog/nonionic-wetting-agents-liquid-coatings-market-outlook-to-2035/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">CAMIプラント存続へ、装甲車両生産の可能性に期待</h2>
+    </div>
+    <p class="article-summary">カナダのCAMI工場が閉鎖を免れ、引き続き操業を継続する見通しとなった。装甲車両の生産拠点としての活用が検討されており、防衛産業への転換が期待されている。電気自動車（EV）バン生産からの方針転換が背景にあるとみられ、地域雇用の維持にも貢献する可能性がある。</p>
+    <div class="article-footer">
+        <span class="article-source">CTV News — 2026年08月30日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.ctvnews.ca/london/article/cami-plant-to-remain-open-hope-for-potential-armoured-vehicle-production/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">カンタス航空、エアバスA380の退役を前倒し＆ボーイング787-9用新ビジネススイートを発表</h2>
+    </div>
+    <p class="article-summary">カンタス航空はエアバスA380の退役スケジュールを早める一方、新たに導入するボーイング787-9ドリームライナー向けの豪華ビジネスクラススイートを発表した。同航空会社は機材刷新を通じてキャビン体験の向上を図る戦略を進めている。航空機の世代交代に伴い、塗装・内装コーティングを含む新仕様への対応が今後の焦点となる。</p>
+    <div class="article-footer">
+        <span class="article-source">The Points Guy — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://thepointsguy.com/news/qantas-airbus-a380-retirement-new-boeing-787-suites/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-industrial">
+            工業塗装
+        </span>
+        <h2 class="article-title">L.B. フォスター、鉄道技術部門の成長を強調——キャッシュフローは2017年以来の最高水準に</h2>
+    </div>
+    <p class="article-summary">L.B. フォスター（NASDAQ: FSTR）は投資家向けプレゼンテーションにおいて、同社の成長戦略およびポートフォリオ転換について説明した。第2四半期の業績では、キャッシュフローが2017年以来の最高水準を記録した。同社は鉄道技術分野を中核事業と位置づけ、製品・サービスの高付加価値化を推進している。コーティング関連事業を含むインフラ向けソリューションの拡充も戦略の一環とみられる。</p>
+    <div class="article-footer">
+        <span class="article-source">MarketBeat — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.marketbeat.com/instant-alerts/event-lb-foster-highlights-rail-tech-growth-as-cash-flow-hits-best-level-since-2017-2026-08-29/?utm_source=yahoofinance&amp;amp;utm_medium=yahoofinance"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPGのセグメント横断型リーダーシップ体制の拡充が投資家に与える影響</h2>
+    </div>
+    <p class="article-summary">PPG Industriesは、複数事業セグメントをまたぐ新たなリーダーシップ体制を拡充した。この組織再編は、事業部門間の連携強化と経営効率の向上を狙ったものとみられる。投資家にとっては、中長期的な収益構造や事業戦略の変化に注目が集まる。新体制が業績や株主価値にどう影響するかが今後の焦点となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">simplywall.st — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simplywall.st/stocks/us/materials/nyse-ppg/ppg-industries/news/how-ppgs-expanded-crosssegment-leadership-structure-will-imp"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPG、スロベニアの特別支援学校で「カラフル・コミュニティ」プロジェクトを完了</h2>
+    </div>
+    <p class="article-summary">PPGは、スロベニアの特別な教育的ニーズを持つ子どもたちのための学校において、社会貢献活動「COLORFUL COMMUNITIES（カラフル・コミュニティ）」プロジェクトを完了した。同プロジェクトはPPGが世界各地で展開するCSR活動の一環であり、地域社会の施設に塗装を施すことで環境改善を支援するものである。PPGの塗料・塗装の専門知識を活かし、学習環境の美化と機能向上に貢献した。</p>
+    <div class="article-footer">
+        <span class="article-source">PPG Industries — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://investor.ppg.com/news/news-details/2026/PPG-completes-COLORFUL-COMMUNITIES-project-at-school-for-children-with-special-educational-needs-in-Slovenia/default.aspx"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">アクサルタ・コーティング・システムズ、労働問題でミラー・ストラテジーズを起用</h2>
+    </div>
+    <p class="article-summary">アクサルタ・コーティング・システムズは、労働問題に関するロビー活動のためミラー・ストラテジーズ社を新たに雇用した。同社が政策・規制対応の一環として外部ロビイストを活用する動きは、労働法制や雇用規制をめぐる業界の関心の高まりを反映している。詳細な契約内容や活動範囲については明らかにされていない。</p>
+    <div class="article-footer">
+        <span class="article-source">Legis1 — 2026年08月29日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://legis1.com/news/axalta-lobbying-labor-coating-systems-hires"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">新旺達（Sunwoda）2026年上半期決算：EVバッテリー・蓄電池事業が牽引し売上高41.48%増の過去最高業績を達成</h2>
+    </div>
+    <p class="article-summary">中国の電池メーカー新旺達（Sunwoda）は、2026年上半期において売上高が前年同期比41.48%増となる過去最高の業績を記録した。EV向けバッテリーおよびエネルギー貯蔵システム事業の急成長が主な要因となっている。同社の好調な業績は、中国国内外でのEV普及拡大と再生可能エネルギー需要の高まりを背景としている。</p>
+    <div class="article-footer">
+        <span class="article-source">Gasgoo — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://autonews.gasgoo.com/articles/ev/sunwoda-h1-2026-results-ev-battery-and-energy-storage-growth-drives-record-performance-revenue-up-4148-yoy-2093233823885377536"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">FAA、構造的完全性を脅かすひび割れを受けボーイング787の主翼検査を指示</h2>
+    </div>
+    <p class="article-summary">米国連邦航空局（FAA）は、ボーイング787型機の主翼に構造上の完全性を損なう可能性のあるひび割れが確認されたとして、同機体の検査を義務付ける指令を発出した。ひび割れの発生が航空機の安全運航に重大なリスクをもたらす恐れがあると判断されたことが背景にある。この措置は、ボーイング社が品質管理や製造工程をめぐる問題で規制当局の厳しい監視下に置かれる中で発令されたものであり、航空機メーカーへのさらなる圧力となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">Aerospace Global News — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://aerospaceglobalnews.com/news/faa-boeing-787-wing-inspection-directive/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">中聯重科、2026年上半期売上高9.2%増・海外売上高は12.5%増を達成</h2>
+    </div>
+    <p class="article-summary">中国の建設機械大手・中聯重科（Zoomlion）は、2026年上半期の売上高が前年同期比9.17%増の271.4億元（約40.4億米ドル）に達したと発表した。国際売上高は12.5%増と国内を上回る伸びを示し、グローバル展開が加速していることを示した。建設機械業界における同社の国際競争力の強化が業績拡大を牽引している。</p>
+    <div class="article-footer">
+        <span class="article-source">PRNewswire — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.prnewswire.com/news-releases/zoomlion-reports-9-2-revenue-growth-in-h1-2026--with-international-revenue-up-12-5-302862643.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-industrial">
+            工業塗装
+        </span>
+        <h2 class="article-title">i2Cool、電力不要の冷却コーティングポートフォリオを拡充——欧州の熱波激化を背景に</h2>
+    </div>
+    <p class="article-summary">香港の気候技術企業i2Coolは、新製品「CorroCool」コーティングを発表し、電力を使わない受動的放射冷却技術を屋外電気キャビネット・産業機器・金属インフラへ展開する。同技術は太陽光を反射しながら熱を大気中に放出することで、設備の表面温度を大幅に低下させる。欧州での熱波激化が深刻化する中、エネルギーコスト削減と設備保護の両立を図るソリューションとして注目されている。防食機能も兼ね備えた本製品は、工業インフラ向けの次世代機能性コーティングとして市場投入される。</p>
+    <div class="article-footer">
+        <span class="article-source">PRNewswire — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.prnewswire.com/news-releases/i2cool-expands-electricity-free-cooling-portfolio-as-europe-faces-intensifying-heatwaves-302862621.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">ウォール街アナリストはハンティントン・インガルス株に強気か？</h2>
+    </div>
+    <p class="article-summary">ハンティントン・インガルス（米国大手造船・防衛企業）は過去1年間、株式市場全体と比較して低調なパフォーマンスが続いている。しかし、ウォール街のアナリストたちは同社株に対して引き続き中程度の強気見通しを維持している。同社は米海軍向け艦艇の建造・整備を主力事業とし、防衛関連コーティング・塗装分野とも関連が深い企業として知られる。</p>
+    <div class="article-footer">
+        <span class="article-source">Barchart.com — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.barchart.com/story/news/4285733/are-wall-street-analysts-bullish-on-huntington-ingalls-stock"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">自動車補修塗料市場の規模・シェア・成長予測レポート（2035年）</h2>
+    </div>
+    <p class="article-summary">SNS Insiderが自動車補修塗料市場に関する調査レポートを発表した。同レポートは2035年を見据えた市場規模、シェア、成長動向を網羅的に分析している。自動車保有台数の増加や修理需要の拡大、環境規制への対応を背景に、水性塗料やUV硬化型塗料など次世代補修塗料の採用が市場成長を牽引すると予測される。地域別・製品別の詳細な市場動向や競合分析も含まれており、業界関係者にとって重要な戦略立案ツールとなる内容となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">SNS Insider — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.snsinsider.com/reports/automotive-refinish-coatings-market-10884"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">キャタピラー株、インディアナ工場拡張と2026年見通しを投資家が評価する中、811ドル超で安定推移</h2>
+    </div>
+    <p class="article-summary">キャタピラーの株価は811ドル以上で安定した動きを見せており、投資家はインディアナ州の工場拡張計画と2026年の事業見通しを注視している。同社は建設・鉱山機械の大手メーカーとして設備投資を継続しており、製造能力の強化を図っている。工場拡張は生産効率や塗装・仕上げ工程を含む製造ラインの増強につながる可能性があり、業界関係者からも関心を集めている。</p>
+    <div class="article-footer">
+        <span class="article-source">AD HOC NEWS — 2026年08月28日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.ad-hoc-news.de/boerse/news/corporate-news/caterpillar-stock-steadies-above-811-as-investors-weigh-indiana-plant/70009652"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+
+
+
+
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
