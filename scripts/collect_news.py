@@ -270,10 +270,8 @@ def collect_overseas_rss_news() -> list[Article]:
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
-            # UTC に統一して比較
-            if pub_dt.utcoffset() is None:
-                pub_dt = pub_dt.replace(tzinfo=timezone.utc)
-            if pub_dt.astimezone(timezone.utc) < cutoff:
+            # 公開日不明の記事は古い可能性があるため除外。UTC に統一して比較
+            if pub_dt is None or pub_dt.astimezone(timezone.utc) < cutoff:
                 continue
 
             title = getattr(entry, "title", "").strip()
@@ -383,8 +381,14 @@ def collect_news() -> list[Article]:
     return result
 
 
-def _parse_rss_date(entry: Any) -> datetime:
-    """RSS エントリの公開日を datetime に変換する。"""
+def _parse_rss_date(entry: Any) -> datetime | None:
+    """
+    RSS エントリの公開日を datetime に変換する。
+
+    日付が取得できない場合は None を返す。
+    （以前は現在時刻を返していたが、公開日不明の古い記事が
+    「新着」扱いになり期間フィルタをすり抜けるため廃止した）
+    """
     JST = timezone(timedelta(hours=9))
     published = getattr(entry, "published_parsed", None)
     if published:
@@ -393,7 +397,7 @@ def _parse_rss_date(entry: Any) -> datetime:
             return datetime.fromtimestamp(ts, tz=timezone.utc).astimezone(JST)
         except Exception:
             pass
-    return datetime.now(JST)
+    return None
 
 
 def _clean_rss_summary(html: str) -> str:
@@ -549,7 +553,8 @@ def collect_domestic_news() -> list[Article]:
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
-            if pub_dt < cutoff:
+            # 公開日不明の記事は古い可能性があるため除外
+            if pub_dt is None or pub_dt < cutoff:
                 continue
 
             title = getattr(entry, "title", "").strip()
@@ -672,7 +677,8 @@ def collect_site_specific_domestic_news() -> list[Article]:
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
-            if pub_dt < cutoff:
+            # 公開日不明の記事は古い可能性があるため除外
+            if pub_dt is None or pub_dt < cutoff:
                 continue
 
             title = getattr(entry, "title", "").strip()
@@ -824,7 +830,8 @@ def collect_self_mention_news() -> list[Article]:
 
         for entry in entries:
             pub_dt = _parse_rss_date(entry)
-            if pub_dt < cutoff:
+            # 公開日不明の記事は古い可能性があるため除外
+            if pub_dt is None or pub_dt < cutoff:
                 continue
 
             title = getattr(entry, "title", "").strip()

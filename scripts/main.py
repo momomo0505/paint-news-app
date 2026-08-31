@@ -61,6 +61,7 @@ def _save_self_mention_history(urls: set[str]) -> None:
         encoding="utf-8",
     )
 from scripts.generate_html import generate_weekly_report
+from scripts.quality_gate import run_quality_gate
 from scripts.send_email import send_notification
 from scripts.translate_summarize import (
     deduplicate_articles,
@@ -406,6 +407,45 @@ def run_pipeline(
     )
     report_filename = report_path.name
     logger.info("HTML生成完了: %s", report_path)
+
+    # ────────────────────────────────────────
+    # Step 5.5: 品質ゲート（公開前の最終確認）
+    # ────────────────────────────────────────
+    # 掲載記事の実公開日が1か月以内であること・重複がないことを最終検証する。
+    # 違反記事があれば除外してレポートを再生成する。
+    logger.info("")
+    logger.info("━━━ Step 5.5/6: 品質ゲート（公開前の最終確認）━━━")
+
+    try:
+        gate = run_quality_gate(
+            competitor_items=competitor_items,
+            domestic_articles=domestic_articles,
+            overseas_articles=overseas_articles,
+            self_mention_articles=self_mention_articles,
+            verify_online=not dry_run,
+        )
+        if not gate.passed:
+            for line in gate.removed:
+                logger.warning("品質ゲート除外: %s", line)
+
+            competitor_items = gate.competitor_items
+            domestic_articles = gate.domestic_articles
+            overseas_articles = gate.overseas_articles
+            self_mention_articles = gate.self_mention_articles
+
+            logger.info("品質ゲート: %d 件を除外してレポートを再生成します", len(gate.removed))
+            report_path = generate_weekly_report(
+                overseas_articles,
+                output_filename=report_filename,
+                competitor_items=competitor_items,
+                domestic_articles=domestic_articles,
+                self_mention_articles=self_mention_articles,
+                weekly_digest=weekly_digest,
+            )
+            logger.info("レポート再生成完了: %s", report_path)
+    except Exception as exc:
+        # ゲート自体の障害でレポート配信を止めない（従来の掲載内容のまま続行）
+        logger.error("品質ゲート実行エラー（スキップして続行）: %s", exc)
 
     if save_json:
         _save_articles_json(overseas_articles)
