@@ -15,6 +15,9 @@ env/
 # Environment Variables (NEVER commit!)
 .env
 
+# ML転送の重複送信ガード（ローカル状態）
+.forward-state
+
 # IDE
 .vscode/
 .idea/

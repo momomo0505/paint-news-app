@@ -5,6 +5,8 @@ param(
     [string]$MailingList = "",
     [string]$SubjectKeyword = "",
     [string]$IntroTemplate = "",
+    [int]$MaxWaitMinutes = 90,
+    [int]$RetryIntervalMinutes = 10,
     [switch]$DryRun
 )
 
@@ -67,6 +69,18 @@ Write-Host "Keyword: $SubjectKeyword"
 Write-Host "Intro: $introMessage"
 Write-Host "Date: $(Get-Date -Format 'yyyy-MM-dd')"
 
+$today = (Get-Date).Date
+$todayKey = $today.ToString("yyyy-MM-dd")
+$stateFile = Join-Path $projectRoot ".forward-state"
+
+# 手動転送とリトライ中の自動実行が重なった場合の二重送信を防ぐ
+if (-not $DryRun -and (Test-Path $stateFile)) {
+    if ((Get-Content $stateFile -Raw).Trim() -eq $todayKey) {
+        Write-Host "Already forwarded today ($todayKey). Skip."
+        exit 0
+    }
+}
+
 try {
     $outlook = New-Object -ComObject Outlook.Application
     $namespace = $outlook.GetNamespace("MAPI")
@@ -76,23 +90,41 @@ try {
     exit 1
 }
 
-$today = (Get-Date).Date
+function Find-TodayNewsMail {
+    param($Inbox, [string]$Keyword, [datetime]$Today)
+
+    $found = @()
+    foreach ($item in $Inbox.Items) {
+        if ($item.Class -ne 43) { continue }
+
+        $subject = [string]$item.Subject
+        if ($subject -notlike "*$Keyword*") { continue }
+
+        if ($item.ReceivedTime.Date -ne $Today) { continue }
+
+        $found += $item
+    }
+    return $found
+}
+
+# 配信元 (GitHub Actions) の起動遅延や Outlook への取り込み遅れで
+# 実行時点ではまだ届いていないことがあるため、一定時間ポーリングする
+$deadline = (Get-Date).AddMinutes($MaxWaitMinutes)
 $candidates = @()
 
-foreach ($item in $inbox.Items) {
-    if ($item.Class -ne 43) { continue }
+while ($true) {
+    $candidates = @(Find-TodayNewsMail -Inbox $inbox -Keyword $SubjectKeyword -Today $today)
+    if ($candidates.Count -gt 0) { break }
 
-    $subject = [string]$item.Subject
-    if ($subject -notlike "*$SubjectKeyword*") { continue }
+    if ($DryRun -or (Get-Date) -ge $deadline) { break }
 
-    $received = $item.ReceivedTime
-    if ($received.Date -ne $today) { continue }
-
-    $candidates += $item
+    Write-Host "Not found yet. Retrying in $RetryIntervalMinutes min (deadline: $($deadline.ToString('HH:mm')))."
+    try { $namespace.SendAndReceive($false) } catch { }
+    Start-Sleep -Seconds ($RetryIntervalMinutes * 60)
 }
 
 if ($candidates.Count -eq 0) {
-    Write-Warning "No matching email found for today."
+    Write-Warning "No matching email found for today (waited up to $MaxWaitMinutes min)."
     exit 2
 }
 
@@ -120,6 +152,7 @@ try {
 
     $forward.Send()
     Write-Host "Forwarded to: $($mailingLists -join ', ')"
+    Set-Content -Path $stateFile -Value $todayKey -Encoding UTF8
     exit 0
 } catch {
     Write-Error "Forward failed: $_"
