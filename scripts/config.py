@@ -363,9 +363,15 @@ COMPETITOR_SITES = [
         "url": "https://www.anest-iwata.co.jp/news/",
         "language": "ja",
     },
+    # 吉田工業はブランドサイト（燕エアクリーン）と会社サイトの両方を監視する
     {
-        "name": "吉田工業（燕エアクリーン）",
+        "name": "吉田工業",
         "url": "https://www.tsubame-air-clean.jp/toso-booth/",
+        "language": "ja",
+    },
+    {
+        "name": "吉田工業",
+        "url": "https://www.k-yoshida.co.jp/info",
         "language": "ja",
     },
     {
@@ -437,6 +443,22 @@ COMPETITOR_SITES = [
     {
         "name": "サンエス工業",
         "url": "https://www.sanesu-ind.co.jp/news/",
+        "language": "ja",
+    },
+    {
+        # 個別記事ページではなく「お知らせ」一覧を監視する
+        "name": "常盤電機",
+        "url": "https://www.tokiden.co.jp/information/",
+        "language": "ja",
+    },
+    {
+        "name": "タクボエンジニアリング",
+        "url": "https://www.takubo.co.jp/j/news/",
+        "language": "ja",
+    },
+    {
+        "name": "正英製作所",
+        "url": "https://www.shoei-mfg.co.jp/news/",
         "language": "ja",
     },
     # ── 海外メーカー ──────────────────────────

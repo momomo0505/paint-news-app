@@ -43,6 +43,15 @@ HEADERS = {
 
 REQUEST_TIMEOUT = 15
 
+# 1件のニュース項目を囲む要素と判定する上限リンク数。
+# 一覧全体を囲む要素まで遡って先頭記事の日付を拾うのを防ぐ。
+MAX_LINKS_PER_ITEM = 3
+
+# 項目の日付・見出しを探して遡る祖先の最大段数
+MAX_ANCESTOR_DEPTH = 4
+
+HEADING_TAGS = re.compile(r"^h[1-6]$")
+
 
 def _parse_date(text: str) -> datetime | None:
     """テキストから日付を抽出して datetime を返す。見つからなければ None。"""
@@ -84,6 +93,72 @@ def _fetch_page(url: str) -> BeautifulSoup | None:
         return None
 
 
+def _clean_title(text: str) -> str:
+    """
+    タイトルの先頭・末尾に付く日付とカテゴリ表記を取り除く。
+
+    一覧のマークアップをそのまま拾うと
+    「防爆協働ロボット導入のお知らせ 2026.09.10 お知らせ」のように
+    日付・カテゴリがタイトルに混ざるため整形する。
+    """
+    date_edge = r"\d{4}\s*[./年-]\s*\d{1,2}\s*[./月-]\s*\d{1,2}\s*日?"
+    cleaned = re.sub(rf"^\s*{date_edge}\s*", "", text)
+    # 末尾は「日付 + カテゴリ名」の並びになることが多い
+    cleaned = re.sub(rf"\s*{date_edge}\s*[#＃]?\S{{0,10}}\s*$", "", cleaned)
+    return cleaned.strip() or text.strip()
+
+
+def _item_blocks(node):
+    """要素から上に向かって「1件のニュース項目」とみなせる祖先を順に返す。"""
+    for _ in range(MAX_ANCESTOR_DEPTH):
+        if node is None or node.name in ("body", "html"):
+            return
+        # リンクを多数含む要素は一覧全体なので、これ以上は遡らない
+        if len(node.find_all("a", href=True)) > MAX_LINKS_PER_ITEM:
+            return
+        yield node
+        node = node.parent
+
+
+def _find_item_date(a_tag) -> datetime | None:
+    """
+    リンクに対応する日付を探す。
+
+    リンク自身のテキスト → 1件分とみなせる近い祖先 の順に見る。
+    直接の親を無条件に使うと、一覧全体を囲む要素から先頭記事の日付を
+    拾って全項目が同じ日付になる（正英製作所のサイトで発生）。
+    """
+    date = _parse_date(a_tag.get_text(separator=" ", strip=True))
+    if date:
+        return date
+
+    for block in _item_blocks(a_tag.parent):
+        date = _parse_date(block.get_text(separator=" ", strip=True))
+        if date:
+            return date
+    return None
+
+
+def _find_heading_link(block):
+    """ブロック内の見出し（h1〜h6）に含まれるリンクを返す。"""
+    for heading in block.find_all(HEADING_TAGS):
+        a_tag = heading.find("a", href=True)
+        if a_tag:
+            return a_tag
+    return None
+
+
+def _find_text_link(block):
+    """ブロック内で最も長いテキストを持つリンクを返す。"""
+    candidates = [
+        a for a in block.find_all("a", href=True)
+        if len(a.get_text(strip=True)) >= 6
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda a: len(a.get_text(strip=True)))
+
+
 def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
     """
     ページからニュース項目を抽出する。
@@ -101,10 +176,10 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         # タイトルとリンクを抽出
         a_tag = li.find("a", href=True)
         if a_tag:
-            title = a_tag.get_text(strip=True) or text[:80]
+            title = _clean_title(a_tag.get_text(strip=True) or text)[:80]
             href = a_tag["href"]
         else:
-            title = re.sub(r"\d{4}[./年]\d{1,2}[./月]\d{1,2}[日]?\s*", "", text)[:80]
+            title = _clean_title(text)[:80]
             href = base_url
 
         link = urljoin(base_url, href)
@@ -120,10 +195,10 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             continue
         a_tag = dd.find("a", href=True)
         if a_tag:
-            title = a_tag.get_text(strip=True)
+            title = _clean_title(a_tag.get_text(strip=True))[:80]
             link = urljoin(base_url, a_tag["href"])
         else:
-            title = dd.get_text(strip=True)[:80]
+            title = _clean_title(dd.get_text(strip=True))[:80]
             link = base_url
         raw = dt.get_text(strip=True) + " " + dd.get_text(strip=True)
         items.append({"date": date, "title": title, "url": link, "raw_text": raw})
@@ -136,12 +211,47 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         for a_tag in container.find_all("a", href=True):
             text = a_tag.get_text(separator=" ", strip=True)
             parent_text = a_tag.parent.get_text(separator=" ", strip=True) if a_tag.parent else text
-            date = _parse_date(parent_text) or _parse_date(text)
+            date = _find_item_date(a_tag)
             if not date:
                 continue
-            title = text[:80] or parent_text[:80]
+            title = _clean_title(text)[:80] or parent_text[:80]
             link = urljoin(base_url, a_tag["href"])
             items.append({"date": date, "title": title, "url": link, "raw_text": parent_text})
+
+    # ── 戦略4: <time> 要素を起点に項目を組み立てる ──
+    # 日付を <time> で持ち、クラス名に news 等を含まないサイト向け（タクボなど）
+    for time_tag in soup.find_all("time"):
+        date = (
+            _parse_date(time_tag.get("datetime", ""))
+            or _parse_date(time_tag.get_text(strip=True))
+        )
+        if not date:
+            continue
+
+        # 「本文ページへのリンク」のような汎用リンクを拾わないよう、
+        # 見出しリンクを優先し、見つからない場合のみ長いリンクで代替する
+        heading_link = None
+        text_link = None
+        for block in _item_blocks(time_tag.parent):
+            heading_link = _find_heading_link(block)
+            if heading_link is not None:
+                break
+            if text_link is None:
+                text_link = _find_text_link(block)
+
+        a_tag = heading_link or text_link
+        if a_tag is None:
+            continue
+
+        raw_text = a_tag.parent.get_text(separator=" ", strip=True) if a_tag.parent else ""
+        items.append(
+            {
+                "date": date,
+                "title": _clean_title(a_tag.get_text(strip=True))[:80],
+                "url": urljoin(base_url, a_tag["href"]),
+                "raw_text": f"{time_tag.get_text(strip=True)} {raw_text}",
+            }
+        )
 
     # 重複除去（URL基準）
     seen = set()
