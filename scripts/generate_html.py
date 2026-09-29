@@ -49,6 +49,17 @@ def _format_date_ja(iso_date: str) -> str:
         return iso_date
 
 
+def _published_dt(article: Article) -> datetime:
+    """ソート用に published_at を datetime に変換する（失敗時は最古扱い）。"""
+    try:
+        dt = datetime.fromisoformat(article.published_at.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=JST)
+        return dt
+    except (ValueError, AttributeError, TypeError):
+        return datetime.min.replace(tzinfo=timezone.utc)
+
+
 def _count_categories(articles: list[Article]) -> dict[str, dict[str, Any]]:
     """記事のカテゴリ別カウントを集計する。"""
     counts: dict[str, dict[str, Any]] = {}
@@ -93,6 +104,16 @@ def generate_weekly_report(
         Path: 生成したHTMLファイルのパス
     """
     now_jst = datetime.now(JST)
+
+    # 記事は必ず公開日の新しい順に表示する。
+    # （関連性フィルタ・重複除去・要約処理を経ると順序が崩れるため、
+    #   表示直前にソートし直す。in-place でソートすることで、この後に
+    #   同じリストを使うメール送信の掲載順にも反映される）
+    articles.sort(key=_published_dt, reverse=True)
+    if domestic_articles:
+        domestic_articles.sort(key=_published_dt, reverse=True)
+    if self_mention_articles:
+        self_mention_articles.sort(key=_published_dt, reverse=True)
 
     if output_filename is None:
         output_filename = f"weekly-news-{now_jst.strftime('%Y-%m-%d')}.html"

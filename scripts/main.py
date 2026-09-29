@@ -61,9 +61,10 @@ def _save_self_mention_history(urls: set[str]) -> None:
         encoding="utf-8",
     )
 from scripts.generate_html import generate_weekly_report
-from scripts.quality_gate import run_quality_gate
+from scripts.quality_gate import filter_untranslatable_articles, run_quality_gate
 from scripts.send_email import send_notification
 from scripts.translate_summarize import (
+    curate_industry_articles,
     deduplicate_articles,
     filter_relevant_articles,
     generate_weekly_digest,
@@ -277,6 +278,14 @@ def run_pipeline(
                     len(trusted),
                 )
 
+                # 専門誌（WEB塗料報知・日本塗装時報・COATAZ・CarCare Plus）の
+                # 記事は数が多いため、注目度の高いもの・塗装設備に関係する
+                # ものだけを選別して1誌あたりの掲載数を絞る
+                if trusted:
+                    logger.info("専門誌記事の選別中（%d件）...", len(trusted))
+                    trusted = curate_industry_articles(trusted)
+                    logger.info("専門誌選別後: %d件", len(trusted))
+
                 if to_filter:
                     logger.info("国内ニュース関連性フィルタ実行中（%d件）...", len(to_filter))
                     to_filter = filter_relevant_articles(to_filter, language="ja")
@@ -372,6 +381,10 @@ def run_pipeline(
             # 1記事あたり2リクエスト必要なため、件数を絞り込んだ後に解決する
             overseas_articles = resolve_google_news_urls(overseas_articles)
 
+            # Google 翻訳プロキシで表示できない記事（Cloudflare 等の
+            # Bot 対策でプロキシが弾かれるサイト）を掲載前に除外する
+            overseas_articles = filter_untranslatable_articles(overseas_articles)
+
             logger.info("翻訳・要約開始: %d件", len(overseas_articles))
             overseas_articles = translate_and_summarize(overseas_articles)
         logger.info("翻訳完了: %d 件", len(overseas_articles))
@@ -411,7 +424,7 @@ def run_pipeline(
     # ────────────────────────────────────────
     # Step 5.5: 品質ゲート（公開前の最終確認）
     # ────────────────────────────────────────
-    # 掲載記事の実公開日が1か月以内であること・重複がないことを最終検証する。
+    # 掲載記事の実公開日が2週間以内であること・重複がないことを最終検証する。
     # 違反記事があれば除外してレポートを再生成する。
     logger.info("")
     logger.info("━━━ Step 5.5/6: 品質ゲート（公開前の最終確認）━━━")

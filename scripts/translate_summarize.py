@@ -15,11 +15,17 @@ from __future__ import annotations
 import json
 import logging
 import time
+from datetime import datetime
 from typing import Any
 
 import anthropic
 
-from scripts.config import ANTHROPIC_API_KEY, CLAUDE_MODEL, CLAUDE_MAX_TOKENS
+from scripts.config import (
+    ANTHROPIC_API_KEY,
+    CLAUDE_MODEL,
+    CLAUDE_MAX_TOKENS,
+    MAX_ARTICLES_PER_INDUSTRY_SITE,
+)
 from scripts.collect_news import Article
 
 logger = logging.getLogger(__name__)
@@ -404,6 +410,132 @@ Return numbers only, no other text."""
     except Exception as exc:
         logger.error("関連性フィルタエラー（このバッチは全件通過）: %s", exc)
         return articles
+
+
+# ──────────────────────────────────────────────
+# 専門誌記事の選別（国内ニュース用）
+# ──────────────────────────────────────────────
+def _newest_first(articles: list[Article]) -> list[Article]:
+    """公開日の新しい順に並べたリストを返す。"""
+    def _key(a: Article) -> datetime:
+        try:
+            return datetime.fromisoformat(a.published_at)
+        except (ValueError, TypeError):
+            return datetime.min
+    # published_at はいずれも JST の aware datetime だが、パース失敗時の
+    # naive datetime.min と混在すると比較エラーになるため文字列でも比較する
+    try:
+        return sorted(articles, key=_key, reverse=True)
+    except TypeError:
+        return sorted(articles, key=lambda a: a.published_at or "", reverse=True)
+
+
+def curate_industry_articles(
+    articles: list[Article],
+    max_per_source: int = MAX_ARTICLES_PER_INDUSTRY_SITE,
+) -> list[Article]:
+    """
+    塗装業界専門誌（WEB塗料報知・日本塗装時報・COATAZ・CarCare Plus 等）の
+    記事から「注目度が高い」「塗装設備に関係する」ものだけを選別する。
+
+    専門誌は記事数が多く全件掲載するとレポートが専門誌のトピックだらけに
+    なるため、Claude で重要記事を選び 1誌あたり max_per_source 件に絞り込む。
+    API キー未設定・エラー時は新着順に max_per_source 件を採用する。
+
+    Args:
+        articles: 専門誌記事リスト（skip_filter=True のもの）
+        max_per_source: 1誌あたりの最大掲載数
+
+    Returns:
+        list[Article]: 選別後の記事リスト
+    """
+    if not articles:
+        return []
+
+    # 媒体（source）ごとにグループ化して選別する
+    by_source: dict[str, list[Article]] = {}
+    for a in articles:
+        by_source.setdefault(a.source, []).append(a)
+
+    curated: list[Article] = []
+    for source, items in by_source.items():
+        if len(items) <= max_per_source:
+            curated.extend(items)
+            continue
+
+        if not ANTHROPIC_API_KEY:
+            logger.warning(
+                "ANTHROPIC_API_KEY 未設定のため %s は新着順 %d 件を採用",
+                source, max_per_source,
+            )
+            curated.extend(_newest_first(items)[:max_per_source])
+            continue
+
+        curated.extend(_curate_source_batch(source, items, max_per_source))
+        time.sleep(1.0)
+
+    logger.info("専門誌記事選別: %d件 → %d件", len(articles), len(curated))
+    return curated
+
+
+def _curate_source_batch(
+    source: str,
+    articles: list[Article],
+    max_count: int,
+) -> list[Article]:
+    """1媒体分の記事を Claude で選別する。失敗時は新着順で max_count 件。"""
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    items_text = "\n".join(
+        f"{i + 1}. {a.title}" + (f" | {a.description[:80]}" if a.description else "")
+        for i, a in enumerate(articles)
+    )
+
+    prompt = f"""以下は塗装業界専門誌「{source}」の最近の記事一覧です。
+アンデックス㈱（塗装ブース・塗装設備メーカー）の社内ニュースレポートに掲載する記事を、最大{max_count}件選んでください。
+
+【優先して選ぶ記事】
+- 塗装設備・塗装ブース・乾燥炉・塗装ロボット・塗装工程・工業塗装に関係する内容
+- 業界全体への影響が大きいニュース（大手塗料メーカーの再編・買収・提携、規制や原材料の大きな動き、市場動向・業界統計）
+- 塗装設備の需要や顧客業界（自動車・鈑金・航空・建機等）の設備投資に関わる内容
+
+【選ばない記事】
+- 建築塗装・外壁塗装・DIY・インテリア・美観関連
+- 連載講座・技術解説シリーズ・コラム（ニュース性がないもの）
+- 訃報・人事・小規模なイベント告知など影響の小さいもの
+
+記事リスト（番号|タイトル|概要）:
+{items_text}
+
+選んだ記事の番号をカンマ区切りで返してください（最大{max_count}件）。
+該当する記事がない場合は「なし」と返してください。
+例: 3,1,7
+番号のみ返してください。"""
+
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        numbers_text = response.content[0].text.strip()
+        logger.info("専門誌選別（%s）: %s", source, numbers_text[:100])
+
+        if "なし" in numbers_text:
+            return []
+
+        indices = [
+            int(n.strip()) - 1
+            for n in numbers_text.replace("，", ",").split(",")
+            if n.strip().isdigit()
+        ]
+        selected = [articles[i] for i in indices if 0 <= i < len(articles)]
+        if selected:
+            return selected[:max_count]
+    except Exception as exc:
+        logger.error("専門誌選別エラー（%s — 新着順で%d件採用）: %s", source, max_count, exc)
+
+    return _newest_first(articles)[:max_count]
 
 
 def deduplicate_articles(

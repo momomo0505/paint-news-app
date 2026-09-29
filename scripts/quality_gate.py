@@ -45,8 +45,8 @@ logger = logging.getLogger(__name__)
 
 JST = timezone(timedelta(hours=9))
 
-# 掲載を許可する記事の最大経過日数（約1か月）
-MAX_AGE_DAYS = 31
+# 掲載を許可する記事の最大経過日数（2週間 — これより古いニュースは表示しない）
+MAX_AGE_DAYS = 14
 
 # 記事ページ取得の設定
 _FETCH_TIMEOUT = 15
@@ -255,6 +255,143 @@ def fetch_page_date(url: str, session: requests.Session | None = None) -> dateti
     except Exception as exc:
         logger.debug("公開日検証: ページ取得失敗 %s (%s)", url[:80], exc)
         return None
+
+
+# ──────────────────────────────────────────────
+# Google 翻訳プロキシでの表示可否チェック（海外ニュース用）
+# ──────────────────────────────────────────────
+# 海外記事のリンクは Google 翻訳（translate.goog プロキシ）経由で開くため、
+# 翻訳元サイトが Cloudflare 等の Bot 対策で Google のプロキシを弾いていると
+# 「チャレンジの試行回数の上限を超えました」等が表示され記事が読めない。
+# 掲載前に翻訳プロキシ URL を実際に取得し、表示できない記事を除外する。
+
+# <title> タグに現れるチャレンジページの痕跡（記事本文との誤判定を防ぐため
+# タイトルのみで判定する）
+_UNTRANSLATABLE_TITLE_MARKERS = [
+    "just a moment",
+    "attention required",
+    "access denied",
+]
+
+# 本文・スクリプト中に現れるチャレンジページ固有の痕跡
+_UNTRANSLATABLE_BODY_MARKERS = [
+    "cf_chl_opt",           # Cloudflare チャレンジページのインラインスクリプト
+    "cf-chl-bypass",
+    "verifying you are human",
+    "verify you are human",
+    "enable javascript and cookies to continue",
+    # チャレンジ失敗時に表示される日本語メッセージ（添付スクリーンショットと同じもの）
+    "チャレンジの試行回数",
+]
+
+_TITLE_TAG_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
+
+
+def build_translate_proxy_url(
+    url: str,
+    source_lang: str = "en",
+    target_lang: str = "ja",
+) -> str:
+    """
+    記事 URL を Google 翻訳プロキシ（translate.goog）の URL に変換する。
+
+    レポートのリンク（translate.google.com/translate?u=...）はこの
+    プロキシ URL にリダイレクトされるため、事前チェックはこちらを直接叩く。
+    ホスト名の変換規則: 「-」→「--」、「.」→「-」、末尾に .translate.goog
+    """
+    parsed = urlparse(url)
+    host = parsed.netloc.split(":")[0].lower()
+    proxy_host = host.replace("-", "--").replace(".", "-") + ".translate.goog"
+    query = f"_x_tr_sl={source_lang}&_x_tr_tl={target_lang}&_x_tr_hl=ja"
+    if parsed.query:
+        query = parsed.query + "&" + query
+    path = parsed.path or "/"
+    return f"https://{proxy_host}{path}?{query}"
+
+
+def check_translatable(url: str, session: requests.Session | None = None) -> bool:
+    """
+    記事が Google 翻訳プロキシで表示できるかを確認する。
+
+    判定基準:
+    - プロキシが 4xx/5xx を返す → 表示不可（False）
+      ※429（レート制限）はチェック側の問題の可能性が高いため除外しない
+    - ページ内に Cloudflare 等のチャレンジ画面の痕跡がある → 表示不可（False）
+    - ネットワークエラー等で確認できない場合 → True（誤除外を防ぐ）
+    """
+    getter = session or requests
+    proxy_url = build_translate_proxy_url(url)
+    try:
+        resp = getter.get(proxy_url, headers=_HEADERS, timeout=_FETCH_TIMEOUT)
+    except Exception as exc:
+        logger.debug("翻訳可否チェック: 取得失敗のため掲載継続 %s (%s)", url[:80], exc)
+        return True
+
+    if resp.status_code == 429:
+        logger.debug("翻訳可否チェック: レート制限のため判定保留 %s", url[:80])
+        return True
+
+    if resp.status_code >= 400:
+        logger.info("翻訳不可 (HTTP %d): %s", resp.status_code, url[:80])
+        return False
+
+    head = resp.text[:20000].lower()
+
+    title_match = _TITLE_TAG_RE.search(head)
+    if title_match:
+        title = title_match.group(1)
+        for marker in _UNTRANSLATABLE_TITLE_MARKERS:
+            if marker in title:
+                logger.info("翻訳不可 (タイトル: %s): %s", marker, url[:80])
+                return False
+
+    for marker in _UNTRANSLATABLE_BODY_MARKERS:
+        if marker in head:
+            logger.info("翻訳不可 (チャレンジ検出: %s): %s", marker, url[:80])
+            return False
+
+    return True
+
+
+def filter_untranslatable_articles(articles: list[Article]) -> list[Article]:
+    """
+    Google 翻訳プロキシで表示できない海外記事を除外する。
+
+    main.py で翻訳・要約の前段（URL 解決の後）に呼び出すことで、
+    表示できない記事に Claude API のコストを使わずに済む。
+
+    Returns:
+        list[Article]: 翻訳ページが表示できる記事のみ
+    """
+    if not articles:
+        return articles
+
+    logger.info("翻訳可否チェック開始: %d 件", len(articles))
+    session = requests.Session()
+
+    results: dict[str, bool] = {}
+    with ThreadPoolExecutor(max_workers=_FETCH_WORKERS) as pool:
+        futures = {pool.submit(check_translatable, a.url, session): a for a in articles}
+        for future in as_completed(futures):
+            article = futures[future]
+            try:
+                results[article.url] = future.result()
+            except Exception:
+                results[article.url] = True  # 判定不能時は誤除外を避ける
+
+    kept: list[Article] = []
+    for article in articles:
+        if results.get(article.url, True):
+            kept.append(article)
+        else:
+            logger.warning("翻訳不可のため除外: %s", article.title[:60])
+
+    removed = len(articles) - len(kept)
+    if removed:
+        logger.info("翻訳可否チェック: %d 件を除外しました", removed)
+    else:
+        logger.info("翻訳可否チェック: 全記事が表示可能です")
+    return kept
 
 
 # ──────────────────────────────────────────────

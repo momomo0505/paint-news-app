@@ -170,15 +170,43 @@ DOMESTIC_SITE_SPECIFIC_KEYWORDS = [
 ]
 
 # 塗装業界専門サイト（直接スクレイピングで全記事を収集）
-# COATAZ はクライアントサイドレンダリング（HTMLにリンクが含まれない）ため
-# requests + BeautifulSoup では収集できず、対象から除外している。
+#
+# curate=True のサイトは記事数の多い専門誌のため、収集後に Claude で
+# 「注目度が高い」「塗装設備に関係する」記事だけを選別し、
+# 1誌あたり MAX_ARTICLES_PER_INDUSTRY_SITE 件まで絞り込む
+# （レポートが専門誌のトピックだらけになるのを防ぐ）。
 INDUSTRY_NEWS_SITES = [
     {
         "name": "WEB塗料報知",
         "url": "https://www.e-toryo.co.jp/info/",
         "language": "ja",
+        "curate": True,
+    },
+    {
+        "name": "日本塗装時報",
+        "url": "https://tosojiho.jp/",
+        "language": "ja",
+        "curate": True,
+    },
+    {
+        # 記事一覧の日付が「MM/DD HH:MM」形式（年なし）のため、
+        # collect_news の日付パーサで年を補完して扱う。
+        "name": "COATAZ",
+        "url": "https://coataz.com/",
+        "language": "ja",
+        "curate": True,
+    },
+    {
+        # CarCare Plus の「鈑金・塗装」特集の新着一覧ページ
+        "name": "CarCare Plus",
+        "url": "https://carcareplus.jp/special/2/recent/%E9%88%91%E9%87%91%E3%83%BB%E5%A1%97%E8%A3%85",
+        "language": "ja",
+        "curate": True,
     },
 ]
+
+# 専門誌1サイトあたりの最大掲載記事数（curate=True のサイトに適用）
+MAX_ARTICLES_PER_INDUSTRY_SITE = 5
 
 # 国内ニュース収集用 Google News RSS キーワード
 # 営業・経営戦略立案に役立つ幅広い業界情報を収集
@@ -323,8 +351,8 @@ MAX_ARTICLES = 25
 MAX_DOMESTIC_ARTICLES = 25
 MAX_COMPETITOR_ITEMS = 30
 
-# 検索対象期間（日数 ─ 過去30日間）
-SEARCH_DAYS_BACK = 30
+# 検索対象期間（日数 ─ 過去2週間。これより古いニュースはレポートに表示しない）
+SEARCH_DAYS_BACK = 14
 
 # 除外するドメイン（低品質・無関係なソースを除外）
 EXCLUDED_DOMAINS = [

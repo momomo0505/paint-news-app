@@ -639,6 +639,20 @@ def _scrape_parse_date(text: str) -> datetime | None:
             return datetime(y, mo, d, tzinfo=JST)
         except ValueError:
             continue
+
+    # 年なしの「MM/DD HH:MM」形式（COATAZ 等）。年は直近のものと仮定し、
+    # 未来日付になる場合は前年として扱う。
+    m = re.search(r"(?<![\d/])(\d{1,2})/(\d{1,2})\s+\d{1,2}:\d{2}", text)
+    if m:
+        now = datetime.now(JST)
+        try:
+            candidate = datetime(now.year, int(m.group(1)), int(m.group(2)), tzinfo=JST)
+        except ValueError:
+            return None
+        if candidate > now + timedelta(days=2):
+            candidate = candidate.replace(year=now.year - 1)
+        return candidate
+
     return None
 
 
@@ -714,6 +728,105 @@ def collect_site_specific_domestic_news() -> list[Article]:
     return all_articles
 
 
+# タイトルから除去する日付・時刻・曜日のノイズ
+# （記事リンクのテキストに「2026.9.29 Tue 10:47」等が混入するサイト対策）
+_TITLE_DATE_NOISE = re.compile(
+    r"20\d{2}\s*[./年]\s*\d{1,2}\s*[./月]\s*\d{1,2}\s*日?"
+    r"|\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b"
+    r"|\d{1,2}:\d{2}"
+)
+
+# コンテナブロック判定用: ブロック内の日付出現回数を数えるパターン
+_DATE_COUNT_RE = re.compile(
+    r"20\d{2}[./年]\d{1,2}[./月]\d{1,2}|(?<![\d/])\d{1,2}/\d{1,2}\s+\d{1,2}:\d{2}"
+)
+
+
+def _clean_scraped_title(title: str) -> str:
+    """スクレイピングしたタイトルから日付・時刻・余分な空白を除去する。"""
+    title = _TITLE_DATE_NOISE.sub(" ", title)
+    return re.sub(r"\s+", " ", title).strip()
+
+
+def _extract_site_articles(
+    blocks: list[Any],
+    base_url: str,
+    source_name: str,
+    cutoff: datetime,
+    seen_urls: set[str],
+) -> tuple[list[Article], int, int]:
+    """
+    記事一覧ブロック（li / article / section / div）から記事を抽出する。
+
+    Returns:
+        tuple: (記事リスト, 取得件数, 期間外で除外した件数)
+    """
+    articles: list[Article] = []
+    found = 0
+    skipped_old = 0
+
+    for block in blocks:
+        block_text = block.get_text(separator=" ", strip=True)
+
+        # 日付が3つ以上あるブロックは記事一覧全体を包むコンテナとみなして
+        # スキップする（内側の記事単位のブロックで個別に処理される）。
+        if len(_DATE_COUNT_RE.findall(block_text)) >= 3:
+            continue
+
+        date = _scrape_parse_date(block_text)
+        if date is None:
+            continue
+
+        links = block.find_all("a", href=True)
+        if not links:
+            continue
+
+        # カテゴリリンク（「企業」「建築・土木」等）と記事リンクが混在するため、
+        # ブロック内で最も長いリンクテキストを記事タイトルとみなす。
+        title_tag = max(links, key=lambda a: len(a.get_text(strip=True)))
+        title = title_tag.get_text(strip=True)
+
+        # 見出しタグがあればそちらのテキストを優先する
+        # （リンクテキストにカテゴリ名・日付・著者名が混入するサイト対策）
+        heading = block.find(["h1", "h2", "h3", "h4", "h5", "h6"])
+        if heading:
+            heading_text = heading.get_text(strip=True)
+            if len(heading_text) >= 8:
+                title = heading_text
+                heading_link = heading.find("a", href=True) or heading.find_parent(
+                    "a", href=True
+                )
+                if heading_link is not None:
+                    title_tag = heading_link
+
+        title = _clean_scraped_title(title)
+        if len(title) < 8:
+            continue
+
+        link = urljoin(base_url, title_tag["href"])
+        if link in seen_urls:
+            continue
+        seen_urls.add(link)
+
+        if date < cutoff:
+            skipped_old += 1
+            continue
+
+        articles.append(
+            Article(
+                title=title[:200],
+                description="",
+                url=link,
+                source=source_name,
+                published_at=date.isoformat(),
+                skip_filter=True,  # 業界専門サイトの記事は関連性フィルタをバイパス
+            )
+        )
+        found += 1
+
+    return articles, found, skipped_old
+
+
 def collect_industry_site_news() -> list[Article]:
     """
     塗装業界専門サイトを直接スクレイピングして最新記事を収集する。
@@ -743,49 +856,32 @@ def collect_industry_site_news() -> list[Article]:
             logger.warning("%s: ページ取得失敗: %s", name, exc)
             continue
 
-        found = 0
-        skipped_old = 0
         seen_urls: set[str] = set()
 
-        for block in soup.find_all(["li", "article"]):
-            block_text = block.get_text(separator=" ", strip=True)
-            date = _scrape_parse_date(block_text)
-            if date is None:
-                continue
-
-            links = block.find_all("a", href=True)
-            if not links:
-                continue
-
-            # カテゴリリンク（「企業」「建築・土木」等）と記事リンクが混在するため、
-            # ブロック内で最も長いリンクテキストを記事タイトルとみなす。
-            title_tag = max(links, key=lambda a: len(a.get_text(strip=True)))
-            title = title_tag.get_text(strip=True)
-            if len(title) < 8:
-                continue
-
-            link = urljoin(url, title_tag["href"])
-            if link in seen_urls:
-                continue
-            seen_urls.add(link)
-
-            if date < cutoff:
-                skipped_old += 1
-                continue
-
-            all_articles.append(
-                Article(
-                    title=title[:200],
-                    description="",
-                    url=link,
-                    source=name,
-                    published_at=date.isoformat(),
-                    skip_filter=True,  # 業界専門サイトの記事はフィルタをバイパス
-                )
+        # まず標準的な li / article / section ブロックから抽出。
+        # 見つからない場合（div 主体のレイアウトのサイト）は、クラス名に
+        # 記事系キーワードを含む div ブロックで再試行する。
+        blocks = soup.find_all(["li", "article", "section"])
+        articles, found, skipped_old = _extract_site_articles(
+            blocks, url, name, cutoff, seen_urls
+        )
+        if found == 0 and skipped_old == 0:
+            fallback_blocks = soup.find_all(
+                "div", class_=re.compile(r"news|post|article|item|card|entry", re.I)
             )
-            found += 1
+            articles, found, skipped_old = _extract_site_articles(
+                fallback_blocks, url, name, cutoff, seen_urls
+            )
 
-        logger.info("  %s: %d 件取得（期間外で除外 %d 件）", name, found, skipped_old)
+        all_articles.extend(articles)
+
+        if found == 0 and skipped_old == 0:
+            logger.warning(
+                "  %s: 記事を1件も抽出できませんでした（ページ構造の変更や"
+                "クライアントサイドレンダリングの可能性）", name
+            )
+        else:
+            logger.info("  %s: %d 件取得（期間外で除外 %d 件）", name, found, skipped_old)
         time.sleep(1.0)
 
     logger.info("業界専門サイト取得（重複排除前）: %d 件", len(all_articles))
