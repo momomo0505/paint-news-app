@@ -23,13 +23,32 @@ JST = timezone(timedelta(hours=9))
 DATE_PATTERNS = [
     (r"(\d{4})[./年](\d{1,2})[./月](\d{1,2})", "%Y-%m-%d"),   # 2026.05.14 / 2026/05/14 / 2026年5月14日
     (r"(\d{4})-(\d{1,2})-(\d{1,2})", "%Y-%m-%d"),              # 2026-05-14
-    (r"([A-Z][a-z]+)\s+(\d{1,2}),?\s+(\d{4})", "en_month"),   # May 14, 2026
+    (r"([A-Z][a-z]+)\s+(\d{1,2}),?\s+(\d{4})", "en_month"),   # May 14, 2026 / Sep 19, 2026
+    (r"(\d{1,2})\s+([A-Z][a-z]+)\s+(\d{4})", "en_day_month"),  # 19 Sep 2026
+    (r"(\d{1,2})\s+([A-Z][a-z]{2})\b", "en_day_month_noyear"),  # 19 Sep（年なし）
 ]
 
 EN_MONTHS = {
     "January": 1, "February": 2, "March": 3, "April": 4,
     "May": 5, "June": 6, "July": 7, "August": 8,
     "September": 9, "October": 10, "November": 11, "December": 12,
+    "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
+    "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12,
+}
+
+# ナビリンクなどを誤ってニュース見出しとみなさないための除外タイトル
+_GENERIC_TITLES = {
+    "会社案内",
+    "ホーム",
+    "お問い合わせ",
+    "contact",
+    "news",
+    "ニュース",
+    "privacy policy",
+    "プライバシーポリシー",
+    "採用情報",
+    "もっと見る",
+    "read more",
 }
 
 HEADERS = {
@@ -65,9 +84,22 @@ def _parse_date(text: str) -> datetime | None:
                 if month == 0:
                     continue
                 return datetime(int(m.group(3)), month, int(m.group(2)), tzinfo=JST)
-            else:
-                y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
-                return datetime(y, mo, d, tzinfo=JST)
+            if fmt == "en_day_month":
+                month = EN_MONTHS.get(m.group(2), 0)
+                if month == 0:
+                    continue
+                return datetime(int(m.group(3)), month, int(m.group(1)), tzinfo=JST)
+            if fmt == "en_day_month_noyear":
+                month = EN_MONTHS.get(m.group(2), 0)
+                if month == 0:
+                    continue
+                now = datetime.now(JST)
+                candidate = datetime(now.year, month, int(m.group(1)), tzinfo=JST)
+                if candidate > now + timedelta(days=2):
+                    candidate = candidate.replace(year=now.year - 1)
+                return candidate
+            y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            return datetime(y, mo, d, tzinfo=JST)
         except (ValueError, KeyError):
             continue
     return None
@@ -105,6 +137,12 @@ def _clean_title(text: str) -> str:
     cleaned = re.sub(rf"^\s*{date_edge}\s*", "", text)
     # 末尾は「日付 + カテゴリ名」の並びになることが多い
     cleaned = re.sub(rf"\s*{date_edge}\s*[#＃]?\S{{0,10}}\s*$", "", cleaned)
+    # 先頭に付くカテゴリラベル（NEWS / イベント / お知らせ 等）を除去
+    cleaned = re.sub(
+        r"^(NEWS|イベント|お知らせ|IR|リリース|新商品|商品関連情報)\s*",
+        "",
+        cleaned,
+    )
     return cleaned.strip() or text.strip()
 
 
@@ -159,6 +197,34 @@ def _find_text_link(block):
     return max(candidates, key=lambda a: len(a.get_text(strip=True)))
 
 
+def _is_generic_title(title: str) -> bool:
+    """メニュー項目など、ニュース見出しとして不適切なタイトルかを判定する。"""
+    return title.strip().lower() in _GENERIC_TITLES
+
+
+def _pick_item_title(block) -> tuple[str, str | None]:
+    """
+    1件分のブロックから見出しとリンク先を取り出す。
+
+    専用クラス（info_title 等）があればそれを優先し、
+    なければブロック内で最も長いリンクトを採用する。
+    ナビの先頭リンク（会社案内など）を誤って拾うのを防ぐ。
+    """
+    titled = block.find(class_=re.compile(r"(info_title|news__ttl|rss_title|title)", re.I))
+    if titled:
+        text = titled.get_text(strip=True)
+        link = titled if titled.name == "a" and titled.get("href") else titled.find("a", href=True)
+        if link is None:
+            link = titled.find_parent("a", href=True)
+        if text:
+            return text, (link["href"] if link else None)
+
+    a_tag = _find_heading_link(block) or _find_text_link(block) or block.find("a", href=True)
+    if a_tag:
+        return a_tag.get_text(strip=True), a_tag.get("href")
+    return block.get_text(separator=" ", strip=True), None
+
+
 def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
     """
     ページからニュース項目を抽出する。
@@ -168,21 +234,19 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
 
     # ── 戦略1: <li> タグの中に日付パターンが含まれるものを検索 ──
     for li in soup.find_all("li"):
+        # ナビ全体・メガメニューなど、リンクを多数含む要素は除外する
+        if len(li.find_all("a", href=True)) > MAX_LINKS_PER_ITEM:
+            continue
         text = li.get_text(separator=" ", strip=True)
         date = _parse_date(text)
         if not date:
             continue
 
-        # タイトルとリンクを抽出
-        a_tag = li.find("a", href=True)
-        if a_tag:
-            title = _clean_title(a_tag.get_text(strip=True) or text)[:80]
-            href = a_tag["href"]
-        else:
-            title = _clean_title(text)[:80]
-            href = base_url
-
-        link = urljoin(base_url, href)
+        raw_title, href = _pick_item_title(li)
+        title = _clean_title(raw_title or text)[:80]
+        if _is_generic_title(title):
+            continue
+        link = urljoin(base_url, href or base_url)
         items.append({"date": date, "title": title, "url": link, "raw_text": text})
 
     # ── 戦略2: <dl>/<dt>/<dd> パターン（日付がdtに入るサイト向け） ──
@@ -200,6 +264,8 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         else:
             title = _clean_title(dd.get_text(strip=True))[:80]
             link = base_url
+        if _is_generic_title(title):
+            continue
         raw = dt.get_text(strip=True) + " " + dd.get_text(strip=True)
         items.append({"date": date, "title": title, "url": link, "raw_text": raw})
 
@@ -215,6 +281,8 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             if not date:
                 continue
             title = _clean_title(text)[:80] or parent_text[:80]
+            if _is_generic_title(title):
+                continue
             link = urljoin(base_url, a_tag["href"])
             items.append({"date": date, "title": title, "url": link, "raw_text": parent_text})
 
@@ -244,21 +312,25 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
             continue
 
         raw_text = a_tag.parent.get_text(separator=" ", strip=True) if a_tag.parent else ""
+        title = _clean_title(a_tag.get_text(strip=True))[:80]
+        if _is_generic_title(title):
+            continue
         items.append(
             {
                 "date": date,
-                "title": _clean_title(a_tag.get_text(strip=True))[:80],
+                "title": title,
                 "url": urljoin(base_url, a_tag["href"]),
                 "raw_text": f"{time_tag.get_text(strip=True)} {raw_text}",
             }
         )
 
-    # 重複除去（URL基準）
+    # 重複除去（URL基準。末尾スラッシュの有無は同一記事とみなす）
     seen = set()
     unique = []
     for item in items:
-        if item["url"] not in seen:
-            seen.add(item["url"])
+        key = item["url"].rstrip("/").lower()
+        if key not in seen:
+            seen.add(key)
             unique.append(item)
 
     return unique

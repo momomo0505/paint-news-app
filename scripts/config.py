@@ -458,10 +458,11 @@ COMPETITOR_SITES = [
         "language": "ja",
     },
     {
+        # トップページは「実績」などニュース以外の日付付き項目が多いため、
+        # お知らせ一覧を直接監視する。イベント出展も対象に含める。
         "name": "サンワ・リノテック",
-        "url": "https://sanwa-renotech.com/",
+        "url": "https://sanwa-renotech.com/information/",
         "language": "ja",
-        "section_include": ["NEWS"],
     },
     {
         "name": "大塚刷毛製造（マルテー）",

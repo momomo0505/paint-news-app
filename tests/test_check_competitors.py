@@ -204,6 +204,83 @@ def test_existing_patterns() -> None:
     )
 
 
+SANWA_HTML = """
+<section class="information_list" id="main_column">
+<ul class="information_list">
+<li class="post">
+<a href="https://sanwa-renotech.com/information/4620/">
+<time>2026.09.30</time>
+<label>イベント</label>
+<span class="info_title">志摩機械☆万博　EXPO2026に出展いたします</span>
+</a>
+</li>
+<li class="post">
+<a href="https://sanwa-renotech.com/information/4617/">
+<time>2026.09.22</time>
+<label>イベント</label>
+<span class="info_title">2026オクムラ祭りwith日立建機日本に出展いたします</span>
+</a>
+</li>
+<li class="post">
+<a href="https://sanwa-renotech.com/information/4607/">
+<time>2026.09.28</time>
+<label>NEWS</label>
+<span class="info_title">システムメンテナンスに伴うサイト一時停止のお知らせ</span>
+</a>
+</li>
+</ul>
+</section>
+"""
+
+
+def test_sanwa_information_list() -> None:
+    print("--- サンワ・リノテックお知らせ一覧 ---")
+    items = extract(SANWA_HTML, "https://sanwa-renotech.com/information/")
+
+    expo = by_title(items, "志摩機械")
+    okumura = by_title(items, "オクムラ祭り")
+    maint = by_title(items, "システムメンテナンス")
+    check("イベント出展（9/30）を抽出できる", expo is not None, f"titles={[i['title'] for i in items]}")
+    check(
+        "9/30の日付が正しい",
+        expo is not None and expo["date"].strftime("%Y-%m-%d") == "2026-09-30",
+        f"{expo}",
+    )
+    check("イベント出展（9/22）を抽出できる", okumura is not None)
+    check("NEWSも抽出できる", maint is not None)
+    check(
+        "タイトルにカテゴリ名が残らない",
+        expo is not None and not expo["title"].startswith("イベント"),
+        f"{expo['title'] if expo else None}",
+    )
+    check(
+        "同一記事が日付抽出経路の違いで重複しない",
+        len([i for i in items if "志摩機械" in i["title"]]) == 1,
+        f"titles={[i['title'] for i in items]}",
+    )
+
+
+BANZAI_NAV_HTML = """
+<ul class="nav">
+  <li class="dropdown"><a href="/company.html">会社案内</a>
+    <ul><li><a href="/company.html">会社概要</a></li></ul>
+  </li>
+</ul>
+<dl>
+  <dt class="rss_date">2026/09/30</dt>
+  <dd class="rss_title"><a href="/media/a67"><span>新商品</span>エレクトリックタイヤリフター　発売開始</a></dd>
+</dl>
+"""
+
+
+def test_banzai_skips_nav_title() -> None:
+    print("--- バンザイ（ナビ誤検知の防止） ---")
+    items = extract(BANZAI_NAV_HTML, "https://www.banzai.co.jp/news.html")
+    titles = [i["title"] for i in items]
+    check("会社案内をニュースにしない", not any("会社案内" == t for t in titles), f"titles={titles}")
+    check("新商品ニュースは残す", any("タイヤリフター" in t for t in titles), f"titles={titles}")
+
+
 def test_clean_title() -> None:
     print("--- タイトルの日付除去 ---")
     check(
@@ -244,6 +321,8 @@ def main() -> None:
     test_shoei_structure()
     test_takubo_structure()
     test_existing_patterns()
+    test_sanwa_information_list()
+    test_banzai_skips_nav_title()
     test_clean_title()
 
     print()
