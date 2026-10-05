@@ -34,6 +34,28 @@ logger = logging.getLogger(__name__)
 
 JST = timezone(timedelta(hours=9))
 
+# メール本文のフォント指定。
+# Outlook（Word レンダリングエンジン）は <body> の font-family を無視して
+# 日本語を「ＭＳ Ｐゴシック」で表示するため、_inject_font_family() で
+# 全要素のインライン style に注入する。
+# ※ style 属性が単一引用符のケースと衝突しないよう、フォント名は引用符なしで記述する
+_FONT_FAMILY = "Noto Sans JP,Hiragino Sans,Yu Gothic UI,Meiryo,sans-serif"
+
+# Noto Sans JP が未インストールの環境（Windows 等）向けの Web フォント読み込み。
+# 対応クライアント（Apple Mail 等）でのみ有効。Gmail・Outlook では無視され、
+# フォールバック（Yu Gothic UI / Meiryo）が使われる。
+_FONT_HEAD_HTML = (
+    '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">\n'
+    "<style>body,div,p,h1,h2,h3,ul,li,a,span{font-family:" + _FONT_FAMILY + ";}</style>"
+)
+
+
+def _inject_font_family(html: str) -> str:
+    """HTML内の全インライン style 属性の先頭に font-family を注入する。"""
+    html = html.replace('style="', 'style="font-family:' + _FONT_FAMILY + ";")
+    html = html.replace("style='", "style='font-family:" + _FONT_FAMILY + ";")
+    return html
+
 
 def _google_translate_url(url: str) -> str:
     """英語URLをGoogle翻訳経由URLに変換する。"""
@@ -236,8 +258,10 @@ def _build_email_html(
     return (
         "<!DOCTYPE html>\n"
         '<html lang="ja">\n'
-        '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>\n'
-        '<body style="margin:0;padding:0;background:#f8f9fa;font-family:-apple-system,BlinkMacSystemFont,\'Hiragino Sans\',\'Noto Sans JP\',sans-serif;">\n'
+        '<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
+        + _FONT_HEAD_HTML
+        + "</head>\n"
+        '<body style="margin:0;padding:0;background:#f8f9fa;">\n'
         '  <div style="max-width:620px;margin:40px auto;padding:0 16px;">\n'
         '    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:32px;">\n'
         '      <p style="margin:0 0 4px;font-size:0.85rem;color:#6b7280;">塗装業界ニュースレポート</p>\n'
@@ -311,8 +335,10 @@ def send_notification(
     if no_articles or total_count == 0:
         subject = f"🎨 塗装業界ニュース {issue_date}号 — 本日の取得件数: 0件"
         html_body = (
-            "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'></head>"
-            "<body style='font-family:sans-serif;padding:32px;'>"
+            "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>"
+            + _FONT_HEAD_HTML
+            + "</head>"
+            "<body style='padding:32px;'>"
             "<h2>🎨 塗装業界ニュース — " + issue_date + "号</h2>"
             "<p>本日は各ソース（競合サイト・国内RSS・NewsAPI）からの記事取得件数が 0件 でした。</p>"
             "<ul>"
@@ -333,6 +359,11 @@ def send_notification(
             self_mention_articles=self_mention_articles,
             weekly_digest=weekly_digest,
         )
+
+    # 全要素のインライン style に font-family を注入する
+    # （Outlook 等が <body> のフォント指定を無視して
+    #   ＭＳ Ｐゴシックで表示するのを防ぐ）
+    html_body = _inject_font_family(html_body)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
