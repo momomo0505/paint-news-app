@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塗装業界ウィークリーニュース — 2026年10月12日</title>
+    <style>
+        /* ── リセット & ベース ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #f8f9fa;
+            --color-surface: #ffffff;
+            --color-text: #1a1a2e;
+            --color-text-secondary: #6b7280;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-border: #e5e7eb;
+            --color-equipment: #059669;
+            --color-technology: #7c3aed;
+            --color-automotive: #dc2626;
+            --color-regulation: #d97706;
+            --color-market: #2563eb;
+            --color-company: #0891b2;
+            --color-other: #6b7280;
+            --radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --transition: 0.2s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+                         "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+                         "Yu Gothic", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── ヘッダー ── */
+        .header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 24px 0;
+        }
+
+        .header-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── 統計バー ── */
+        .stats-bar {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-equipment { background: var(--color-equipment); }
+        .dot-technology { background: var(--color-technology); }
+        .dot-automotive { background: var(--color-automotive); }
+        .dot-regulation { background: var(--color-regulation); }
+        .dot-market { background: var(--color-market); }
+        .dot-company { background: var(--color-company); }
+        .dot-other { background: var(--color-other); }
+
+        /* ── 記事リスト ── */
+        .articles {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .article-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        .article-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d1d5db;
+        }
+
+        .article-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 2px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .tag-equipment  { background: #ecfdf5; color: var(--color-equipment); }
+        .tag-technology { background: #f5f3ff; color: var(--color-technology); }
+        .tag-automotive { background: #fef2f2; color: var(--color-automotive); }
+        .tag-regulation { background: #fffbeb; color: var(--color-regulation); }
+        .tag-market     { background: var(--color-accent-light); color: var(--color-market); }
+        .tag-company    { background: #ecfeff; color: var(--color-company); }
+        .tag-other      { background: #f3f4f6; color: var(--color-other); }
+
+        .article-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+
+        .article-summary {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .article-source {
+            font-weight: 500;
+        }
+
+        .article-link {
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity var(--transition);
+        }
+
+        .article-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ── フッター ── */
+        .footer {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* ── 空状態 ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* ── レスポンシブ ── */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.25rem; }
+            .article-card { padding: 16px; }
+            .article-card-header { flex-direction: column; gap: 6px; }
+            .category-tag { margin-top: 0; }
+            .article-footer { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── 印刷 ── */
+        @media print {
+            body { background: white; }
+            .article-card { break-inside: avoid; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="header">
+    <div class="header-inner">
+        <div style="margin-bottom:12px;">
+            <a href="https://momomo0505.github.io/paint-news-app/"
+               style="display:inline-flex;align-items:center;gap:6px;
+                      font-size:0.85rem;font-weight:600;color:#2563eb;
+                      background:#eff6ff;border:1px solid #bfdbfe;
+                      border-radius:6px;padding:6px 14px;
+                      text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='#dbeafe'"
+               onmouseout="this.style.background='#eff6ff'">
+                ← 過去のレポート一覧
+            </a>
+        </div>
+        <h1>🎨 塗装業界ニュースレポート</h1>
+        <div class="header-meta">
+            <span>📅 2026年10月12日</span>
+            
+            <span>🏭 競合: 10件</span>
+            <span>🇯🇵 国内: 22件</span>
+            <span>🌍 海外: 20件</span>
+            <span>📆 対象: 2026/09/28 〜 2026/10/12</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════ -->
+<!-- 週次総括コメント                       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:20px auto 0;padding:0 20px;">
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:4px solid #0284c7;border-radius:8px;padding:20px 24px;">
+        <h2 style="font-size:1rem;font-weight:700;color:#0c4a6e;margin:0 0 12px;">
+            🧠 今週のポイント
+        </h2>
+        <ul style="margin:0;padding:0;list-style:none;">
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **日本ペイントがアクゾノーベルの東南アジア塗料事業を約2,160億円で買収**。Duluxブランドを含むインドネシア等の建築用塗料事業を獲得し、売上高は8年で3倍規模へ。国内大手の海外M&amp;A攻勢が加速している。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **AkzoNobelとAxaltaの合併（250億ドル規模）がEU承認に近づく**。世界塗料市場の再編が進展しており、グローバルサプライチェーンや価格競争力に与える影響を注視する必要がある。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **PPGが航空宇宙向けコーティング工場をハンツビル拡張（7,000万ドル投資）**。エアバス・ボーイングの大型発注が相次ぐ航空機需要の回復を背景に、航空宇宙向けコーティング市場への投資が活発化している。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **国内競合各社が展示会・新製品で攻勢**。大塚刷毛製造がローラー新グレード投入、バンザイがEVタイヤリフターを発売するなど、製品ラインアップ拡充と展示会プロモーションの動きが集中している。
+            </li>
+            
+            <li style="font-size:0.9rem;color:#1e3a5f;line-height:1.7;padding:4px 0;border-bottom:1px solid #e0f2fe;">
+                ● **自動車・モビリティ産業でEV・自動運転技術が進化**、プジョーの全固体電池車やStellantisとWayveのAI共同開発など、車体設計の変化が塗装工程・表面処理の仕様変更を中期的に促す可能性がある。
+            </li>
+            
+        </ul>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 0: 弊社関連記事（取材・掲載）  -->
+<!-- ══════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 1: 競合他社・関連メーカー動向 -->
+<!-- ══════════════════════════════════════ -->
+<main class="articles">
+
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #dc2626;padding-left:12px;margin-bottom:16px;">
+        1. 競合他社・関連メーカー動向
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">Japan IT Week 秋 第3回 AIインフラ・データセンターEXPO 出展のお知らせ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月09日</span>
+        <a href="https://www.taikisha.co.jp/news/20261009_965.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">【出展のお知らせ】2026年10月7日～9日　TOOL JAPAN-第16回農業WEEK(通称：J-AGRI KYUSHU)　㏌幕張メッセ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月07日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e3%80%90%e5%87%ba%e5%b1%95%e3%81%ae%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%80%912026%e5%b9%b410%e6%9c%887%e6%97%a5%ef%bd%9e9%e6%97%a5%e3%80%80tool-japan-%e7%ac%ac16%e5%9b%9e%e8%be%b2%e6%a5%adweek/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">明々工業（キュービックシステム）</span>
+        <h2 class="article-title">☆第1回猛暑テック-猛暑対策テクノロジー展-　in幕張メッセ</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月05日</span>
+        <a href="https://www.cubicsystem.co.jp/news/%e2%98%86%e7%ac%ac1%e5%9b%9e%e7%8c%9b%e6%9a%91%e3%83%86%e3%83%83%e3%82%af-%e7%8c%9b%e6%9a%91%e5%af%be%e7%ad%96%e3%83%86%e3%82%af%e3%83%8e%e3%83%ad%e3%82%b8%e3%83%bc%e5%b1%95-%e3%80%80in%e5%b9%95/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">ヲサメ工業</span>
+        <h2 class="article-title">『長尺・重量物対応に特化した搬送装置』の特徴、技術及び事例を掲載しました。NEW</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月05日</span>
+        <a href="https://www.osame.co.jp/news/20261005.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">サンワ・リノテック</span>
+        <h2 class="article-title">JUMBO FAIR 2026に出展いたします。</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月05日</span>
+        <a href="https://sanwa-renotech.com/information/4626/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大気社</span>
+        <h2 class="article-title">自己株式の取得状況に関するお知らせ[101.2 KB]</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年10月01日</span>
+        <a href="https://www.taikisha.co.jp/common/mtimg/20261001.pdf" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">アネスト岩田</span>
+        <h2 class="article-title">【お知らせ】システムメンテナンスに伴うサイト一時停止について</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年09月30日</span>
+        <a href="https://www.anest-iwata.co.jp/news/2026/2026-09-30" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">バンザイ</span>
+        <h2 class="article-title">エレクトリックタイヤリフター　発売開始</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年09月30日</span>
+        <a href="https://www.banzai.co.jp/media/category01/a67" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">サンワ・リノテック</span>
+        <h2 class="article-title">志摩機械☆万博　EXPO2026に出展いたします</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年09月30日</span>
+        <a href="https://sanwa-renotech.com/information/4620/" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#fee2e2;color:#991b1b;">大塚刷毛製造（マルテー）</span>
+        <h2 class="article-title">マルテー無泡ローラーにDELUXEタイプが新登場！</h2>
+    </div>
+    <div class="article-footer">
+        <span class="article-source">2026年09月29日</span>
+        <a href="https://www.maru-t.co.jp/news/article.php?d=329" target="_blank" rel="noopener noreferrer" class="article-link">
+            詳細を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 2: 国内塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #16a34a;padding-left:12px;margin-bottom:16px;">
+        2. 国内塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">鉄鋼業界は市場回復の波に乗っている。 - Vietnam.vn</h2>
+    </div>
+    
+    <p class="article-summary">ベトナムの鉄鋼業界が市場回復の流れに乗っていると報じられた。鉄鋼需要の回復は塗料・防錆塗装市場にも好影響をもたらす可能性がある。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Vietnam.vn — 2026年10月11日</span>
+        <a href="https://www.vietnam.vn/ja/nganh-thep-don-da-phuc-hoi-cua-thi-truong" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本全固体電池市場：トヨタ、日産、ホンダによる全固体電池開発の加速が新たな製造・サプライチェーン機会を創出 - Dream News</h2>
+    </div>
+    
+    <p class="article-summary">トヨタ・日産・ホンダが全固体電池開発を加速しており、日本市場における新たな製造・サプライチェーンの機会が拡大している。次世代EV向け電池技術の実用化に向けた競争が国内で本格化している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Dream News — 2026年10月09日</span>
+        <a href="https://www.dreamnews.jp/press/0000364761" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイントが事業買収 オランダの塗料大手から - 沖縄タイムス社</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントがオランダの塗料大手アクゾノーベルから事業を買収した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">沖縄タイムス社 — 2026年10月08日</span>
+        <a href="https://www.okinawatimes.co.jp/articles/-/1940173" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイントは、アクゾノーベルの塗料ブランド「デュラックス」を13億5000万ドルで買収した。 - Vietnam.vn</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントはアクゾノーベルが展開する塗料ブランド「デュラックス」を13億5000万ドル（約2,160億円）で買収した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Vietnam.vn — 2026年10月07日</span>
+        <a href="https://www.vietnam.vn/ja/nippon-paint-thau-tom-thuong-hieu-son-dulux-cua-akzonobel-voi-thuong-vu-1-35-ti-usd" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、デュラックスのアクゾノーベル事業をインドネシアを含む形で買収 - IDNFinancials</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントはインドネシアを含む東南アジア地域でアクゾノーベルが展開するデュラックスブランドの事業を買収した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">IDNFinancials — 2026年10月07日</span>
+        <a href="https://www.idnfinancials.com/jp/news/69913/nippon-paint-acquires-akzonobels-dulux-line-including-in-indonesia" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイントHD、アクゾ社の東南アジア建築塗料事業を買収</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントホールディングスがアクゾノーベル社の東南アジア建築塗料事業を買収し、アジア市場でのプレゼンス拡大を図る。新興国市場における建築塗料需要の取り込みを強化する戦略的な動きとなる。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本塗装時報 — 2026年10月07日</span>
+        <a href="https://tosojiho.jp/?p=12455" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、「ダンジオーラ」に屋根用硬化剤 遮熱塗料と組み合わせ作業を短縮</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントが塗料「ダンジオーラ」向けに屋根用硬化剤を新たに展開し、遮熱塗料との組み合わせで施工工程の短縮を実現した。作業効率の向上と遮熱性能の両立が塗装業者にとってメリットとなる。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本塗装時報 — 2026年10月07日</span>
+        <a href="https://tosojiho.jp/?p=12451" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">EcoPro BM・Samsung SDI、硫化物系全固体電池の材料開発で提携…2027年の量産目指す - BigGo ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">韓国のEcoPro BMとSamsung SDIが硫化物系全固体電池の材料開発で提携し、2027年の量産化を目指す。次世代電池材料の供給体制構築に向けた動きが加速している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">BigGo ファイナンス — 2026年10月06日</span>
+        <a href="https://finance.biggo.jp/news/e9cee90f-8371-4690-b283-fbd693ab38e9" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、蘭アクゾから執念の買収 M&amp;A攻勢で売上高8年で3倍 - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントはオランダのアクゾノーベルから事業を買収し、積極的なM&amp;A戦略により売上高を8年間で3倍に拡大している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年10月06日</span>
+        <a href="https://www.nikkei.com/article/DGXZQOUC051OR0V01C26A0000000/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日ペHD、蘭大手から事業買収 東南アジアの建築用塗料 - 47NEWS</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントホールディングスがオランダの塗料大手から東南アジアの建築用塗料事業を買収した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">47NEWS — 2026年10月05日</span>
+        <a href="https://www.47news.jp/15039886.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、アクゾノーベルの東南アジア塗料事業を2,160億円で買収 Duluxなど獲得 ｜Seizo Trend - ビジネス+IT</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントはアクゾノーベルの東南アジア塗料事業を約2,160億円で買収し、「Dulux（デュラックス）」など主要ブランドを獲得した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">ビジネス+IT — 2026年10月05日</span>
+        <a href="https://www.sbbit.jp/article/st/187271" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイントHD、株価反発 蘭アクゾの東南アジア事業を買収 - 日本経済新聞</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントホールディングスがオランダのアクゾノーベルの東南アジア事業買収を発表し、市場では好感され株価が反発した。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本経済新聞 — 2026年10月05日</span>
+        <a href="https://www.nikkei.com/article/DGXZQOFL050L30V01C26A0000000/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">日本ペイント、蘭アクゾの東南アジア事業を買収 2160億円 - Reuters</h2>
+    </div>
+    
+    <p class="article-summary">日本ペイントはアクゾノーベルの東南アジア事業を約2,160億円で買収し、同地域での事業基盤をさらに強化する。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">Reuters — 2026年10月05日</span>
+        <a href="https://www.reuters.com/jp/world/BU7OTRF76NLPHG2BP23JPDNZ3A-2026-10-04/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">ベル型塗装機をメインに展示 Binksジャパン 【2026CJTレポ】</h2>
+    </div>
+    
+    <p class="article-summary">Binksジャパンが2026CJTにベル型塗装機をメインとした展示を行った。自動車塗装などに用いられる高効率塗装機器として注目を集めた。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">WEB塗料報知 — 2026年10月05日</span>
+        <a href="https://www.e-toryo.co.jp/report/binks-4-2/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">薬剤×設備×加工の総合力 パーカーエンジニアリング 【2026CJTレポ】</h2>
+    </div>
+    
+    <p class="article-summary">パーカーエンジニアリングが2026CJTにおいて、薬剤・設備・加工を組み合わせた総合的な表面処理ソリューションを展示した。複合的なアプローチにより塗装前処理工程の最適化を提案している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">WEB塗料報知 — 2026年10月05日</span>
+        <a href="https://www.e-toryo.co.jp/report/parker-eng-2/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">サンコウ電子研究所のBluetooth搭載膜厚計が好評【2026CJTレポ】</h2>
+    </div>
+    
+    <p class="article-summary">サンコウ電子研究所がBluetooth搭載の膜厚計を2026CJTに出展し、好評を博した。無線データ転送機能により、塗装現場での膜厚管理の効率化が期待される。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">WEB塗料報知 — 2026年10月05日</span>
+        <a href="https://www.e-toryo.co.jp/report/sanko-denshi-9/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">奥野製薬工業 脱フッ素への挑戦【2026CJTレポ】</h2>
+    </div>
+    
+    <p class="article-summary">奥野製薬工業が2026CJTにて、環境規制に対応した脱フッ素化への取り組みを展示・発表した。フッ素系化合物の代替技術開発が塗装・表面処理業界における重要課題となっている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">WEB塗料報知 — 2026年10月05日</span>
+        <a href="https://www.e-toryo.co.jp/report/okuno-5/" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">Hyundai Motor・Toyota・BYD、「夢の電池」全固体電池の開発競争が本格化 - BigGo ファイナンス</h2>
+    </div>
+    
+    <p class="article-summary">現代自動車・トヨタ・BYDが「夢の電池」と呼ばれる全固体電池の開発競争を本格化させている。EV市場における次世代電池技術の覇権争いがグローバル規模で激化している。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">BigGo ファイナンス — 2026年10月03日</span>
+        <a href="https://finance.biggo.jp/news/fd1548d8-1522-43b3-98dd-1b590f1a010f" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">【オートアフターマーケット九州】水性塗料の新たな活用から次世代バッテリーまで、自動車アフターマーケットの最新トレンドが集結</h2>
+    </div>
+    
+    <p class="article-summary">「オートアフターマーケット九州」において、水性塗料の新たな活用方法や次世代バッテリーなど、自動車アフターマーケットの最新トレンドが紹介された。塗装分野では水性塗料の動向が特に注目を集めている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">CarCare Plus — 2026年10月03日</span>
+        <a href="https://carcareplus.jp/article/2026/10/03/15974.html" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">第９回コーティングジャパン開催 塗料・塗装機器メーカーら47社が出展</h2>
+    </div>
+    
+    <p class="article-summary">塗料・塗装機器メーカーなど47社が出展する「第9回コーティングジャパン」が開催された。塗装業界の最新技術や製品が一堂に集まる注目の展示会となっている。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本塗装時報 — 2026年10月01日</span>
+        <a href="https://tosojiho.jp/?p=12435" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">関西ペイント 組織変更と役員人事</h2>
+    </div>
+    
+    <p class="article-summary">関西ペイントが組織変更および役員人事を実施した。業界大手の体制刷新として注目される。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本塗装時報 — 2026年09月30日</span>
+        <a href="https://tosojiho.jp/?p=12429" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag" style="background:#dcfce7;color:#166534;">国内</span>
+        <h2 class="article-title">技能グランプリＯＳＡＫＡ 府塗装技能士会から４選手参加</h2>
+    </div>
+    
+    <p class="article-summary">技能グランプリOSAKAに、府塗装技能士会から4名の選手が参加した。塗装技能の高度な競技会で、地域の技能士が腕を競う。</p>
+    
+    <div class="article-footer">
+        <span class="article-source">日本塗装時報 — 2026年09月30日</span>
+        <a href="https://tosojiho.jp/?p=12426" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+
+
+
+<!-- ══════════════════════════════════════ -->
+<!-- Section 3: 海外塗装業界ニュース       -->
+<!-- ══════════════════════════════════════ -->
+
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #7c3aed;padding-left:12px;margin-bottom:16px;">
+        3. 海外塗装業界ニュース
+    </h2>
+</div>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">ボーイング、2026年上半期に787-9ドリームライナーを35機納入——エアバスA350-900の20機を上回る</h2>
+    </div>
+    <p class="article-summary">2026年上半期において、ボーイングは787-9ドリームライナーを35機納入し、エアバスのA350-900（20機）を大きく上回る実績を記録した。両機種はワイドボディ長距離機市場で直接競合しており、ボーイングが納入数で優位に立った形となる。航空機の製造・納入ペースは機体の表面処理・コーティング工程の生産能力とも密接に関連しており、業界の製造動向として注目される。</p>
+    <div class="article-footer">
+        <span class="article-source">Simple Flying — 2026年10月12日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simpleflying.com/boeing-hand-over-35-787-9-dreamliners-h1-2026-compared-airbus-20-a350-900/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">プジョー RCZ ビジョン発表：全固体電池搭載、493馬力、個性的なステアリングホイール</h2>
+    </div>
+    <p class="article-summary">プジョーが次世代コンセプトカー「RCZ ビジョン」を公開した。全固体電池を採用し、493馬力を発揮する高性能電動スポーツカーとして注目を集めている。独特のデザインのステアリングホイールなど先進的なインテリアも特徴で、プジョーの将来的な電動化・デザイン戦略を示す一台となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">Top Gear — 2026年10月12日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.topgear.com/car-news/first-look/new-peugeot-rcz-vision-solid-state-battery-493bhp-and-a-mad-steering-wheel"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">タレス、日本初の外国製軍事装備品整備施設を開設へ</h2>
+    </div>
+    <p class="article-summary">フランスの防衛・電子機器大手タレスが、日本初となる外国製軍事装備品の維持整備施設を開設する計画を発表した。この施設は、日本の防衛装備品の国内維持整備能力強化を目的としており、日本の防衛政策の転換を反映したものとみられる。詳細については今後明らかにされる見込みである。</p>
+    <div class="article-footer">
+        <span class="article-source">Мілітарний — 2026年10月12日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://militarnyi.com/en/news/thales-to-open-japan-s-first-foreign-military-equipment-maintenance-facility/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">中聯重科、鉱山機械事業を拡大——海外売上高が成長</h2>
+    </div>
+    <p class="article-summary">中国の重機メーカー・中聯重科（Zoomlion）は、鉱山機械事業の拡大と海外事業強化を推進している。2026年上半期において同社の鉱山機械部門は売上成長を達成し、国際展開を加速させている。建設機械・重機分野における同社のグローバル競争力強化の一環として、新興市場や資源国向けの事業拡大が進んでいる。</p>
+    <div class="article-footer">
+        <span class="article-source">PRNewswire — 2026年10月10日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.prnewswire.com/news-releases/zoomlion-expands-mining-machinery-business-as-international-revenue-grows-302905031.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">アボロン、エアバスおよびボーイングから航空機250機を発注</h2>
+    </div>
+    <p class="article-summary">航空機リース大手のアボロンが、エアバスとボーイングから合計250機の航空機を発注した。この大型発注は、航空需要の回復と長期的な機材拡充戦略を反映している。新造機の大量導入により、最新世代の燃費効率に優れた機体へのフリート刷新が進むとみられる。航空機の塗装・コーティング需要にも中長期的な影響を与える可能性がある。</p>
+    <div class="article-footer">
+        <span class="article-source">Aviation Week — 2026年10月10日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://aviationweek.com/air-transport/airlines-lessors/avolon-orders-250-airbus-boeing-aircraft"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">WayveとStellantis、フィアット・ジープ・マセラティ向けに単一AIドライバーシステムを共同開発</h2>
+    </div>
+    <p class="article-summary">AI自動運転スタートアップのWayveとStellantisが、フィアット・ジープ・マセラティの各ブランドに対応する統一AIドライビングシステムの開発に向けて連携を強化している。Wayve CEOのアレックス・ケンドール氏は、AIドライビングシステムはシートベルトや緊急ブレーキと同様に、いつかすべての車に必要不可欠な技術になると述べた。両社CEOはイタリア・トリノで開催されたWave by Ventoイベントで対談し、複数の異なる車種・ブランドに単一のAIシステムを適応させるアプローチの優位性を強調した。</p>
+    <div class="article-footer">
+        <span class="article-source">The Next Web — 2026年10月10日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://thenextweb.com/news/alex-kendall-wayve-stellantis-ai-driving-seatbelt-wave-by-vento"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">PPGインダストリーズ、再び市場の注目を集める</h2>
+    </div>
+    <p class="article-summary">PPGインダストリーズ（NYSE: PPG）が投資家の関心を再び引き付けている。Simply Wall Streetの分析によれば、同社は塗料・コーティング業界における主要プレーヤーとして、その事業動向や財務指標が改めて注目されている。コーティング業界の大手として、PPGの株価動向や業績見通しが市場で再評価されている模様だ。</p>
+    <div class="article-footer">
+        <span class="article-source">Simply Wall Street — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://simplywall.st/stocks/us/materials/nyse-ppg/ppg-industries/news/ppg-industries-ppg-just-put-itself-back-in-focus"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">アボロン、エアバスA330-900を35機・A320neoファミリーを75機発注</h2>
+    </div>
+    <p class="article-summary">航空機リース大手のアボロンが、エアバスのワイドボディ機A330-900を35機、ナローボディ機A320neoファミリーを75機、合計110機を新たに発注した。この大型受注はエアバスの受注残高をさらに積み上げる形となる。航空需要の回復と機材更新需要を背景に、リース会社による大規模な機材調達が続いている。なお、本記事は航空機の調達・製造に関するニュースであり、塗装・コーティング業界との直接的な関連性は限定的である。</p>
+    <div class="article-footer">
+        <span class="article-source">Airbus — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.airbus.com/en/newsroom/press-releases/2026-10-avolon-orders-35-airbus-a330-900-and-75-a320neo-family-aircraft"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-industrial">
+            工業塗装
+        </span>
+        <h2 class="article-title">コーチン造船所、バラルパダムとトゥートゥクディに総額6,000クローレの新施設計画</h2>
+    </div>
+    <p class="article-summary">インド国営のコーチン造船所（CSL）は、バラルパダムに鋼材ブロック製造施設、トゥートゥクディに造船・船舶修繕ユニットの建設を計画しており、総投資額は約6,000クローレ（約850億円）に上る。これらのプロジェクトはインドの造船・海洋インフラの拡充を目的としており、船舶修繕需要の拡大に対応するものである。鋼材ブロック製造拠点の整備は、船体防食塗装や構造材の一括加工を含む上流工程の強化にも寄与するとみられる。</p>
+    <div class="article-footer">
+        <span class="article-source">Business Standard — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.business-standard.com/industry/news/cochin-shipyard-plans-6-000-crore-projects-in-vallarpadam-and-thoothukudi-126100901022_1.html"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">エアバス、2026年目標達成には第4四半期に323機の納入が必要</h2>
+    </div>
+    <p class="article-summary">エアバスが2026年の納入目標を達成するためには、第4四半期だけで323機を納入しなければならないことが明らかになった。これは同社にとって極めて高いハードルであり、サプライチェーンや製造能力への大きな圧力を示している。航空機の需要は依然として旺盛であるが、供給側の制約が引き続き課題となっており、目標達成の実現可能性に業界の注目が集まっている。</p>
+    <div class="article-footer">
+        <span class="article-source">Aerospace Global News — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://aerospaceglobalnews.com/news/airbus-september-2026-orders-deliveries/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-other">
+            その他
+        </span>
+        <h2 class="article-title">【凹み缶】Sikkens BLX Pro デッキ・外装木材オイル（パイン）が80ドルで配送込み</h2>
+    </div>
+    <p class="article-summary">プレミアム木材塗料ブランドSikkensのBLX Proデッキ・外装木材オイル（パイン色）が、凹み缶のアウトレット品として通常価格165ドル以上のところ80ドルで販売されている。オーストラリアのeBayショップ「ozzietrends」が取り扱い、送料込みの価格。夏に向けてデッキや外装木材のリフレッシュに適したタイミングとされている。</p>
+    <div class="article-footer">
+        <span class="article-source">Ozbargain.com.au — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.ozbargain.com.au/node/978305"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">アクサルタ・コーティング・システムズ、2026年第3四半期決算日と業績予想</h2>
+    </div>
+    <p class="article-summary">マーケットビートが、アクサルタ・コーティング・システムズの2026年第3四半期決算発表日（2026年10月29日予定）と業績予想を公表した。アクサルタは自動車・工業用塗料分野における世界有数のコーティングメーカーであり、四半期ごとの決算発表が業界関係者や投資家から注目されている。詳細な収益予測や一株当たり利益（EPS）の見通しについては、マーケットビートのレポートにまとめられている。</p>
+    <div class="article-footer">
+        <span class="article-source">MarketBeat — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.marketbeat.com/earnings/reports/2026-10-29-axalta-coating-systems-ltd-stock/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-aerospace">
+            航空機・宇宙
+        </span>
+        <h2 class="article-title">航空宇宙向けコーティング大手PPG、ハンツビルに7,000万ドルの新工場拡張を発表</h2>
+    </div>
+    <p class="article-summary">PPGは米国アラバマ州ハンツビルの生産拠点に対し、7,000万ドル規模の設備拡張投資を発表した。同社は航空宇宙・防衛分野向けのコーティング・シーリング材を主力製品とする大手メーカーであり、今回の投資により生産能力の大幅な強化が見込まれる。ハンツビルは航空宇宙産業の集積地として知られており、NASAや防衛関連企業の需要拡大に対応するための戦略的投資とみられる。</p>
+    <div class="article-footer">
+        <span class="article-source">The Bama Buzz — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://thebamabuzz.com/ppg-announces-new-70-million-expansion-huntsville/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-company">
+            企業ニュース
+        </span>
+        <h2 class="article-title">AkzoNobelとAxalta、250億ドル規模の合併がEU承認に近づく</h2>
+    </div>
+    <p class="article-summary">塗料・コーティング大手のAkzoNobelとAxaltaの合併交渉が、欧州連合（EU）の規制当局による承認に向けて大きく前進している。両社の合併総額は約250億ドル（約3.7兆円）に上り、実現すれば世界の塗料・コーティング業界に大きな再編をもたらす。EU当局は競争環境への影響を審査しており、最終承認が得られれば業界の勢力図が大幅に塗り替えられる見込みだ。</p>
+    <div class="article-footer">
+        <span class="article-source">PYMNTS.com — 2026年10月09日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.pymnts.com/cpi-posts/akzonobel-axalta-near-eu-approval-for-25-billion-merger/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">I-CARが2026年SEMAショーにADAS・診断・溶接トレーニングを出展</h2>
+    </div>
+    <p class="article-summary">I-CAR（自動車衝突修理教育機関）が2026年のSEMAショーにおいて、ADAS（先進運転支援システム）、車両診断、溶接技術に関するトレーニングプログラムを提供する。ボディショップ技術者の教育・スキルアップを目的とした実践的な訓練機会を展示会の場で展開する。自動車修理業界における技術の高度化・複雑化に対応するため、現場技術者への専門教育の普及を図る取り組みの一環となる。</p>
+    <div class="article-footer">
+        <span class="article-source">Body Shop Business — 2026年10月08日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.bodyshopbusiness.com/i-car-brings-education-technical-expertise-and-industry-resources-to-sema/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">EUROFER：欧州鉄鋼市場が圧迫、鉄鋼生産量が過去最低を記録</h2>
+    </div>
+    <p class="article-summary">欧州鉄鋼連盟（EUROFER）の報告によると、欧州の鉄鋼生産量が過去最低水準に落ち込み、鉄鋼市場が深刻な圧力にさらされている。需要低迷や輸入品との競争激化、エネルギーコストの高騰などが生産縮小の主因とみられる。欧州鉄鋼業界は構造的な課題に直面しており、今後の市場回復には政策的支援や需要喚起策が不可欠な状況となっている。</p>
+    <div class="article-footer">
+        <span class="article-source">Yieh Corp. — 2026年10月08日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://yieh.com/en/News/eurofer-european-steel-market-under-pressure-as-steel-output-hits-record-low/162868"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-regulation">
+            環境規制
+        </span>
+        <h2 class="article-title">中国、EV用固体電池電解質に関するGB/Z 214-2026を発行</h2>
+    </div>
+    <p class="article-summary">中国は電気自動車向け固体電池の電解質に関する新規格「GB/Z 214-2026」を発行した。この規格は固体電解質の技術要件や試験方法を規定するもので、中国における次世代EV用バッテリー技術の標準化を推進する狙いがある。EV市場向けコーティング・絶縁材料を手がけるメーカーにとっても、関連規制動向として注視が必要な規格となる。</p>
+    <div class="article-footer">
+        <span class="article-source">MPR China Certification GmbH — 2026年10月08日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.china-certification.com/en/china-issues-gb-z-214-2026-on-ev-solid-state-battery-electrolytes/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-market">
+            市場動向
+        </span>
+        <h2 class="article-title">2026年上半期、鉄鋼業界全体が低迷する中、方大特殊鋼がトン当たり利益で業界トップを維持</h2>
+    </div>
+    <p class="article-summary">2026年上半期において、鉄鋼業界全体が厳しい経営環境に置かれている中、方大特殊鋼（Fangda Special Steel）はトン当たり利益において業界首位を維持していると上海金属市場（SMM）が報じた。鉄鋼市場は需要低迷や価格圧力を受けているものの、同社は収益性で他社を凌駕する結果を示している。鉄鋼材は防食塗装や工業塗装の主要な基材であり、鉄鋼業界の動向は塗装・コーティング市場の需要にも直結する。</p>
+    <div class="article-footer">
+        <span class="article-source">Shanghai Metals Market — 2026年10月08日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://news.metal.com/newscontent/104146168-fangda-special-steel-leads-industry-in-profit-per-ton-of-steel"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">EV普及が自動車業界にもたらす波及効果</h2>
+    </div>
+    <p class="article-summary">中国製の低価格EVがニュージーランドの中古車市場に大きな変化をもたらす可能性が指摘されている。安価な中国製EVの流入により、既存の中古車市場の価格構造や需要バランスが崩れるリスクがある。筆者のKenny Chingは、NZの自動車業界やインフラがこの変化に対応できる準備が整っているかどうかを問いかけている。EVシフトの加速は、補修塗装・ボディショップ業界を含む自動車関連産業全体への影響も懸念される。</p>
+    <div class="article-footer">
+        <span class="article-source">Interest.co.nz — 2026年10月08日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.interest.co.nz/business/140587/cheap-chinese-evs-could-soon-shake-nz%E2%80%99s-used-car-market-kenny-ching-asks-if-we%C2%A0are"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+<article class="article-card">
+    <div class="article-card-header">
+        <span class="category-tag tag-automotive">
+            自動車塗装
+        </span>
+        <h2 class="article-title">SEMAショーのSNS話題まとめ：ソーシャルメディアで注目を集めたトレンド</h2>
+    </div>
+    <p class="article-summary">米国最大規模の自動車アフターマーケット見本市「SEMAショー」において、ソーシャルメディア上で話題となったトレンドや注目製品・技術をBody Shop Businessがまとめた記事。展示会場での最新動向がSNSを通じてリアルタイムに拡散され、ボディショップ業界関係者の間で大きな反響を呼んだ。自動車補修・カスタム塗装に関連する製品やサービスが多くの注目を集めたとみられる。</p>
+    <div class="article-footer">
+        <span class="article-source">Body Shop Business — 2026年10月07日</span>
+        <a href="https://translate.google.com/translate?sl=en&tl=ja&u=https://www.bodyshopbusiness.com/sema-show-social-buzz-whats-trending-on-social-media/"
+           target="_blank" rel="noopener noreferrer" class="article-link">
+            翻訳して読む →
+        </a>
+    </div>
+</article>
+
+
+
+
+
+</main>
+
+<!-- フッター -->
+<footer class="footer">
+    <p>このレポートは Webスクレイピング + NewsAPI + Claude AI により自動生成されています。</p>
+    <p>© 2026 塗装業界ニュース自動まとめツール</p>
+</footer>
+
+</body>
+</html>
