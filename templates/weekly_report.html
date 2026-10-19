@@ -264,6 +264,7 @@
             <span>🏭 競合: {{ total_competitor }}件</span>
             <span>🇯🇵 国内: {{ total_domestic }}件</span>
             <span>🌍 海外: {{ total_articles }}件</span>
+            {% if total_general > 0 %}<span>💡 話題: {{ total_general }}件</span>{% endif %}
             <span>📆 対象: {{ period_start }} 〜 {{ period_end }}</span>
         </div>
     </div>
@@ -404,7 +405,42 @@
 {% endfor %}
 {% endif %}
 
-{% if not competitor_items and not domestic_articles and not articles %}
+<!-- ══════════════════════════════════════ -->
+<!-- Section 4: 気になる話題（業界外トピック） -->
+<!-- ══════════════════════════════════════ -->
+{% if general_articles %}
+<div style="max-width:800px;margin:0 auto;padding:24px 20px 0;">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#1a1a2e;border-left:4px solid #ea580c;padding-left:12px;margin-bottom:8px;">
+        4. 気になる話題（業界外トピック）
+    </h2>
+    <p style="font-size:0.8rem;color:#6b7280;margin:0 0 16px 16px;">
+        塗装とは直接関係のないニュースですが、技術・ものづくりの話題として取り上げています。
+    </p>
+</div>
+{% for article in general_articles %}
+<article class="article-card" style="border-left:4px solid #fdba74;">
+    <div class="article-card-header">
+        {% if article.category == 'manual' %}
+        <span class="category-tag" style="background:#ffedd5;color:#9a3412;">📌 おすすめ</span>
+        {% else %}
+        <span class="category-tag" style="background:#fff7ed;color:#c2410c;">💡 話題</span>
+        {% endif %}
+        <h2 class="article-title">{{ article.title_ja or article.title }}</h2>
+    </div>
+    {% if article.summary_ja %}
+    <p class="article-summary">{{ article.summary_ja }}</p>
+    {% endif %}
+    <div class="article-footer">
+        <span class="article-source">{{ article.source }} — {{ article.published_at_formatted }}</span>
+        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
+            記事を読む →
+        </a>
+    </div>
+</article>
+{% endfor %}
+{% endif %}
+
+{% if not competitor_items and not domestic_articles and not articles and not general_articles %}
 <div class="empty-state">
     <p>今週の該当ニュースは見つかりませんでした。</p>
 </div>

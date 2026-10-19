@@ -60,6 +60,7 @@ def _save_self_mention_history(urls: set[str]) -> None:
         _json.dumps({"reported_urls": sorted(urls)}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+from scripts.general_topics import collect_general_topics, mark_manual_topics_published
 from scripts.generate_html import generate_weekly_report
 from scripts.quality_gate import filter_untranslatable_articles, run_quality_gate
 from scripts.send_email import send_notification
@@ -390,6 +391,33 @@ def run_pipeline(
         logger.info("翻訳完了: %d 件", len(overseas_articles))
 
     # ────────────────────────────────────────
+    # Step 4.3: 気になる話題（塗装業界外トピック）
+    # ────────────────────────────────────────
+    # 塗装と直接関係のない話題を毎週 2〜3 件織り交ぜる。
+    # docs/manual_topics.json に登録した URL は必ず掲載し、
+    # 残りの枠は Google News から Claude が選ぶ。
+    logger.info("")
+    logger.info("━━━ Step 4.3/6: 気になる話題（業界外トピック）━━━")
+
+    general_articles: list[Article] = []
+    manual_topic_urls: list[str] = []
+    if dry_run:
+        logger.info("ドライラン: 話題ニュース収集スキップ")
+    else:
+        try:
+            # 他セクションと同じ話題を選ばないよう、今週の見出しを渡す
+            other_titles = [a.title_ja or a.title for a in domestic_articles] + [
+                a.title_ja or a.title for a in overseas_articles
+            ]
+            general_articles, manual_topic_urls = collect_general_topics(
+                past_articles=past_articles,
+                exclude_titles=other_titles,
+            )
+        except Exception as exc:
+            logger.error("話題ニュース収集エラー: %s", exc)
+            general_articles = []
+
+    # ────────────────────────────────────────
     # Step 4.5: 週次総括生成
     # ────────────────────────────────────────
     logger.info("")
@@ -416,10 +444,15 @@ def run_pipeline(
         competitor_items=competitor_items,
         domestic_articles=domestic_articles,
         self_mention_articles=self_mention_articles,
+        general_articles=general_articles,
         weekly_digest=weekly_digest,
     )
     report_filename = report_path.name
     logger.info("HTML生成完了: %s", report_path)
+
+    # 手動登録した話題は掲載済みにしておく（次回の二重掲載を防ぐ）
+    if manual_topic_urls and not dry_run:
+        mark_manual_topics_published(manual_topic_urls, today_str)
 
     # ────────────────────────────────────────
     # Step 5.5: 品質ゲート（公開前の最終確認）
@@ -453,6 +486,7 @@ def run_pipeline(
                 competitor_items=competitor_items,
                 domestic_articles=domestic_articles,
                 self_mention_articles=self_mention_articles,
+                general_articles=general_articles,
                 weekly_digest=weekly_digest,
             )
             logger.info("レポート再生成完了: %s", report_path)
@@ -461,7 +495,9 @@ def run_pipeline(
         logger.error("品質ゲート実行エラー（スキップして続行）: %s", exc)
 
     if save_json:
-        _save_articles_json(overseas_articles)
+        # 話題ニュースも保存しておくと、翌週以降の「過去掲載済み」判定に使われ
+        # 同じ話題が繰り返し選ばれるのを防げる
+        _save_articles_json(overseas_articles + general_articles)
 
     # ────────────────────────────────────────
     # Step 6: メール送信
@@ -478,6 +514,7 @@ def run_pipeline(
                 competitor_items=competitor_items,
                 domestic_articles=domestic_articles,
                 self_mention_articles=self_mention_articles,
+                general_articles=general_articles,
                 weekly_digest=weekly_digest,
             )
             if success:

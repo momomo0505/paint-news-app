@@ -89,6 +89,7 @@ def generate_weekly_report(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    general_articles: list[Article] | None = None,
     weekly_digest: str = "",
 ) -> Path:
     """
@@ -99,6 +100,8 @@ def generate_weekly_report(
         output_filename: 出力ファイル名（省略時は日付ベースで自動生成）
         competitor_items: 競合他社ニュース項目リスト
         domestic_articles: 国内ニュース記事リスト
+        self_mention_articles: 弊社関連記事リスト
+        general_articles: 気になる話題（塗装業界外トピック）記事リスト
 
     Returns:
         Path: 生成したHTMLファイルのパス
@@ -114,6 +117,11 @@ def generate_weekly_report(
         domestic_articles.sort(key=_published_dt, reverse=True)
     if self_mention_articles:
         self_mention_articles.sort(key=_published_dt, reverse=True)
+    if general_articles:
+        # 手動登録（おすすめ）を先頭に、その後は新しい順
+        general_articles.sort(
+            key=lambda a: (a.category != "manual", -_published_dt(a).timestamp())
+        )
 
     if output_filename is None:
         output_filename = f"weekly-news-{now_jst.strftime('%Y-%m-%d')}.html"
@@ -147,6 +155,9 @@ def generate_weekly_report(
         # 競合ニュース（生の dict リスト）
         "competitor_items": competitor_items or [],
         "competitor_by_company": competitor_by_company,
+        # 気になる話題（業界外）
+        "general_articles": _prepare_article_data(general_articles or []),
+        "total_general": len(general_articles or []),
         # 共通
         "issue_date": now_jst.strftime("%Y年%m月%d日"),
         "period_start": period_start.strftime("%Y/%m/%d"),
@@ -174,6 +185,7 @@ def generate_weekly_report(
         domestic_articles or [],
         articles,
         self_mention_articles or [],
+        general_articles or [],
     )
     _update_index_page(now_jst)
 
@@ -211,6 +223,7 @@ def _update_search_index(
     domestic_articles: list[Article],
     overseas_articles: list[Article],
     self_mention_articles: list[Article],
+    general_articles: list[Article] | None = None,
 ) -> None:
     """docs/search-index.json に今週分のエントリを追加/更新する。"""
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
@@ -245,6 +258,10 @@ def _update_search_index(
         title = a.title_ja or a.title
         if title:
             articles_list.append({"title": title, "section": "自社"})
+    for a in (general_articles or []):
+        title = a.title_ja or a.title
+        if title:
+            articles_list.append({"title": title, "section": "話題"})
 
     new_entry = {
         "date": date_str,

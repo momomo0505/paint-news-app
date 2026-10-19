@@ -204,6 +204,43 @@ def _build_overseas_section(articles: list[Article]) -> str:
     )
 
 
+def _build_general_section(general_articles: list[Article]) -> str:
+    """気になる話題（塗装業界外トピック）セクション。"""
+    if not general_articles:
+        return ""
+
+    rows = ""
+    for article in general_articles:
+        url = article.url
+        title = article.title_ja or article.title
+        summary = article.summary_ja or article.description[:100] or ""
+        tag = "📌 おすすめ" if article.category == "manual" else "💡 話題"
+        rows += (
+            '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">'
+            '<div style="margin-bottom:4px;">'
+            '<span style="font-size:0.75rem;background:#ffedd5;color:#9a3412;padding:1px 6px;border-radius:3px;">' + tag + "</span>"
+            "</div>"
+            '<p style="margin:0 0 4px;font-size:0.9rem;color:#1a1a2e;font-weight:500;">' + title[:80] + "</p>"
+            + (
+                '<p style="margin:0 0 6px;font-size:0.85rem;color:#4b5563;line-height:1.5;">' + summary[:150] + "</p>"
+                if summary else ""
+            )
+            + '<a href="' + url + '" style="font-size:0.8rem;color:#2563eb;text-decoration:none;">記事を読む →</a>'
+            "</li>\n"
+        )
+
+    return (
+        '<div style="margin-bottom:28px;">'
+        '<h2 style="margin:0 0 4px;font-size:1rem;font-weight:700;color:#1a1a2e;'
+        'border-left:4px solid #ea580c;padding-left:10px;">'
+        "4. 気になる話題（業界外トピック）</h2>"
+        '<p style="margin:0 0 12px 14px;font-size:0.75rem;color:#6b7280;">'
+        "塗装とは直接関係のないニュースですが、技術・ものづくりの話題として。</p>"
+        '<ul style="margin:0;padding:0;list-style:none;">' + rows + "</ul>"
+        "</div>"
+    )
+
+
 # ──────────────────────────────────────────────
 # メール本文テンプレート
 # ──────────────────────────────────────────────
@@ -214,15 +251,18 @@ def _build_email_html(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    general_articles: list[Article] | None = None,
     weekly_digest: str = "",
 ) -> str:
-    """通知メールのHTML本文を構築する（自社記事 + 3セクション構成）。"""
+    """通知メールのHTML本文を構築する（自社記事 + 4セクション構成）。"""
 
     summary_text = (
         "競合: " + str(len(competitor_items or [])) + "件 ｜ "
         "国内: " + str(len(domestic_articles or [])) + "件 ｜ "
         "海外: " + str(len(articles)) + "件"
     )
+    if general_articles:
+        summary_text += " ｜ 話題: " + str(len(general_articles)) + "件"
 
     # 週次総括ブロック
     digest_html = ""
@@ -246,6 +286,7 @@ def _build_email_html(
     competitor_html = _build_competitor_section(competitor_items or [])
     domestic_html = _build_domestic_section(domestic_articles or [])
     overseas_html = _build_overseas_section(articles)
+    general_html = _build_general_section(general_articles or [])
 
     self_mention_badge = ""
     if self_mention_articles:
@@ -278,6 +319,7 @@ def _build_email_html(
         + competitor_html
         + domestic_html
         + overseas_html
+        + general_html
         +         '      <div style="text-align:center;margin-top:8px;">'
         '<a href="' + report_url + '" '
         'style="display:inline-block;padding:12px 28px;background:#2563eb;color:#ffffff !important;'
@@ -303,6 +345,7 @@ def send_notification(
     competitor_items: list[dict] | None = None,
     domestic_articles: list[Article] | None = None,
     self_mention_articles: list[Article] | None = None,
+    general_articles: list[Article] | None = None,
     weekly_digest: str = "",
     no_articles: bool = False,
 ) -> bool:
@@ -357,6 +400,7 @@ def send_notification(
             competitor_items=competitor_items,
             domestic_articles=domestic_articles,
             self_mention_articles=self_mention_articles,
+            general_articles=general_articles,
             weekly_digest=weekly_digest,
         )
 

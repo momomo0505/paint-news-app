@@ -460,7 +460,15 @@ def _resolve_gn_url(article_id: str, session: requests.Session, timeout: int = 2
     response.raise_for_status()
 
     match = re.search(r'\\"garturlres\\",\\"(https?://.*?)\\"', response.text)
-    return match.group(1) if match else None
+    if not match:
+        return None
+    # 応答は JSON 文字列が二重にエスケープされているため、"\\u003d" のような
+    # エスケープを "=" に戻す（戻さないと URL に \u003d が残りリンク切れになる）
+    raw = match.group(1)
+    try:
+        return json.loads('"' + raw.replace("\\\\", "\\") + '"')
+    except json.JSONDecodeError:
+        return raw
 
 
 def resolve_google_news_urls(articles: list[Article], max_workers: int = 8) -> list[Article]:

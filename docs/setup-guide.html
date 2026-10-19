@@ -1066,6 +1066,31 @@ git push -u origin main
         </div>
         <p style="margin-top:8px;">変更後は <code>git add .</code> &rarr; <code>git commit -m "設定変更"</code> &rarr; <code>git push</code> でGitHubに反映します。</p>
     </div>
+
+    <h3>8-4. 「気になる話題」に載せたい記事を手動で登録する</h3>
+    <div class="card">
+        <p>
+            レポートの第4セクション「気になる話題（業界外トピック）」には、塗装とは直接関係のない
+            技術・ものづくり系のニュースを毎回 2〜3 件載せています。<br>
+            通常は自動で選ばれますが、「この記事は必ず載せたい」というものがあれば
+            <code>docs/manual_topics.json</code> に URL を追加するだけで次回レポートに掲載されます。
+        </p>
+        <div class="code-block"><pre>{
+  "topics": [
+    {
+      "url": "https://example.com/news/123",
+      "note": "テスラが空飛ぶロードスターの実演を披露（任意のメモ）"
+    }
+  ]
+}</pre></div>
+        <ul>
+            <li><code>url</code> … 記事ページの URL（必須）。見出し・概要・公開日はページから自動取得します。</li>
+            <li><code>note</code> … 任意のメモ。要約を作るときの参考になります。</li>
+            <li>掲載が終わると自動で <code>"published": "2026-10-19"</code> のように日付が書き込まれ、二度は載りません。</li>
+            <li>手動登録が 3 件を超えた分は、次回以降のレポートに順次掲載されます。</li>
+        </ul>
+        <p style="margin-top:8px;">追加後は <code>git add docs/manual_topics.json</code> &rarr; <code>git commit -m "話題を追加"</code> &rarr; <code>git push</code> で反映します。</p>
+    </div>
 </section>
 
 
