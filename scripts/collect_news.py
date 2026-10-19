@@ -471,7 +471,7 @@ def _resolve_gn_url(article_id: str, session: requests.Session, timeout: int = 2
         return raw
 
 
-def resolve_google_news_urls(articles: list[Article], max_workers: int = 8) -> list[Article]:
+def resolve_google_news_urls(articles: list[Article], max_workers: int = 4) -> list[Article]:
     """
     記事リスト中の Google News リダイレクト URL を実際の記事 URL に置き換える。
 
@@ -491,13 +491,29 @@ def resolve_google_news_urls(articles: list[Article], max_workers: int = 8) -> l
 
     logger.info("Google News URL 解決中: %d 件", len(targets))
 
-    session = requests.Session()
-    session.headers.update(_SCRAPE_HEADERS)
+    def _resolve_with_own_session(article_id: str) -> str | None:
+        # requests.Session はスレッド間で共有すると SSL 接続が壊れることがある
+        # （件数が増えると "UNEXPECTED_EOF_WHILE_READING" が多発した）ため、
+        # スレッドごとに専用の Session を作り、失敗時は 1 回だけやり直す
+        last_exc: Exception | None = None
+        for attempt in range(2):
+            session = requests.Session()
+            session.headers.update(_SCRAPE_HEADERS)
+            try:
+                return _resolve_gn_url(article_id, session)
+            except Exception as exc:  # noqa: BLE001 - 呼び出し側でまとめて警告を出す
+                last_exc = exc
+                time.sleep(1.0 * (attempt + 1))
+            finally:
+                session.close()
+        if last_exc:
+            raise last_exc
+        return None
 
     resolved = 0
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = {
-            pool.submit(_resolve_gn_url, _extract_gn_article_id(a.url), session): a
+            pool.submit(_resolve_with_own_session, _extract_gn_article_id(a.url)): a
             for a in targets
         }
         for future in as_completed(futures):

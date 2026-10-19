@@ -386,12 +386,17 @@ GENERAL_TOPIC_RSS_KEYWORDS = [
 # 話題ニュースの収集期間（日数）。鮮度重視で通常ニュースより短くする
 GENERAL_TOPIC_DAYS_BACK = 7
 
-# 1 キーワードあたりの取得件数
-GENERAL_TOPIC_ITEMS_PER_KEYWORD = 8
+# 1 キーワードあたりの取得件数（最大 10 件を選ぶので候補は多めに集める）
+GENERAL_TOPIC_ITEMS_PER_KEYWORD = 12
 
 # 自動収集で選ぶ件数の範囲（手動登録分を含めて最大 MAX 件まで）
+# ※ 同じ出来事を扱う記事は 1 件にまとめるので、実際の掲載数は MAX より少なくなることがある
 MIN_GENERAL_TOPICS = 2
-MAX_GENERAL_TOPICS = 3
+MAX_GENERAL_TOPICS = 10
+
+# 同じ話題かどうかの判定しきい値（見出しの文字 2-gram の重なり率）
+# 大きいほど「かなり似た見出し」だけを重複とみなす
+GENERAL_TOPIC_SIMILARITY_THRESHOLD = 0.35
 
 # 手動登録ファイル（掲載したい URL をここに書いておくと次回レポートに載る）
 MANUAL_TOPICS_PATH = DOCS_DIR / "manual_topics.json"

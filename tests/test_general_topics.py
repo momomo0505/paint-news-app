@@ -22,7 +22,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from scripts.collect_news import Article
 from scripts.general_topics import (
+    _looks_like_market_report,
+    drop_duplicate_topics,
+    is_same_topic,
     load_manual_topics,
     mark_manual_topics_published,
     parse_article_metadata,
@@ -116,12 +120,73 @@ def test_parse_metadata() -> None:
     check("site_name が無ければドメイン", meta["source"] == "newsdig.tbs.co.jp", meta["source"])
 
 
+def _art(title: str, url: str) -> Article:
+    return Article(title=title, description="", url=url, source="test", published_at="2026-10-18T00:00:00+09:00")
+
+
+def test_duplicate_topics() -> None:
+    print("--- 同じ話題の判定 ---")
+
+    # 同じ出来事（媒体違い・言い回し違い）
+    check(
+        "テスラ空飛ぶロードスター（媒体違い）",
+        is_same_topic(
+            "テスラの空飛ぶロードスター｜飛行デモ動画とRocket仕様の仕組みを解説",
+            "テスラ、新型ロードスターの飛行デモを公開 空飛ぶクルマ時代へ",
+        ),
+    )
+    check(
+        "H3ロケット10号機（見出し違い）",
+        is_same_topic(
+            "H3ロケット10号機 打ち上げ成功 火星衛星探査機MMXを搭載",
+            "火星衛星探査機MMXを載せたH3ロケット10号機、打ち上げに成功",
+        ),
+    )
+    # 分野が同じだけの別の話題は重複にしない
+    check(
+        "別の話題（EV同士）は重複にしない",
+        not is_same_topic(
+            "トヨタ、アリーン搭載車拡大 全固体電池も実用化",
+            "日産、新型リーフの航続距離を700kmに延長",
+        ),
+    )
+    check(
+        "別の話題（空飛ぶクルマ vs ロケット）は重複にしない",
+        not is_same_topic(
+            "空飛ぶクルマ、米26州で社会実装向け実証",
+            "H3ロケット10号機 打ち上げ成功",
+        ),
+    )
+
+    # リストから重複を落とす（先頭優先・除外リストも考慮）
+    arts = [
+        _art("テスラ、新型ロードスターの飛行デモを公開", "https://a/1"),
+        _art("H3ロケット10号機 打ち上げ成功 火星衛星探査機MMXを搭載", "https://a/2"),
+        _art("火星衛星探査機MMXを載せたH3ロケット10号機、打ち上げに成功", "https://a/3"),
+        _art("ヒューマノイドロボットが工場で検品作業を開始", "https://a/4"),
+    ]
+    kept = drop_duplicate_topics(arts, exclude_titles=["テスラの空飛ぶロードスター｜飛行デモ動画を解説"])
+    urls = [a.url for a in kept]
+    check("手動登録と同じ話題を除外", "https://a/1" not in urls, str(urls))
+    check("同じ出来事は先頭の1件だけ残す", urls == ["https://a/2", "https://a/4"], str(urls))
+
+    print("--- 市場レポートっぽい見出しの除外 ---")
+    check(
+        "市場規模○○億ドルは除外",
+        _looks_like_market_report("産業AIが「工場の頭脳」へ進化―製造業コパイロット市場、2035年に200億米ドル規模へ拡大"),
+    )
+    check("市場予測レポートは除外", _looks_like_market_report("空飛ぶクルマ市場の予測レポート2035年版を発行"))
+    check("普通のニュースは残す", not _looks_like_market_report("トヨタ、アリーン搭載車拡大 全固体電池も実用化"))
+    check("「市場」を含む普通の見出しは残す", not _looks_like_market_report("日産、新型リーフを欧州市場に投入"))
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     test_manual_topics_file()
     test_parse_metadata()
+    test_duplicate_topics()
 
     print(f"\n結果: OK {_passed} / FAIL {_failed}")
     sys.exit(1 if _failed else 0)
