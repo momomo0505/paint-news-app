@@ -107,9 +107,18 @@ def _read_manual_file(path) -> list[dict]:
     return normalized
 
 
-def load_manual_topics(path=MANUAL_TOPICS_PATH) -> list[dict]:
-    """未掲載（"published" が空）の手動登録エントリを返す。"""
-    pending = [e for e in _read_manual_file(path) if not e.get("published")]
+def load_manual_topics(path=MANUAL_TOPICS_PATH, report_date: str | None = None) -> list[dict]:
+    """
+    未掲載の手動登録エントリを返す。
+
+    "published" が空のものに加えて、"published" が今回のレポート日付（report_date）と
+    同じものも「未掲載」として扱う。同じ号を作り直したとき（手動での再生成の直後に
+    GitHub Actions が同じ日に走った場合など）に、手動登録した記事が消えないようにするため。
+    """
+    pending = [
+        e for e in _read_manual_file(path)
+        if not e.get("published") or (report_date and e.get("published") == report_date)
+    ]
     if pending:
         logger.info("手動登録トピック: %d 件（未掲載）", len(pending))
     return pending
@@ -123,7 +132,7 @@ def mark_manual_topics_published(urls: list[str], date_str: str, path=MANUAL_TOP
     targets = {u.strip().rstrip("/") for u in urls}
     changed = False
     for entry in entries:
-        if entry.get("url", "").strip().rstrip("/") in targets and not entry.get("published"):
+        if entry.get("url", "").strip().rstrip("/") in targets and entry.get("published") != date_str:
             entry["published"] = date_str
             changed = True
     if changed:
@@ -339,13 +348,68 @@ def topic_similarity(title_a: str, title_b: str) -> float:
     return max(jaccard, ratio)
 
 
+# 「特徴的な語」として扱う文字列: 漢字 3 文字以上、またはカタカナ 3 文字以上の連なり
+_TERM_RE = re.compile(r"[\u4e00-\u9fff]{3,}|[\u30a0-\u30ff\u30fc]{3,}")
+
+# どのニュースにも出てくる一般的な語（これが共通しても同じ話題とはみなさない）
+_GENERIC_TERMS = {
+    "実証実験", "実用化", "世界初", "新技術", "本格始動", "開発加速", "商用運航", "社会実装",
+    "航続距離", "打ち上げ", "新製品", "発表会", "可能性", "技術開発", "製造業", "次世代",
+    "ニュース", "メディア", "サービス", "システム", "ビジネス", "レポート", "プロジェクト",
+    "テクノロジー", "デザイン", "グローバル", "スタート", "リリース", "インタビュー", "クルマ",
+    "日本経済新聞", "日刊工業新聞", "クロステック", "イーロン", "マスク",
+}
+
+
+# よく出てくるテーマの言い換え辞書。見出しにどれかが含まれていれば同じテーマ名を付ける。
+# （Claude の判定がぶれても、ここにあるテーマは必ず 1 件にまとまる）
+_THEME_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "空飛ぶクルマ": ("空飛ぶ", "eVTOL", "空中で回転", "飛行デモ", "エアモビリティ", "空モビリティ"),
+    "ロケット打ち上げ": ("ロケット", "打ち上げ", "スペースX", "SpaceX", "ファルコン", "JAXA", "衛星", "スターリンク"),
+    "核融合": ("核融合", "フュージョン"),
+    "全固体電池": ("全固体", "次世代電池"),
+    "自動運転": ("自動運転", "ロボタクシー", "無人運転"),
+    "ヒューマノイド": ("ヒューマノイド", "人型ロボット", "オプティマス", "Optimus", "Unitree"),
+    "生成AI×製造": ("生成AI", "AIエージェント", "コパイロット"),
+    "新型EV": ("新型EV", "航続距離", "EV新型", "新型電気自動車"),
+}
+
+
+def themes_of(title: str) -> set[str]:
+    """見出しが辞書のどのテーマに当てはまるか返す（複数可・無ければ空集合）。"""
+    lowered = title.lower()
+    return {
+        theme
+        for theme, words in _THEME_KEYWORDS.items()
+        if any(w.lower() in lowered for w in words)
+    }
+
+
+def distinctive_terms(title: str) -> set[str]:
+    """見出しから話題を特徴づける語（核融合・全固体電池・ロードスター など）を取り出す。"""
+    terms = {t for t in _TERM_RE.findall(title) if t not in _GENERIC_TERMS}
+    # テーマ名も特徴語として扱う（# は通常の語とぶつからない印）
+    terms |= {f"#{theme}" for theme in themes_of(title)}
+    return terms
+
+
 def is_same_topic(
     title_a: str,
     title_b: str,
     threshold: float = GENERAL_TOPIC_SIMILARITY_THRESHOLD,
 ) -> bool:
-    """見出しの類似度がしきい値以上なら「同じ話題」とみなす。"""
-    return topic_similarity(title_a, title_b) >= threshold
+    """
+    「同じ話題」かどうかを判定する。
+
+    次のどちらかに当てはまれば同じ話題とみなす:
+      1. 見出し全体の類似度がしきい値以上（言い回しが近い）
+      2. 特徴的な語（漢字 3 文字以上・カタカナ 3 文字以上）を共有している
+         例: 「核融合」「全固体電池」「自動運転」「ロードスター」「ヒューマノイド」
+    2 は Claude の判定が失敗したときの保険で、少し厳しめ（同じ分野なら 1 件）に働く。
+    """
+    if topic_similarity(title_a, title_b) >= threshold:
+        return True
+    return bool(distinctive_terms(title_a) & distinctive_terms(title_b))
 
 
 def drop_duplicate_topics(
@@ -426,9 +490,14 @@ def _group_same_topics_with_claude(
             messages=[{"role": "user", "content": prompt}],
         )
         text = response.content[0].text.strip()
-        if "```" in text:
-            text = "\n".join(line for line in text.split("\n") if not line.startswith("```"))
-        groups = json.loads(text)
+        # 説明文や ``` が混ざっていても、最初の [ から最後の ] までを配列として読む
+        start, end = text.find("["), text.rfind("]")
+        if start == -1 or end == -1:
+            raise ValueError(f"配列が見つかりません: {text[:80]}")
+        groups = json.loads(text[start : end + 1])
+        if not isinstance(groups, list):
+            raise ValueError("配列ではありません")
+        logger.info("同一話題グルーピング結果: %s", json.dumps(groups, ensure_ascii=False)[:120])
     except Exception as exc:
         logger.warning("同一話題グルーピングに失敗（スキップ）: %s", exc)
         return articles
@@ -619,6 +688,7 @@ def collect_general_topics(
     past_articles=None,
     exclude_titles: list[str] | None = None,
     max_count: int = MAX_GENERAL_TOPICS,
+    report_date: str | None = None,
 ) -> tuple[list[Article], list[str]]:
     """
     今週の「気になる話題」を組み立てる。
@@ -628,6 +698,8 @@ def collect_general_topics(
                        過去に掲載済みの URL・タイトルは候補から外す。
         exclude_titles: 今週の他セクションに載る見出し（話題かぶり防止）
         max_count: 手動登録分を含めた最大掲載数
+        report_date: 今回のレポート日付（YYYY-MM-DD）。同じ日付で掲載済みの
+                     手動登録記事も再掲載の対象にする（同じ号の作り直し用）
 
     Returns:
         (articles, manual_urls): 掲載記事と、掲載した手動登録 URL のリスト
@@ -636,7 +708,7 @@ def collect_general_topics(
 
     # ── 1. 手動登録（必ず掲載） ──
     manual_articles: list[Article] = []
-    for entry in load_manual_topics():
+    for entry in load_manual_topics(report_date=report_date):
         manual_articles.append(_manual_entry_to_article(entry, session))
     manual_urls = [a.url for a in manual_articles]
 

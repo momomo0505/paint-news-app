@@ -412,6 +412,7 @@ def run_pipeline(
             general_articles, manual_topic_urls = collect_general_topics(
                 past_articles=past_articles,
                 exclude_titles=other_titles,
+                report_date=today_str,  # 同じ日の再実行でも手動登録分を落とさない
             )
         except Exception as exc:
             logger.error("話題ニュース収集エラー: %s", exc)

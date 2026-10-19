@@ -82,6 +82,11 @@ def test_manual_topics_file() -> None:
         a_entry = next(e for e in saved["topics"] if e["url"] == "https://example.com/a")
         check("published が書き込まれる", a_entry.get("published") == "2026-10-19", str(a_entry))
         check("残りは未掲載のまま", [e["url"] for e in load_manual_topics(path)] == ["https://example.com/b"])
+        # 同じ日付のレポートを作り直すときは、その日に掲載済みの分も対象に戻す
+        same_day = [e["url"] for e in load_manual_topics(path, report_date="2026-10-19")]
+        check("同じ日の再生成では掲載済み分も含む", same_day == ["https://example.com/a", "https://example.com/b"], str(same_day))
+        other_day = [e["url"] for e in load_manual_topics(path, report_date="2026-10-26")]
+        check("別の日なら掲載済み分は含まない", other_day == ["https://example.com/b"], str(other_day))
 
         # 壊れた JSON でも落ちない
         path.write_text("{ broken", encoding="utf-8")
@@ -140,6 +145,35 @@ def test_duplicate_topics() -> None:
         is_same_topic(
             "H3ロケット10号機 打ち上げ成功 火星衛星探査機MMXを搭載",
             "火星衛星探査機MMXを載せたH3ロケット10号機、打ち上げに成功",
+        ),
+    )
+    # 見出しの文字は似ていなくても、特徴的な語を共有していれば同じ話題
+    check(
+        "核融合（出資ニュース vs 新理論）は同じ話題",
+        is_same_topic(
+            "【日本発の次世代エネルギー】富士電機が核融合ベンチャーに出資！「2030年代発電」へ本格始動",
+            "核融合炉の常識を覆す新理論、「先に加熱、後から燃料投入」で点火に必要なエネルギーを削減か",
+        ),
+    )
+    check(
+        "全固体電池（トヨタ vs 中国動向）は同じ話題",
+        is_same_topic(
+            "トヨタ、アリーン搭載車拡大 全固体電池も実用化",
+            "全固体電池、2027～28年が実用化の節目に 中国は2030年目標、日韓勢も開発加速",
+        ),
+    )
+    check(
+        "空飛ぶクルマ（テスラ vs eVTOL実証）は同じテーマ",
+        is_same_topic(
+            "テスラの空飛ぶロードスター｜飛行デモ動画とRocket仕様の仕組みを解説",
+            "空飛ぶクルマ、米26州で社会実装向け実証 中東では2026年にジョビーが商用運航",
+        ),
+    )
+    check(
+        "ロケット打ち上げ（JAXA vs スペースX）は同じテーマ",
+        is_same_topic(
+            "ロケット「イプシロンS」に模擬衛星搭載 JAXA、26年度打ち上げ",
+            "スペースXがスターリンク衛星27機を軌道投入 ファルコン9の第1段は20回目の飛行",
         ),
     )
     # 分野が同じだけの別の話題は重複にしない
