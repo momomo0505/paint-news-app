@@ -23,6 +23,10 @@ manual_topics.json の書き方:
     }
     ※ "note" は任意（Claude に渡す補足メモ）。"title" を書けばページ取得に
       失敗したときの見出しとして使われる。
+
+古くなった話題を外したいとき:
+    config.GENERAL_TOPIC_EXCLUDE_PATTERNS に見出しの正規表現を追加する。
+    一致する記事は自動収集の候補から外れる（手動登録分には影響しない）。
 """
 
 from __future__ import annotations
@@ -52,6 +56,7 @@ from scripts.config import (
     CLAUDE_MODEL,
     EXCLUDED_DOMAINS,
     GENERAL_TOPIC_DAYS_BACK,
+    GENERAL_TOPIC_EXCLUDE_PATTERNS,
     GENERAL_TOPIC_ITEMS_PER_KEYWORD,
     GENERAL_TOPIC_RSS_KEYWORDS,
     GENERAL_TOPIC_SIMILARITY_THRESHOLD,
@@ -246,6 +251,15 @@ def _looks_like_press_release(url: str) -> bool:
     return bool(_PR_URL_RE.search(url))
 
 
+# 古くなった話題（config.GENERAL_TOPIC_EXCLUDE_PATTERNS）をまとめた正規表現
+_EXCLUDE_TOPIC_RES = [re.compile(p, re.IGNORECASE) for p in GENERAL_TOPIC_EXCLUDE_PATTERNS]
+
+
+def is_stale_topic(title: str) -> bool:
+    """見出しが「もう載せない話題」（設定ファイルの除外パターン）に当てはまれば True。"""
+    return any(r.search(title) for r in _EXCLUDE_TOPIC_RES)
+
+
 def _is_within_days(published_at: str, days: int) -> bool:
     """ISO 形式の日付文字列が「今から days 日以内」なら True（解釈できなければ True）。"""
     if not published_at:
@@ -290,6 +304,9 @@ def collect_general_topic_candidates() -> list[Article]:
                 continue
             if _looks_like_press_release(link):
                 logger.debug("プレスリリース配信ページのため除外: %s", title)
+                continue
+            if is_stale_topic(title):
+                logger.info("古くなった話題のため除外: %s", title[:50])
                 continue
             source_info = getattr(entry, "source", None)
             source = source_info.title if source_info and hasattr(source_info, "title") else "Google News"

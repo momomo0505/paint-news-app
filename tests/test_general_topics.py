@@ -27,6 +27,7 @@ from scripts.general_topics import (
     _looks_like_market_report,
     drop_duplicate_topics,
     is_same_topic,
+    is_stale_topic,
     load_manual_topics,
     mark_manual_topics_published,
     parse_article_metadata,
@@ -214,6 +215,27 @@ def test_duplicate_topics() -> None:
     check("「市場」を含む普通の見出しは残す", not _looks_like_market_report("日産、新型リーフを欧州市場に投入"))
 
 
+def test_stale_topics() -> None:
+    print("--- 古くなった話題の除外 ---")
+    stale = [
+        "テスラの「空飛ぶクルマ」なぜ飛べる？ 新型「ロードスター」の驚きの仕組みとは！",
+        "テスラの新型「ロードスター」はなぜ飛べるのか？ その仕組みを物理学で読み解く",
+        "テスラが新型ロードスターの発表会で空中に浮く実演を披露",
+        "Tesla Roadster flying demo stuns audience",
+    ]
+    for t in stale:
+        check(f"除外: {t[:30]}", is_stale_topic(t), t)
+
+    fresh = [
+        "テスラ、ロボタクシーの営業エリアを拡大",
+        "テスラ「オプティマス」第3世代を公開",
+        "テスラ、新型「モデルY」の国内価格を発表",
+        "空飛ぶクルマ、大阪で商用運航に向けた実証開始",
+    ]
+    for t in fresh:
+        check(f"残す: {t[:30]}", not is_stale_topic(t), t)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -221,6 +243,7 @@ def main() -> None:
     test_manual_topics_file()
     test_parse_metadata()
     test_duplicate_topics()
+    test_stale_topics()
 
     print(f"\n結果: OK {_passed} / FAIL {_failed}")
     sys.exit(1 if _failed else 0)

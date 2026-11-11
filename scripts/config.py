@@ -381,6 +381,20 @@ GENERAL_TOPIC_RSS_KEYWORDS = [
     "世界初 技術 開発 成功",
     # 話題の新製品・ガジェット
     "新製品 発表 話題 テクノロジー",
+    # テスラ（空飛ぶロードスター以外の新しい話題を拾う。除外は下の EXCLUDE で指定）
+    "テスラ 新型 OR 発表 OR 公開",
+    "テスラ ロボタクシー OR オプティマス OR 自動運転",
+]
+
+# 気になる話題から外す「古くなった話題」。
+# 見出しがどれかの正規表現に一致した記事は候補から除外する（大文字小文字は区別しない）。
+# 同じ出来事の続報が媒体を変えて何週も出てくる場合にここへ追加する。
+# 不要になったら行を消せば再び拾うようになる。
+GENERAL_TOPIC_EXCLUDE_PATTERNS = [
+    # テスラ新型ロードスターの「空飛ぶ」実演（2026-10 に話題化、10/19・10/26・11/9 号に掲載済み）
+    r"テスラ.*(空飛ぶ|飛べる|飛ぶ|浮く|空中|ロードスター)",
+    r"(ロードスター|空飛ぶクルマ).*テスラ",
+    r"Tesla.*(Roadster|flying|fly)",
 ]
 
 # 話題ニュースの収集期間（日数）。鮮度重視で通常ニュースより短くする
@@ -450,8 +464,9 @@ COMPETITOR_SITES = [
         "language": "ja",
     },
     {
+        # トップページは展示会情報しか載らないため、お知らせ一覧を直接監視する
         "name": "栗田工業",
-        "url": "https://kurita-kogyo.co.jp/",
+        "url": "https://kurita-kogyo.co.jp/news/",
         "language": "ja",
     },
     {
@@ -537,7 +552,74 @@ COMPETITOR_SITES = [
         "url": "https://www.shoei-mfg.co.jp/news/",
         "language": "ja",
     },
+    # ── 塗装設備・ブース関連（2026-11 追加） ──────────
+    {
+        "name": "IEC",
+        "url": "https://iec-jpn.co.jp/notice/",
+        "language": "ja",
+    },
+    {
+        "name": "蒲田工業",
+        "url": "https://www.kamata.co.jp/html/news/",
+        "language": "ja",
+    },
+    {
+        # 新着情報はトップページのみ（専用の一覧ページ・RSS なし）。
+        # 各項目に個別リンクが無いため、リンク先はトップページになる。
+        "name": "日本スピンドル製造",
+        "url": "https://www.spindle.co.jp/",
+        "language": "ja",
+    },
+    {
+        # 一覧ページ(HTML)は <a> がカード全体を囲む構造で日付が取れないため RSS を使う
+        "name": "エコム",
+        "url": "https://ecom-jp.co.jp/topics/",
+        "rss": "https://ecom-jp.co.jp/topics/feed/",
+        "language": "ja",
+    },
+    # ── 塗装機・スプレーガン・塗装ロボット関連（2026-11 追加） ──
+    {
+        "name": "旭サナック",
+        "url": "https://www.sunac.co.jp/topics/",
+        "language": "ja",
+    },
+    {
+        # 一覧も詳細ページも日付が「2026.08」のように年月のみ。
+        # 月末（当月は今日）の日付として扱うため、表示日付は実際と数日〜数週間ずれる。
+        "name": "明治機械製作所",
+        "url": "https://www.meijiair.co.jp/topics/",
+        "language": "ja",
+        "month_only_dates": True,
+    },
+    {
+        # HTML だと画像リンクが先に拾われてタイトルが崩れるため RSS を使う
+        "name": "NCC",
+        "url": "https://ncc-nice.com/news/",
+        "rss": "https://ncc-nice.com/feed/",
+        "language": "ja",
+    },
+    {
+        # 一覧ページに日付が無いため RSS を使う
+        "name": "エンジニアリング・ラボ",
+        "url": "https://eng-lab.co.jp/information/",
+        "rss": "https://eng-lab.co.jp/information/feed/",
+        "language": "ja",
+    },
+    {
+        # 一覧ページに日付が無いため RSS（PRカテゴリ）を使う
+        "name": "日本ピーシーエス",
+        "url": "https://www.j-pcs.com/category/pr-category/",
+        "rss": "https://www.j-pcs.com/category/pr-category/feed/",
+        "language": "ja",
+    },
     # ── 海外メーカー ──────────────────────────
+    {
+        # 初回アクセス時に JS で Cookie(visitToken) を発行する簡易ゲートあり。
+        # check_competitors._fetch_page が自動で突破する。
+        "name": "江蘇長虹智能装備（中国）",
+        "url": "https://www.echanghong.com/news/3/",
+        "language": "zh-CN",
+    },
     {
         "name": "WLD（広州ウェイロンダ）",
         "url": "https://ja.wld-spraybooth.com/newslist-1",

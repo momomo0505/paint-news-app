@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from scripts.check_competitors import _clean_title, _extract_news_items
+from scripts.check_competitors import _clean_title, _extract_news_items, _parse_date
 
 _passed = 0
 _failed = 0
@@ -281,6 +281,143 @@ def test_banzai_skips_nav_title() -> None:
     check("新商品ニュースは残す", any("タイヤリフター" in t for t in titles), f"titles={titles}")
 
 
+# ──────────────────────────────────────────────
+# 江蘇長虹型: <a> がカード全体を囲み、見出し <h3> にリンクが無い
+# ──────────────────────────────────────────────
+CHANGHONG_HTML = """
+<ul class="xypg-news-list">
+  <li>
+    <a href="https://www.echanghong.com/news/475.html" title="长虹菲迪亚亮相SURCAR">
+      <div class="img1"><img src="x.png" alt=""></div>
+      <div class="wz">
+        <div class="tit">
+          <h3>长虹菲迪亚亮相SURCAR，带来全新电芯UV光铠绝缘技术喷印融合方案</h3>
+          <div class="date">2026-09-23 17:32:06</div>
+        </div>
+        <div class="info">近日，SURCAR亚洲国际汽车涂装峰会在上海举行，长虹菲迪亚受邀出席并发表主题演讲...</div>
+        <div class="more"><span>查看更多 +</span></div>
+      </div>
+    </a>
+  </li>
+</ul>
+"""
+
+
+def test_changhong_heading_without_link() -> None:
+    print("--- 江蘇長虹型（カード全体リンク + 見出し） ---")
+    items = extract(CHANGHONG_HTML, "https://www.echanghong.com/news/3/")
+    item = items[0] if items else None
+    check("項目が抽出される", item is not None, f"len={len(items)}")
+    check(
+        "見出しの文字だけがタイトルになる（日付・本文が混ざらない）",
+        item is not None and item["title"] == "长虹菲迪亚亮相SURCAR，带来全新电芯UV光铠绝缘技术喷印融合方案",
+        f"{item['title'] if item else None}",
+    )
+    check(
+        "外側の <a> のリンク先を使う",
+        item is not None and item["url"] == "https://www.echanghong.com/news/475.html",
+        f"{item['url'] if item else None}",
+    )
+    check(
+        "日付が正しい",
+        item is not None and item["date"].strftime("%Y-%m-%d") == "2026-09-23",
+    )
+
+
+# ──────────────────────────────────────────────
+# 明治機械型: 日付が「2026.08」のように年月のみ
+# ──────────────────────────────────────────────
+MEIJI_HTML = """
+<ul class="headline">
+  <li class="clfix tt_01">
+    <div class="date">2026.08</div>
+    <div class="detail"><a href="/topics/detail/145">【新発売】新型低圧霧化ハンドスプレーガン｜F111Lシリーズ発売。</a> <span>NEW!</span></div>
+  </li>
+  <li class="clfix tt_01">
+    <div class="date">2024.03</div>
+    <div class="detail"><a href="/topics/detail/120">古いお知らせ</a></div>
+  </li>
+</ul>
+"""
+
+
+def test_month_only_dates() -> None:
+    print("--- 年月のみの日付（明治機械型） ---")
+    # 既定（フラグなし）では年月だけの日付は無視する → 既存サイトの挙動を変えない
+    default_items = extract(MEIJI_HTML, "https://www.meijiair.co.jp/topics/")
+    check("フラグなしでは年月だけの項目を拾わない", len(default_items) == 0, f"len={len(default_items)}")
+
+    soup = BeautifulSoup(MEIJI_HTML, "lxml")
+    items = _extract_news_items(soup, "https://www.meijiair.co.jp/topics/", allow_month_only=True)
+    new = by_title(items, "F111L")
+    old = by_title(items, "古いお知らせ")
+    check("フラグありなら項目を拾う", new is not None and old is not None, f"titles={[i['title'] for i in items]}")
+    check(
+        "過去月は月末の日付になる",
+        old is not None and old["date"].strftime("%Y-%m-%d") == "2024-03-31",
+        f"{old['date'] if old else None}",
+    )
+    check(
+        "リンク先が解決される",
+        new is not None and new["url"] == "https://www.meijiair.co.jp/topics/detail/145",
+        f"{new['url'] if new else None}",
+    )
+
+    check(
+        "本文中の「2026年8月より発売」は年月日付として扱わない（日が続く表記は対象外）",
+        _parse_date("新モデル、2026年8月1日より発売開始", allow_month_only=True).day == 1,
+    )
+    check(
+        "フル日付がある場合はそちらを優先する",
+        _parse_date("2026.08 2026.08.25 更新", allow_month_only=True).day == 25,
+    )
+
+
+# ──────────────────────────────────────────────
+# 日本スピンドル型: 日付の直後に素のテキストで見出し、個別リンク無し
+# ──────────────────────────────────────────────
+SPINDLE_HTML = """
+<div id="panel1" class="tab_panel"><ul>
+  <li class="newItem">
+    <datetime>2026.10.26</datetime>
+    ケミカルマテリアルJapan2026に出展いたします。<br>
+    <p>　2026年11月26日(木)～27日(金)、東京ビッグサイトにて開催される展示会に出展いたします。<br>
+      <a href="https://www.chemmate.jp/" target="_blank">展示会ホームページはこちら</a>　<a href="https://f-vr.jp/cmj/2026/">来場事前登録はこちら</a>
+    </p>
+  </li>
+  <li class="newItem">
+    <datetime>2026.10.23</datetime>
+    EcoVadisから「ブロンズ」評価を取得しました。<br>
+    <p>　今後もサステナビリティ推進に積極的に取り組みます。</p>
+  </li>
+</ul></div>
+"""
+
+
+def test_spindle_plain_text_title() -> None:
+    print("--- 日本スピンドル型（日付直後の素のテキスト見出し） ---")
+    items = extract(SPINDLE_HTML, "https://www.spindle.co.jp/")
+    titles = [i["title"] for i in items]
+    check("個別リンクが無くても2件とも抽出される", len(items) == 2, f"titles={titles}")
+    check(
+        "日付直後のテキストが見出しになる（関連リンク文言を拾わない）",
+        "ケミカルマテリアルJapan2026に出展いたします。" in titles
+        and not any("ホームページはこちら" in t for t in titles),
+        f"titles={titles}",
+    )
+    check(
+        "リンク先は一覧ページ自身になる",
+        all(i["url"] == "https://www.spindle.co.jp/" for i in items),
+        f"urls={[i['url'] for i in items]}",
+    )
+    eco = by_title(items, "EcoVadis")
+    check(
+        "日付が項目ごとに付く",
+        eco is not None and eco["date"].strftime("%Y-%m-%d") == "2026-10-23",
+        f"{eco}",
+    )
+
+
 def test_clean_title() -> None:
     print("--- タイトルの日付除去 ---")
     check(
@@ -323,6 +460,9 @@ def main() -> None:
     test_existing_patterns()
     test_sanwa_information_list()
     test_banzai_skips_nav_title()
+    test_changhong_heading_without_link()
+    test_month_only_dates()
+    test_spindle_plain_text_title()
     test_clean_title()
 
     print()

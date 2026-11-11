@@ -107,7 +107,8 @@ def _build_competitor_section(competitor_items: list[dict]) -> str:
         url = item.get("url", "#")
         title = item.get("title", "（タイトルなし）")
         company = item.get("company", "")
-        read_label = "翻訳して読む →" if item.get("language") == "en" else "詳細を読む →"
+        # 日本語以外（英語・イタリア語・中国語など）は Google 翻訳経由のリンクになる
+        read_label = "翻訳して読む →" if item.get("language", "ja") != "ja" else "詳細を読む →"
         rows += (
             '<li style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">'
             '<div style="margin-bottom:4px;">'

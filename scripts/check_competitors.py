@@ -3,13 +3,21 @@
 ========================================================
 各メーカーの公式サイトをスクレイピングし、
 過去 SEARCH_DAYS_BACK 日以内の更新情報を取得する。
+
+COMPETITOR_SITES の各サイトは以下の任意キーで取得方法を切り替えられる:
+    rss:               指定すると HTML ではなく RSS フィードから取得する
+                       （一覧ページに日付が無い WordPress サイト向け）
+    month_only_dates:  True にすると「2026.08」のような年月だけの日付も
+                       受け付ける（日付を月単位でしか出さないサイト向け）
 """
 
+import calendar
 import logging
 import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin, urlparse
 
+import feedparser
 import requests
 from bs4 import BeautifulSoup
 
@@ -71,9 +79,48 @@ MAX_ANCESTOR_DEPTH = 4
 
 HEADING_TAGS = re.compile(r"^h[1-6]$")
 
+# 年月だけの日付（2026.08 / 2026年8月）。日付の後ろに日が続かないものだけ対象
+MONTH_ONLY_PATTERN = re.compile(r"(\d{4})[./年](\d{1,2})(?![./月]?\s*\d)")
 
-def _parse_date(text: str) -> datetime | None:
-    """テキストから日付を抽出して datetime を返す。見つからなければ None。"""
+# JS で Cookie を発行してから本来のページへ飛ばす簡易アクセス制限
+# （江蘇長虹のサイトなど）。このトークン名が本文にあれば Cookie を付けて再取得する。
+_COOKIE_GATE_TOKEN = "visitToken"
+_COOKIE_GATE_HASH_RE = re.compile(r"md5_hash\s*=\s*['\"]([0-9a-f]+)['\"]")
+
+
+def _month_only_date(text: str) -> datetime | None:
+    """
+    「2026.08」のように年月しか書かれていない日付を datetime にする。
+
+    日が分からないので、その月の末日（当月なら今日）とみなす。
+    月初の日付にすると月後半の更新を 14 日ウィンドウで取りこぼすため、
+    「多少長く表示されても見逃さない」側に倒している。
+    """
+    m = MONTH_ONLY_PATTERN.search(text)
+    if not m:
+        return None
+    try:
+        year, month = int(m.group(1)), int(m.group(2))
+        if not 1 <= month <= 12:
+            return None
+        now = datetime.now(JST)
+        last_day = calendar.monthrange(year, month)[1]
+        candidate = datetime(year, month, last_day, tzinfo=JST)
+        if candidate > now:
+            candidate = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        return candidate
+    except ValueError:
+        return None
+
+
+def _parse_date(text: str, allow_month_only: bool = False) -> datetime | None:
+    """
+    テキストから日付を抽出して datetime を返す。見つからなければ None。
+
+    allow_month_only=True のときだけ年月のみの表記（2026.08）も受け付ける。
+    既定で無効なのは、本文中の「2026年8月より発売」のような文言を
+    日付と誤認して項目を増やさないため。
+    """
     for pattern, fmt in DATE_PATTERNS:
         m = re.search(pattern, text)
         if not m:
@@ -102,6 +149,8 @@ def _parse_date(text: str) -> datetime | None:
             return datetime(y, mo, d, tzinfo=JST)
         except (ValueError, KeyError):
             continue
+    if allow_month_only:
+        return _month_only_date(text)
     return None
 
 
@@ -116,13 +165,55 @@ def _make_google_translate_url(url: str, lang: str) -> str:
 def _fetch_page(url: str) -> BeautifulSoup | None:
     """URLを取得してBeautifulSoupオブジェクトを返す。失敗時は None。"""
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        session = requests.Session()
+        session.headers.update(HEADERS)
+        resp = session.get(url, timeout=REQUEST_TIMEOUT)
+
+        # JS で Cookie を発行する簡易ゲート（独自ステータス 319 で空ページが返る）。
+        # ページ内のハッシュをそのまま Cookie に入れて再取得すると本来のページが取れる。
+        gate = _COOKIE_GATE_HASH_RE.search(resp.text) if _COOKIE_GATE_TOKEN in resp.text else None
+        if gate:
+            logger.info("Cookie ゲートを検出。トークンを付けて再取得: %s", url)
+            session.cookies.set(_COOKIE_GATE_TOKEN, gate.group(1), domain=urlparse(url).hostname)
+            resp = session.get(url, timeout=REQUEST_TIMEOUT)
+
         resp.raise_for_status()
         resp.encoding = resp.apparent_encoding
         return BeautifulSoup(resp.text, "lxml")
     except Exception as e:
         logger.warning("ページ取得失敗 %s: %s", url, e)
         return None
+
+
+def _fetch_rss_items(rss_url: str) -> list[dict]:
+    """
+    RSS フィードからニュース項目を取得する。
+
+    一覧ページに日付が表示されないサイト（エコム・NCC など WordPress 系）は
+    HTML からは日付が取れないため、同じサイトが配信している RSS を使う。
+    返り値の形式は _extract_news_items と同じ。
+    """
+    try:
+        feed = feedparser.parse(rss_url, request_headers=HEADERS)
+    except Exception as e:
+        logger.warning("RSS 取得失敗 %s: %s", rss_url, e)
+        return []
+
+    items = []
+    for entry in getattr(feed, "entries", []):
+        parsed = getattr(entry, "published_parsed", None) or getattr(entry, "updated_parsed", None)
+        if not parsed:
+            continue
+        try:
+            date = datetime.fromtimestamp(calendar.timegm(parsed), tz=timezone.utc).astimezone(JST)
+        except Exception:
+            continue
+        title = _clean_title(getattr(entry, "title", "") or "")[:80]
+        link = getattr(entry, "link", "") or rss_url
+        if not title or _is_generic_title(title):
+            continue
+        items.append({"date": date, "title": title, "url": link, "raw_text": title})
+    return items
 
 
 def _clean_title(text: str) -> str:
@@ -158,7 +249,7 @@ def _item_blocks(node):
         node = node.parent
 
 
-def _find_item_date(a_tag) -> datetime | None:
+def _find_item_date(a_tag, allow_month_only: bool = False) -> datetime | None:
     """
     リンクに対応する日付を探す。
 
@@ -166,12 +257,12 @@ def _find_item_date(a_tag) -> datetime | None:
     直接の親を無条件に使うと、一覧全体を囲む要素から先頭記事の日付を
     拾って全項目が同じ日付になる（正英製作所のサイトで発生）。
     """
-    date = _parse_date(a_tag.get_text(separator=" ", strip=True))
+    date = _parse_date(a_tag.get_text(separator=" ", strip=True), allow_month_only)
     if date:
         return date
 
     for block in _item_blocks(a_tag.parent):
-        date = _parse_date(block.get_text(separator=" ", strip=True))
+        date = _parse_date(block.get_text(separator=" ", strip=True), allow_month_only)
         if date:
             return date
     return None
@@ -197,6 +288,27 @@ def _find_text_link(block):
     return max(candidates, key=lambda a: len(a.get_text(strip=True)))
 
 
+def _text_right_after_date(block) -> str:
+    """
+    日付要素（<time> / <datetime>）の直後に置かれた「素のテキスト」を返す。
+
+    日本スピンドルのように
+        <li><datetime>2026.10.26</datetime>見出し<br><p>本文 <a>関連リンク</a></p></li>
+    と、見出しがリンクにもタグにも包まれていないサイト向け。
+    最初のタグ（<br> や <p>）に当たった時点で打ち切るので、
+    本文や「展示会ホームページはこちら」のようなリンク文言は混ざらない。
+    """
+    date_el = block.find(["time", "datetime"])
+    if date_el is None:
+        return ""
+    parts = []
+    for sib in date_el.next_siblings:
+        if getattr(sib, "name", None):  # タグに当たったら終わり
+            break
+        parts.append(str(sib))
+    return " ".join("".join(parts).split())
+
+
 def _is_generic_title(title: str) -> bool:
     """メニュー項目など、ニュース見出しとして不適切なタイトルかを判定する。"""
     return title.strip().lower() in _GENERIC_TITLES
@@ -219,16 +331,37 @@ def _pick_item_title(block) -> tuple[str, str | None]:
         if text:
             return text, (link["href"] if link else None)
 
-    a_tag = _find_heading_link(block) or _find_text_link(block) or block.find("a", href=True)
+    # 日付の直後に見出しが素のテキストで置かれている構造（日本スピンドルなど）。
+    # 項目専用のリンクが無いので URL は一覧ページ自身になる（呼び出し側で base_url に解決）。
+    plain = _text_right_after_date(block)
+    if len(plain) >= 6:
+        return plain, None
+
+    a_tag = _find_heading_link(block)
+    if a_tag:
+        return a_tag.get_text(strip=True), a_tag.get("href")
+
+    # 見出し(h1〜h6)はあるがリンクを内包せず、<a> がカード全体を囲んでいる構造
+    # （江蘇長虹など）。見出しの文字をタイトルにし、リンクは外側の <a> から取る。
+    heading = block.find(HEADING_TAGS)
+    if heading and heading.get_text(strip=True):
+        outer = heading.find_parent("a", href=True) or block.find("a", href=True)
+        return heading.get_text(strip=True), (outer.get("href") if outer else None)
+
+    a_tag = _find_text_link(block) or block.find("a", href=True)
     if a_tag:
         return a_tag.get_text(strip=True), a_tag.get("href")
     return block.get_text(separator=" ", strip=True), None
 
 
-def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
+def _extract_news_items(
+    soup: BeautifulSoup, base_url: str, allow_month_only: bool = False
+) -> list[dict]:
     """
     ページからニュース項目を抽出する。
     日付・タイトル・リンクのセットを返す。
+
+    allow_month_only=True のサイトでは年月だけの日付も項目として扱う。
     """
     items = []
 
@@ -238,7 +371,7 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         if len(li.find_all("a", href=True)) > MAX_LINKS_PER_ITEM:
             continue
         text = li.get_text(separator=" ", strip=True)
-        date = _parse_date(text)
+        date = _parse_date(text, allow_month_only)
         if not date:
             continue
 
@@ -251,7 +384,7 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
 
     # ── 戦略2: <dl>/<dt>/<dd> パターン（日付がdtに入るサイト向け） ──
     for dt in soup.find_all("dt"):
-        date = _parse_date(dt.get_text(strip=True))
+        date = _parse_date(dt.get_text(strip=True), allow_month_only)
         if not date:
             continue
         dd = dt.find_next_sibling("dd")
@@ -277,7 +410,7 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         for a_tag in container.find_all("a", href=True):
             text = a_tag.get_text(separator=" ", strip=True)
             parent_text = a_tag.parent.get_text(separator=" ", strip=True) if a_tag.parent else text
-            date = _find_item_date(a_tag)
+            date = _find_item_date(a_tag, allow_month_only)
             if not date:
                 continue
             title = _clean_title(text)[:80] or parent_text[:80]
@@ -290,8 +423,8 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
     # 日付を <time> で持ち、クラス名に news 等を含まないサイト向け（タクボなど）
     for time_tag in soup.find_all("time"):
         date = (
-            _parse_date(time_tag.get("datetime", ""))
-            or _parse_date(time_tag.get_text(strip=True))
+            _parse_date(time_tag.get("datetime", ""), allow_month_only)
+            or _parse_date(time_tag.get_text(strip=True), allow_month_only)
         )
         if not date:
             continue
@@ -325,10 +458,14 @@ def _extract_news_items(soup: BeautifulSoup, base_url: str) -> list[dict]:
         )
 
     # 重複除去（URL基準。末尾スラッシュの有無は同一記事とみなす）
+    # 項目専用リンクが無く URL が一覧ページ自身になる項目は、タイトルも含めて区別する
+    page_key = base_url.rstrip("/").lower()
     seen = set()
     unique = []
     for item in items:
         key = item["url"].rstrip("/").lower()
+        if key == page_key:
+            key = f"{key}#{item['title']}"
         if key not in seen:
             seen.add(key)
             unique.append(item)
@@ -358,14 +495,23 @@ def check_all_competitors() -> list[dict]:
         url = site["url"]
         lang = site["language"]
         section_include = site.get("section_include", [])
-        logger.info("監視中: %s (%s)", company, url)
+        rss_url = site.get("rss")
+        allow_month_only = bool(site.get("month_only_dates", False))
+        logger.info("監視中: %s (%s)", company, rss_url or url)
 
-        soup = _fetch_page(url)
-        if soup is None:
-            logger.warning("%s: ページ取得スキップ", company)
-            continue
+        if rss_url:
+            # RSS 指定サイトは HTML を読まずフィードから項目を取る
+            items = _fetch_rss_items(rss_url)
+            if not items:
+                logger.warning("%s: RSS から項目を取得できませんでした", company)
+                continue
+        else:
+            soup = _fetch_page(url)
+            if soup is None:
+                logger.warning("%s: ページ取得スキップ", company)
+                continue
+            items = _extract_news_items(soup, url, allow_month_only)
 
-        items = _extract_news_items(soup, url)
         recent = [i for i in items if i["date"] >= cutoff]
 
         # section_include が指定されている場合は raw_text でフィルター

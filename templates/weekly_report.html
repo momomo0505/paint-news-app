@@ -341,7 +341,7 @@
     <div class="article-footer">
         <span class="article-source">{{ item.date.strftime('%Y年%m月%d日') }}</span>
         <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="article-link">
-            {% if item.language == 'en' %}翻訳して読む →{% else %}詳細を読む →{% endif %}
+            {% if item.language != 'ja' %}翻訳して読む →{% else %}詳細を読む →{% endif %}
         </a>
     </div>
 </article>
