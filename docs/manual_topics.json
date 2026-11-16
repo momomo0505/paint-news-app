@@ -4,6 +4,11 @@
       "url": "https://transcarweb.com/2610-tesla-roadster-flight-demo/",
       "note": "テスラが新型ロードスターの発表会で空中に浮く実演を披露",
       "published": "2026-10-19"
+    },
+    {
+      "url": "https://www.monodzukuri.meti.go.jp/prizewinner/10/02_06.html",
+      "note": "第10回ものづくり日本大賞・経済産業大臣賞。衝撃波で粉塵を剥がすメンテナンスレス集塵装置の開発と事業化。11/16号のみ掲載（掲載後は published が付き再掲されない）",
+      "published": "2026-11-16"
     }
   ]
 }
